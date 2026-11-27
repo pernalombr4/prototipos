@@ -1,0 +1,1471 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/menu-lateral/",
+  "andaime": "Estado",
+  "cenas": {
+    "sp": [
+      {
+        "estado": "Sem personalização"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "novo": [
+      {
+        "estado": "Workspace novo"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "emUso": [
+      {
+        "estado": "Sem personalização"
+      },
+      {
+        "esperar": 1200
+      },
+      {
+        "estado": "Em uso"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "semPermissao": [
+      {
+        "estado": "Sem personalização"
+      },
+      {
+        "esperar": 1200
+      },
+      {
+        "estado": "Sem permissão"
+      },
+      {
+        "esperar": 1500
+      }
+    ],
+    "quarenta": [
+      {
+        "estado": "Sem personalização"
+      },
+      {
+        "esperar": 1200
+      },
+      {
+        "estado": "40 categorias"
+      },
+      {
+        "esperar": 1500
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "sp",
+      "destacar": {
+        "css": "div[class~=\"w-[4.5rem]\"]"
+      }
+    },
+    "RF002": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 5
+        },
+        {
+          "css": "[data-slot=\"content\"]"
+        }
+      ]
+    },
+    "RF003": {
+      "cena": "sp",
+      "destacar": {
+        "css": "button[aria-label=\"Mais\"]"
+      }
+    },
+    "RF004": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Mais\"]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Comparações",
+        "ancestral": ".grid-cols-3"
+      }
+    },
+    "RF005": {
+      "cena": "sp",
+      "passos": [
+        {
+          "js": "(() => { const b = [...document.querySelectorAll('div[class~=\"w-[4.5rem]\"] > div > button')][3]; const r = b.getBoundingClientRect(); b.parentElement.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + 30, clientY: r.y + 20, button: 2 })) })()",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Abrir em nova aba",
+        "Copiar link",
+        "Recolher menu"
+      ]
+    },
+    "RF011": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 3
+        },
+        {
+          "texto": "Logs de auditoria"
+        },
+        {
+          "css": "h1"
+        }
+      ]
+    },
+    "RF012": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Tarefas",
+          "esperar": 700
+        },
+        {
+          "clicar": "Agendadas",
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 0
+        },
+        {
+          "css": "h1"
+        }
+      ]
+    },
+    "RF013": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 1
+        },
+        {
+          "texto": "Auditoria interna"
+        }
+      ]
+    },
+    "RF014": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+        "n": 3
+      }
+    },
+    "RF015": {
+      "sem": "O protótipo ainda não troca o painel quando a tela abre pela busca, por link ou por voltar."
+    },
+    "RF021": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "aside h2"
+      }
+    },
+    "RF022": {
+      "cena": "sp",
+      "destacar": {
+        "css": "aside"
+      }
+    },
+    "RF023": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Logs de auditoria"
+      }
+    },
+    "RF024": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "document.getElementById('__nuxt').style.filter = 'grayscale(1)'",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Logs de auditoria"
+        },
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 3
+        }
+      ]
+    },
+    "RF025": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "css": "button[aria-label=\"Filtrar o menu\"]"
+        },
+        {
+          "css": "button[aria-label=\"Recolher menu\"]"
+        }
+      ]
+    },
+    "RF031": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[class~=\"max-h-[70vh]\"]"
+        },
+        {
+          "css": "aside h2"
+        }
+      ]
+    },
+    "RF032": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1000
+        },
+        {
+          "pairar": "Logs de requisição",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[class~=\"max-h-[70vh]\"]"
+      }
+    },
+    "RF033": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[class~=\"max-h-[70vh]\"] > p"
+      }
+    },
+    "RF034": {
+      "cena": "emUso",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1000
+        },
+        {
+          "js": "(() => { const f = document.querySelector('[class~=\"max-h-[70vh]\"]'); const s = [...f.querySelectorAll('span[title]')].find(x => x.title === 'Solicitações de compra e reembolso'); s.closest('button').dataset.print = 'longo' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[class~=\"max-h-[70vh]\"]"
+        },
+        {
+          "css": "[data-print=\"longo\"]"
+        }
+      ]
+    },
+    "RF035": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1000
+        },
+        {
+          "js": "void 0",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[class~=\"max-h-[70vh]\"]"
+      }
+    },
+    "RF036": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1000
+        },
+        {
+          "clicar": "Expandir Inteligência artificial",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[class~=\"max-h-[70vh]\"]"
+      }
+    },
+    "RF037": {
+      "cena": "sp",
+      "passos": [
+        {
+          "focar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          }
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 3
+        },
+        {
+          "css": "aside h2"
+        }
+      ]
+    },
+    "RF041": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Recolher menu\"]"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "aside"
+      }
+    },
+    "RF042": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Recolher menu\"]"
+          },
+          "esperar": 1000
+        },
+        {
+          "pairar": {
+            "css": "button[aria-label=\"Expandir menu\"]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "button[aria-label=\"Expandir menu\"]"
+        },
+        {
+          "css": "[data-slot=\"content\"]"
+        }
+      ]
+    },
+    "RF043": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Recolher menu\"]"
+          },
+          "esperar": 1000
+        },
+        {
+          "js": "document.activeElement && document.activeElement.blur()",
+          "esperar": 400
+        },
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 0
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[class~=\"max-h-[70vh]\"]"
+        },
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 0
+        }
+      ]
+    },
+    "RF044": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "focar": {
+            "css": "button[aria-label=\"Recolher menu\"]"
+          }
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": ":focus"
+      }
+    },
+    "RT001": {
+      "sem": "A chave de lançamento por workspace é regra do servidor e não tem tela no protótipo."
+    },
+    "RF101": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[class~=\"group/painel\"]"
+      }
+    },
+    "RF102": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Expandir E-mails",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Recolher E-mails"
+        },
+        {
+          "texto": "Expandir Workspace"
+        }
+      ]
+    },
+    "RF103": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 5
+        },
+        {
+          "texto": "Recolher Workspace"
+        },
+        {
+          "texto": "Visão geral"
+        },
+        {
+          "css": "h1"
+        }
+      ]
+    },
+    "RF104": {
+      "sem": "O miolo de Configurações no protótipo é ilustrativo e não mostra as abas das telas de hoje."
+    },
+    "RF105": {
+      "cena": "semPermissao",
+      "passos": [
+        {
+          "pairar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 5
+        },
+        {
+          "css": "[data-slot=\"content\"]"
+        }
+      ]
+    },
+    "RF106": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": "Informações básicas",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "texto": "Informações básicas"
+      }
+    },
+    "RF111": {
+      "cena": "sp",
+      "destacar": {
+        "css": "button[aria-label=\"Ajuda\"]"
+      }
+    },
+    "RF112": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "button[aria-label=\"Ajuda\"]"
+          },
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const a = [...document.querySelectorAll('body *')].find(e => e.children.length === 0 && e.textContent.trim() === 'Novidades da plataforma'); let p = a; while (p && !(p.textContent.includes('Documenta') && p.textContent.includes('Suporte'))) p = p.parentElement; p.dataset.print = 'ajuda' })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=\"ajuda\"]"
+      }
+    },
+    "RF113": {
+      "cena": "sp",
+      "destacar": {
+        "css": "button[aria-label=\"Ajuda\"]"
+      }
+    },
+    "RF201": {
+      "cena": "sp",
+      "passos": [
+        {
+          "js": "(() => { const a = [...document.querySelectorAll('aside span[title]')]; const i = a.find(s => s.title === 'Início'); const m = a.find(s => s.title === 'Assinaturas'); let p = i; while (p && !p.contains(m)) p = p.parentElement; p.dataset.print = 'nativos' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=\"nativos\"]"
+      }
+    },
+    "RF202": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Chat de IA",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Chat de IA"
+        },
+        {
+          "css": "h1"
+        }
+      ]
+    },
+    "RF203": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Tarefas",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const t = [...document.querySelectorAll('aside span[title]')]; const linha = n => { const s = t.find(x => x.title === n); return s.closest('button, a') || s.parentElement }; const r1 = linha('Tarefas').getBoundingClientRect(); const r2 = linha('Rápidas').getBoundingClientRect(); const d = document.createElement('div'); d.dataset.print = 'tarefas'; Object.assign(d.style, { position: 'fixed', left: Math.min(r1.left, r2.left) + 'px', top: r1.top + 'px', width: (Math.max(r1.right, r2.right) - Math.min(r1.left, r2.left)) + 'px', height: (r2.bottom - r1.top) + 'px', pointerEvents: 'none' }); document.body.appendChild(d) })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=\"tarefas\"]"
+      }
+    },
+    "RF204": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Relatórios",
+          "esperar": 1500
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Relatórios"
+        },
+        {
+          "texto": "Contratos a vencer",
+          "ancestral": "tr"
+        }
+      ]
+    },
+    "RF205": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Contratos",
+          "esperar": 1200
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Extrair relatório\"]"
+          },
+          "esperar": 700
+        },
+        {
+          "clicar": "Relatório padrão",
+          "esperar": 800
+        },
+        {
+          "clicar": "Excel",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "li[data-slot=\"base\"]"
+        },
+        "Abrir Relatórios"
+      ]
+    },
+    "RF206": {
+      "cena": "sp",
+      "destacar": {
+        "texto": "Recolher Categorias"
+      }
+    },
+    "RF301": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 3
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const t = [...document.querySelectorAll('aside span[title]')]; const i = t.find(s => s.title === 'Logs de auditoria'); const m = t.find(s => s.title === 'Logs de requisição'); let p = i; while (p && !p.contains(m)) p = p.parentElement; p.dataset.print = 'auditoria' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=\"auditoria\"]"
+      }
+    },
+    "RF302": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 4
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const t = [...document.querySelectorAll('aside span[title]')]; const i = t.find(s => s.title === 'Apps'); const m = t.find(s => s.title === 'Webhooks'); let p = i; while (p && !p.contains(m)) p = p.parentElement; p.dataset.print = 'integracoes' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=\"integracoes\"]"
+      }
+    },
+    "RF303": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 2
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+          "n": 2
+        },
+        {
+          "texto": "Dashboards"
+        }
+      ]
+    },
+    "RF304": {
+      "sem": "O estado sem permissão do protótipo ainda mostra Auditoria e Integrações na trilha."
+    },
+    "RF311": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 2
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Nome",
+          "exato": true
+        },
+        {
+          "texto": "Atualizado em",
+          "exato": true
+        }
+      ]
+    },
+    "RF312": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 2
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Contratos por status",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "texto": "Contratos por status",
+        "exato": true
+      }
+    },
+    "RF313": {
+      "cena": "novo",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 2
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Nenhum dashboard ainda",
+        "ancestral": "[class~=\"border-dashed\"]"
+      }
+    },
+    "RF401": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[class~=\"group/secao\"]"
+      }
+    },
+    "RF402": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Ver todas as 8 categorias"
+      }
+    },
+    "RF403": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Ver todas as 8 categorias",
+          "esperar": 1000
+        },
+        {
+          "clicar": "Buscar categoria"
+        },
+        {
+          "digitar": "reembolso"
+        },
+        {
+          "pairar": "Pedidos que passam por aprovação financeira.",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "css": "input[placeholder=\"Buscar categoria\"]"
+        },
+        {
+          "texto": "Solicitações de compra e reembolso",
+          "ancestral": "li"
+        }
+      ]
+    },
+    "RF404": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Ver todas as 8 categorias",
+          "esperar": 1000
+        },
+        {
+          "clicar": "Buscar categoria"
+        },
+        {
+          "digitar": "xyz"
+        }
+      ],
+      "destacar": {
+        "texto": "Nenhuma categoria com \"xyz\""
+      }
+    },
+    "RF405": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": "Recolher Categorias",
+          "esperar": 500
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Mais ações de Categorias\"]"
+          },
+          "esperar": 800
+        },
+        {
+          "pairar": "Ordenar por",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Ordenar por",
+        "Mais usadas",
+        "Ordem alfabética",
+        "Criadas recentemente"
+      ]
+    },
+    "RF406": {
+      "cena": "emUso",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Solicitações de compra e reembolso"
+      }
+    },
+    "RF407": {
+      "cena": "novo",
+      "passos": [
+        {
+          "rolar": "Criar categoria"
+        }
+      ],
+      "destacar": {
+        "texto": "Nenhuma categoria ainda",
+        "ancestral": "[class~=\"border-dashed\"]"
+      }
+    },
+    "RF408": {
+      "cena": "novo",
+      "passos": [
+        {
+          "rolar": "Criar categoria"
+        }
+      ],
+      "destacar": "Criar categoria"
+    },
+    "RF411": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": "Clientes",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "button[aria-label=\"Fixar nos favoritos\"]"
+      }
+    },
+    "RF412": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": "Clientes",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "button[aria-label=\"Fixar nos favoritos\"]"
+      }
+    },
+    "RF413": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": "Clientes",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "button[aria-label=\"Fixar nos favoritos\"]"
+      }
+    },
+    "RF414": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": "Clientes",
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Fixar nos favoritos\"]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Recolher Favoritos"
+      }
+    },
+    "RF415": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": "Clientes",
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Fixar nos favoritos\"]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Clientes entrou nos seus favoritos."
+      }
+    },
+    "RNF401": {
+      "cena": "quarenta",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[class~=\"group/secao\"]",
+        "n": 1
+      }
+    },
+    "RF501": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Contratos",
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const b = [...document.querySelectorAll('button')].find(x => x.textContent.trim() === 'Aditivo'); b.parentElement.dataset.print = 'abas' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=\"abas\"]"
+      }
+    },
+    "RF502": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": "Contratos",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Aditivo",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Aditivo",
+        {
+          "css": "table"
+        }
+      ]
+    },
+    "RF503": {
+      "sem": "O protótipo não tem endereço por tela, então o link antigo do formulário não se reproduz nele."
+    },
+    "RF504": {
+      "cena": "sp",
+      "destacar": {
+        "texto": "Contratos"
+      }
+    },
+    "RF505": {
+      "sem": "O protótipo ainda mostra a barra de abas na categoria com 1 formulário."
+    },
+    "RF601": {
+      "cena": "sp",
+      "passos": [
+        {
+          "js": "document.querySelector('[aria-label=\"Redimensionar o menu\"]').dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }))"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "aside"
+        },
+        {
+          "css": "[aria-label=\"Redimensionar o menu\"]"
+        }
+      ]
+    },
+    "RF602": {
+      "sem": "O protótipo não guarda a largura entre um carregamento e outro da página."
+    },
+    "RF603": {
+      "cena": "sp",
+      "passos": [
+        {
+          "js": "(() => { HTMLElement.prototype.setPointerCapture = function () {}; const b = document.querySelector('[aria-label=\"Redimensionar o menu\"]'); const r = b.getBoundingClientRect(); const x = r.x + 4, y = 300; b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: x, clientY: y, pointerId: 1 })); b.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: x - 110, clientY: y, pointerId: 1 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "aside"
+      }
+    },
+    "RF604": {
+      "cena": "sp",
+      "passos": [
+        {
+          "js": "(() => { HTMLElement.prototype.setPointerCapture = function () {}; const b = document.querySelector('[aria-label=\"Redimensionar o menu\"]'); const r = b.getBoundingClientRect(); const x = r.x + 4, y = 300; b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, button: 0, clientX: x, clientY: y, pointerId: 1 })); b.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: x - 110, clientY: y, pointerId: 1 })); b.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: x - 110, clientY: y, pointerId: 1 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "aside"
+        },
+        {
+          "css": "button[aria-label=\"Expandir menu\"]"
+        }
+      ]
+    },
+    "RF605": {
+      "cena": "sp",
+      "passos": [
+        {
+          "js": "document.querySelector('[aria-label=\"Redimensionar o menu\"]').dispatchEvent(new KeyboardEvent('keydown', { key: 'End', bubbles: true, cancelable: true }))"
+        },
+        {
+          "js": "document.querySelector('[aria-label=\"Redimensionar o menu\"]').dispatchEvent(new MouseEvent('dblclick', { bubbles: true }))",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        {
+          "css": "aside"
+        },
+        {
+          "css": "[aria-label=\"Redimensionar o menu\"]"
+        }
+      ]
+    },
+    "RF606": {
+      "cena": "sp",
+      "passos": [
+        {
+          "focar": {
+            "css": "[aria-label=\"Redimensionar o menu\"]"
+          }
+        },
+        {
+          "js": "document.activeElement.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true, cancelable: true }))",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "css": "[aria-label=\"Redimensionar o menu\"]"
+      }
+    },
+    "RF611": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Filtrar o menu\"]"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "input[placeholder=\"Filtrar o menu\"]"
+      }
+    },
+    "RF612": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Filtrar o menu\"]"
+          },
+          "esperar": 800
+        },
+        {
+          "digitar": "fornec"
+        }
+      ],
+      "destacar": {
+        "css": "button[aria-label=\"Fechar filtro\"]"
+      }
+    },
+    "RF613": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Filtrar o menu\"]"
+          },
+          "esperar": 800
+        },
+        {
+          "digitar": "fornec"
+        }
+      ],
+      "destacar": {
+        "texto": "Fornecedores"
+      }
+    },
+    "RF614": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 5
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Filtrar o menu\"]"
+          },
+          "esperar": 800
+        },
+        {
+          "digitar": "modelos"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Recolher E-mails"
+        },
+        {
+          "texto": "Modelos de e-mail"
+        }
+      ]
+    },
+    "RF615": {
+      "cena": "sp",
+      "passos": [
+        {
+          "clicar": {
+            "css": "div[class~=\"w-[4.5rem]\"] > div > button",
+            "n": 1
+          },
+          "esperar": 1200
+        },
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Filtrar o menu\"]"
+          },
+          "esperar": 800
+        },
+        {
+          "digitar": "o"
+        }
+      ],
+      "destacar": {
+        "css": "[class~=\"group/secao\"]"
+      }
+    },
+    "RF616": {
+      "cena": "sp",
+      "passos": [
+        {
+          "pairar": {
+            "css": "aside h2"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label=\"Filtrar o menu\"]"
+          },
+          "esperar": 800
+        },
+        {
+          "digitar": "xyz"
+        },
+        {
+          "js": "(() => { const els = [...document.querySelectorAll('aside *')]; const a = els.find(e => e.children.length === 0 && e.textContent.trim().startsWith('Nada no menu com')); const b = els.find(e => e.tagName === 'BUTTON' && e.textContent.includes('no workspace')); let p = a; while (p && !p.contains(b)) p = p.parentElement; p.dataset.print = 'vazio' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=\"vazio\"]"
+        }
+      ]
+    }
+  }
+}

@@ -1,5 +1,8 @@
 # Fases de implementação: menu lateral em trilha e painel
 
+> **Substituído em 2026-11-27** pelos 5 épicos do [README](README.md), na divisão por esforço. Este arquivo e os
+> `fase-*.md` ficam como registro.
+
 **Objetivo:** dividir a construção do menu novo em 6 fases de front-end, na ordem em que o dev deve fazer, para
 cada fase partir de uma base que já funciona.
 

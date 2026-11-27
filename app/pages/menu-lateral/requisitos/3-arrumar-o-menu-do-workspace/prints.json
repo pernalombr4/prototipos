@@ -1,0 +1,1248 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/menu-lateral/",
+  "andaime": "Estado",
+  "cenas": {
+    "comercial": [
+      {
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "esperar": 500
+      },
+      {
+        "clicar": "Comercial",
+        "esperar": 900
+      }
+    ],
+    "rascunho": [
+      {
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "esperar": 500
+      },
+      {
+        "clicar": "Comercial",
+        "esperar": 900
+      },
+      {
+        "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"triagem de propostas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+        "esperar": 700
+      },
+      {
+        "clicar": "Mover para cima",
+        "esperar": 900
+      }
+    ],
+    "personalizar": [
+      {
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "esperar": 500
+      },
+      {
+        "js": "(s => { s['$strilha-personalizar'] = \"secoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1200
+      },
+      {
+        "clicar": "Expandir Comercial",
+        "esperar": 700
+      }
+    ],
+    "mais": [
+      {
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "esperar": 500
+      },
+      {
+        "clicar": {
+          "css": "button[aria-label='Criar']",
+          "n": 1
+        },
+        "esperar": 900
+      }
+    ],
+    "criarMenu": [
+      {
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "esperar": 500
+      },
+      {
+        "clicar": {
+          "css": "button[aria-label='Criar']",
+          "n": 1
+        },
+        "esperar": 900
+      },
+      {
+        "clicar": "Criar menu",
+        "esperar": 1000
+      }
+    ],
+    "editor": [
+      {
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "esperar": 500
+      },
+      {
+        "clicar": "Configurações",
+        "esperar": 900
+      },
+      {
+        "clicar": "Interface",
+        "esperar": 600
+      },
+      {
+        "clicar": "Menus",
+        "esperar": 1300
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "void 0",
+          "esperar": 100
+        }
+      ],
+      "destacar": [
+        "Painel de vendas",
+        "Metas do trimestre"
+      ]
+    },
+    "RF002": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "void 0",
+          "esperar": 100
+        }
+      ],
+      "destacar": "Metas do trimestre"
+    },
+    "RF007": {
+      "sem": "O protótipo mostra os submenus sempre abertos, sem a seta de abrir e fechar."
+    },
+    "RF003": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Adicionar submenu",
+        "Painel de vendas"
+      ]
+    },
+    "RF004": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"triagem de propostas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Adicionar submenu",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const e = [...document.querySelector('[role=dialog]').querySelectorAll(\"*\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"minhas requisições\")[0]; e.closest('[role=option]').click() })()",
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Minhas requisições"
+    },
+    "RF005": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"metas do trimestre\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Tirar do menu",
+          "esperar": 900
+        }
+      ],
+      "destacar": "Metas do trimestre"
+    },
+    "RF008": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Tirar da seção"
+    },
+    "RF006": {
+      "sem": "O protótipo mostra o menu de uma pessoa só e não simula outro membro fora do grupo."
+    },
+    "RF011": {
+      "cena": "rascunho",
+      "destacar": {
+        "texto": "Arraste o quanto quiser. Nada muda para ninguém até você salvar.",
+        "n": 0
+      }
+    },
+    "RF012": {
+      "cena": "rascunho",
+      "destacar": {
+        "css": "li[data-slot=base]"
+      }
+    },
+    "RF013": {
+      "cena": "rascunho",
+      "destacar": [
+        {
+          "css": "span[aria-label='Mexido, ainda não salvo']"
+        }
+      ]
+    },
+    "RF014": {
+      "cena": "rascunho",
+      "destacar": {
+        "texto": "Salvar só para mim",
+        "ancestral": "div.rounded-xl"
+      }
+    },
+    "RF015": {
+      "antes": [
+        {
+          "estado": "Sem permissão"
+        }
+      ],
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"triagem de propostas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Ocultar do menu",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Salvar só para mim",
+        "ancestral": "div.rounded-xl"
+      }
+    },
+    "RF016": {
+      "cena": "rascunho",
+      "passos": [
+        {
+          "clicar": "Salvar para todos",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Menu salvo para todo o workspace.",
+        "ancestral": "li"
+      }
+    },
+    "RF017": {
+      "cena": "rascunho",
+      "passos": [
+        {
+          "clicar": "Salvar só para mim",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Menu salvo só para você.",
+        "ancestral": "li"
+      }
+    },
+    "RF018": {
+      "cena": "rascunho",
+      "passos": [
+        {
+          "clicar": "Salvar só para mim",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Este menu é só seu.",
+        "Voltar ao do workspace"
+      ]
+    },
+    "RF019": {
+      "cena": "rascunho",
+      "destacar": "Descartar"
+    },
+    "RF020": {
+      "cena": "rascunho",
+      "passos": [
+        {
+          "js": "(s => { s['$smenu-recolhido'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "button[aria-label='Alterações não salvas']"
+      }
+    },
+    "RF021": {
+      "cena": "personalizar",
+      "passos": [
+        {
+          "rolar": "Recolher Comercial"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Recolher Comercial",
+          "ancestral": "li"
+        },
+        {
+          "texto": "Integrações tem ordem fixa, como Configurações: nada entra, sai ou muda de lugar.",
+          "exato": true
+        },
+        {
+          "css": "section[aria-label='Nas áreas da trilha'] > p"
+        }
+      ]
+    },
+    "RF022": {
+      "cena": "rascunho",
+      "passos": [
+        {
+          "js": "(s => { s['$strilha-personalizar'] = \"secoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Salvar",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RI001": {
+      "sem": "É uma rota do servidor, e o protótipo não tem back-end."
+    },
+    "RI002": {
+      "sem": "É uma rota do servidor, e o protótipo não tem back-end."
+    },
+    "RI003": {
+      "sem": "É uma rota do servidor, e o protótipo não tem back-end."
+    },
+    "RF101": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Painel de vendas",
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RF102": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF103": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Mover para",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]",
+        "n": 1
+      }
+    },
+    "RF104": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Renomear",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF105": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "clicar": "Integrações",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"credenciais\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Credenciais",
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RF106": {
+      "antes": [
+        {
+          "estado": "Sem permissão"
+        }
+      ],
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Mover para baixo"
+    },
+    "RF107": {
+      "junto": "RF101",
+      "destacar": "Painel de vendas"
+    },
+    "RF108": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "clicar": "Auditoria",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"logs de auditoria\")[0]; e.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowDown', altKey: true, bubbles: true })) })()",
+          "esperar": 900
+        }
+      ],
+      "destacar": "Logs de auditoria"
+    },
+    "RF111": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(s => { for (const k of ['$smenu-rascunho', '$smenu-ao-vivo']) for (const n of s[k]) if ([\"s-comercial\"].includes(n.id)) { n.lugar = 'painel'; n.painel = 'dados' } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 500
+        },
+        {
+          "clicar": "Dados",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"comercial\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Expandir Comercial",
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RF112": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(s => { for (const k of ['$smenu-rascunho', '$smenu-ao-vivo']) for (const n of s[k]) if ([\"s-integracoes\"].includes(n.id)) { n.lugar = 'painel'; n.painel = 'dados' } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 500
+        },
+        {
+          "clicar": "Dados",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"integrações\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Expandir Integrações",
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RF113": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"comercial\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Comercial",
+        {
+          "texto": "Mover para cima",
+          "ancestral": "[role=group]"
+        }
+      ]
+    },
+    "RF201": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "pairar": "Painel de vendas"
+        }
+      ],
+      "destacar": {
+        "css": "button [class*='grip-vertical']"
+      }
+    },
+    "RF202": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"t-req\"; s['$smenu-alvo'] = {\"id\":\"t-tri\",\"posicao\":\"antes\"} })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Minhas requisições"
+    },
+    "RF203": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(s => { for (const k of ['$smenu-rascunho', '$smenu-ao-vivo']) for (const n of s[k]) if ([\"s-comercial\",\"s-conhecimento\"].includes(n.id)) { n.lugar = 'painel'; n.painel = 'dados' } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 500
+        },
+        {
+          "clicar": "Dados",
+          "esperar": 900
+        },
+        {
+          "clicar": "Expandir Comercial",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"t-pv\"; s['$smenu-alvo'] = {\"id\":\"s-conhecimento\",\"posicao\":\"dentro\"} })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Painel de vendas",
+        "Expandir Conhecimento"
+      ]
+    },
+    "RF204": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(s => { for (const k of ['$smenu-rascunho', '$smenu-ao-vivo']) for (const n of s[k]) if ([\"s-comercial\",\"s-conhecimento\"].includes(n.id)) { n.lugar = 'painel'; n.painel = 'dados' } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 500
+        },
+        {
+          "clicar": "Dados",
+          "esperar": 900
+        },
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"s-comercial\"; s['$smenu-alvo'] = {\"id\":\"s-conhecimento\",\"posicao\":\"antes\"} })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 700
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll('div[draggable]')].find(x => x.getBoundingClientRect().width && x.innerText.trim().toLowerCase().startsWith(\"conhecimento\")); const r = e.getBoundingClientRect(); const d = document.createElement('div'); d.dataset.print = 'linha'; Object.assign(d.style, { position: 'fixed', left: r.left + 'px', top: (r.top - 6) + 'px', width: r.width + 'px', height: '12px', pointerEvents: 'none' }); document.body.appendChild(d) })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": [
+        "Expandir Comercial",
+        {
+          "css": "div[data-print='linha']"
+        }
+      ]
+    },
+    "RF205": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"t-req\"; s['$smenu-alvo'] = {\"id\":\"t-tri\",\"posicao\":\"antes\"} })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 700
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll('div[draggable]')].find(x => x.getBoundingClientRect().width && x.innerText.trim().toLowerCase().startsWith(\"triagem de propostas\")); const r = e.getBoundingClientRect(); const d = document.createElement('div'); d.dataset.print = 'linha'; Object.assign(d.style, { position: 'fixed', left: r.left + 'px', top: (r.top - 6) + 'px', width: r.width + 'px', height: '12px', pointerEvents: 'none' }); document.body.appendChild(d) })()",
+          "esperar": 300
+        }
+      ],
+      "destacar": {
+        "css": "div[data-print='linha']"
+      }
+    },
+    "RF206": {
+      "antes": [
+        {
+          "estado": "Sem permissão"
+        }
+      ],
+      "cena": "comercial",
+      "passos": [
+        {
+          "pairar": "Painel de vendas"
+        }
+      ],
+      "destacar": "Painel de vendas"
+    },
+    "RF207": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"t-req\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"div[draggable]\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"triagem de propostas\")[0]; const r = e.getBoundingClientRect(); const y = r.top + 2; e.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, clientX: r.left + 20, clientY: y })) })()",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Minhas requisições",
+        {
+          "texto": "Salvar só para mim",
+          "ancestral": "div.rounded-xl"
+        }
+      ]
+    },
+    "RF211": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(s => { for (const k of ['$smenu-rascunho', '$smenu-ao-vivo']) for (const n of s[k]) if ([\"s-comercial\"].includes(n.id)) { n.lugar = 'painel'; n.painel = 'dados' } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 500
+        },
+        {
+          "clicar": "Dados",
+          "esperar": 900
+        },
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"c-1\"; s['$smenu-alvo'] = {\"id\":\"s-comercial\",\"posicao\":\"dentro\"} })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Expandir Comercial"
+    },
+    "RF212": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(s => { for (const k of ['$smenu-rascunho', '$smenu-ao-vivo']) for (const n of s[k]) if ([\"s-auditoria\",\"s-integracoes\"].includes(n.id)) { n.lugar = 'painel'; n.painel = 'dados' } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 500
+        },
+        {
+          "clicar": "Dados",
+          "esperar": 900
+        },
+        {
+          "clicar": "Expandir Auditoria",
+          "esperar": 600
+        },
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"a-logs\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"div[draggable]\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"integrações\")[0]; const r = e.getBoundingClientRect(); const y = r.top + r.height / 2; e.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, clientX: r.left + 20, clientY: y })) })()",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Integrações tem ordem fixa, como Configurações: nada entra, sai ou muda de lugar.",
+          "ancestral": "li"
+        },
+        "Logs de auditoria"
+      ]
+    },
+    "RF213": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "clicar": "Integrações",
+          "esperar": 900
+        },
+        {
+          "pairar": "Credenciais"
+        }
+      ],
+      "destacar": "Credenciais"
+    },
+    "RF301": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Excluir menu"
+    },
+    "RF302": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"comercial\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Excluir seção"
+    },
+    "RF303": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"triagem de propostas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Excluir menu",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Triagem de propostas foi excluído.",
+          "ancestral": "li"
+        },
+        "Descartar"
+      ]
+    },
+    "RF304": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Excluir menu",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF305": {
+      "antes": [
+        {
+          "estado": "Sem permissão"
+        }
+      ],
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"comercial\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": "Excluir seção"
+    },
+    "RF306": {
+      "cena": "personalizar",
+      "passos": [
+        {
+          "pairar": {
+            "texto": "Recolher Comercial",
+            "ancestral": "li"
+          }
+        }
+      ],
+      "destacar": "Excluir seção: Comercial"
+    },
+    "RF401": {
+      "cena": "mais",
+      "destacar": [
+        "Descreva o que quer criar",
+        "Criar menu",
+        "Criar categoria"
+      ]
+    },
+    "RF402": {
+      "cena": "mais",
+      "passos": [
+        {
+          "digitar": "menu"
+        }
+      ],
+      "destacar": [
+        "Descreva o que quer criar",
+        "Criar menu"
+      ]
+    },
+    "RF403": {
+      "antes": [
+        {
+          "estado": "Sem permissão"
+        }
+      ],
+      "cena": "mais",
+      "destacar": [
+        "Criar menu",
+        "Criar categoria"
+      ]
+    },
+    "RF404": {
+      "cena": "mais",
+      "destacar": [
+        "Criar seção",
+        {
+          "texto": "Personalizar a barra lateral",
+          "n": 1
+        }
+      ]
+    },
+    "RF411": {
+      "cena": "criarMenu",
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF412": {
+      "cena": "criarMenu",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[form='form-criar-menu']"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Dê um nome ao menu.",
+        {
+          "css": "[role=dialog] input[placeholder^='Ex.']"
+        }
+      ]
+    },
+    "RF413": {
+      "cena": "criarMenu",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Consultas",
+            "n": 0
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF414": {
+      "cena": "criarMenu",
+      "destacar": [
+        "Escolha as categorias",
+        "Este tipo pede ao menos uma categoria"
+      ]
+    },
+    "RF415": {
+      "cena": "criarMenu",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[form='form-criar-menu']"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": "Escolha ao menos uma categoria para este tipo."
+    },
+    "RF416": {
+      "cena": "criarMenu",
+      "passos": [
+        {
+          "clicar": "No Início",
+          "esperar": 600
+        },
+        {
+          "clicar": "Dentro de uma seção",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Onde ele fica",
+        "Dentro de qual seção"
+      ]
+    },
+    "RF417": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Adicionar submenu",
+          "esperar": 900
+        },
+        {
+          "clicar": "Criar menu",
+          "esperar": 1000
+        },
+        {
+          "clicar": "Painel de vendas (Comercial)",
+          "esperar": 700
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF418": {
+      "antes": [
+        {
+          "estado": "Workspace novo"
+        }
+      ],
+      "cena": "criarMenu",
+      "passos": [
+        {
+          "clicar": "No Início",
+          "esperar": 600
+        }
+      ],
+      "destacar": {
+        "texto": "Dentro de um menu",
+        "ancestral": "[role=option]"
+      }
+    },
+    "RF419": {
+      "cena": "criarMenu",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Todo o workspace",
+            "n": 0
+          },
+          "esperar": 700
+        },
+        {
+          "clicar": "Jurídico",
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF420": {
+      "cena": "criarMenu",
+      "passos": [
+        {
+          "digitar": "Atendimento"
+        }
+      ],
+      "destacar": {
+        "texto": "Como fica no menu",
+        "ancestral": "div.border-dashed"
+      }
+    },
+    "RF421": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Adicionar submenu",
+          "esperar": 900
+        },
+        {
+          "clicar": "Criar menu",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        "Dentro de um menu",
+        "Dentro de qual menu",
+        "Painel de vendas (Comercial)"
+      ]
+    },
+    "RF422": {
+      "cena": "comercial",
+      "passos": [
+        {
+          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
+          "esperar": 700
+        },
+        {
+          "clicar": "Adicionar submenu",
+          "esperar": 900
+        },
+        {
+          "clicar": "Criar menu",
+          "esperar": 1000
+        },
+        {
+          "digitar": "Metas regionais"
+        },
+        {
+          "clicar": {
+            "texto": "Consultas",
+            "n": 0
+          },
+          "esperar": 700
+        },
+        {
+          "clicar": "Arquivos",
+          "esperar": 600
+        },
+        {
+          "clicar": {
+            "css": "button[form='form-criar-menu']"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Metas regionais",
+        {
+          "texto": "Salvar só para mim",
+          "ancestral": "div.rounded-xl"
+        }
+      ]
+    },
+    "RF423": {
+      "passos": [
+        {
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "esperar": 500
+        },
+        {
+          "clicar": "Configurações",
+          "esperar": 900
+        },
+        {
+          "clicar": "Interface",
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Menus",
+        "Casos de uso"
+      ]
+    },
+    "RF431": {
+      "cena": "mais",
+      "passos": [
+        {
+          "clicar": "Criar categoria",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] input"
+        },
+        {
+          "css": "button[form='form-criar-categoria']"
+        }
+      ]
+    },
+    "RF432": {
+      "cena": "mais",
+      "passos": [
+        {
+          "clicar": "Criar categoria",
+          "esperar": 1000
+        },
+        {
+          "digitar": "Patrimônio"
+        },
+        {
+          "clicar": {
+            "css": "button[form='form-criar-categoria']"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": "Dados",
+          "esperar": 900
+        }
+      ],
+      "destacar": "Patrimônio"
+    },
+    "RI401": {
+      "sem": "É uma rota do servidor, e o protótipo não tem back-end."
+    },
+    "RF501": {
+      "cena": "editor",
+      "passos": [
+        {
+          "rolar": "Metas do trimestre"
+        }
+      ],
+      "destacar": {
+        "texto": "Metas do trimestre",
+        "ancestral": "div.rounded-lg"
+      }
+    },
+    "RF502": {
+      "cena": "editor",
+      "destacar": [
+        {
+          "css": "[role=dialog] .mb-3 button",
+          "n": 0
+        },
+        {
+          "css": "[role=dialog] .mb-3 button",
+          "n": 1
+        }
+      ]
+    },
+    "RF503": {
+      "cena": "editor",
+      "passos": [
+        {
+          "rolar": "Credenciais"
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Credenciais",
+          "ancestral": "div.rounded-lg"
+        }
+      ]
+    },
+    "RF504": {
+      "cena": "editor",
+      "passos": [
+        {
+          "rolar": "Metas do trimestre"
+        },
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"c-2\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll('[role=dialog] span')].find(x => x.innerText.trim() === \"Comercial\").closest('[draggable]'); const r = e.getBoundingClientRect(); const y = r.top + r.height / 2; e.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, clientX: r.left + 20, clientY: y })) })()",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Metas do trimestre",
+          "ancestral": "div.rounded-lg"
+        },
+        {
+          "css": "li[data-slot=base]"
+        }
+      ]
+    },
+    "RF505": {
+      "sem": "O protótipo não mostra o botão de excluir no editor de menus."
+    },
+    "RF506": {
+      "sem": "O protótipo não tem a ação de editar um menu no editor."
+    },
+    "RF507": {
+      "cena": "editor",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=dialog] .mb-3 button",
+            "n": 1
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]",
+        "n": 1
+      }
+    },
+    "RF508": {
+      "cena": "editor",
+      "passos": [
+        {
+          "rolar": "Minhas requisições"
+        },
+        {
+          "js": "(s => { s['$smenu-arrastando'] = \"t-req\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        },
+        {
+          "js": "(() => { const e = [...document.querySelectorAll('[role=dialog] span')].find(x => x.innerText.trim() === \"Triagem de propostas\").closest('[draggable]'); const r = e.getBoundingClientRect(); const y = r.top + 2; e.dispatchEvent(new DragEvent('drop', { bubbles: true, cancelable: true, clientX: r.left + 20, clientY: y })) })()",
+          "esperar": 900
+        },
+        {
+          "js": "document.querySelectorAll('li[data-slot=base] button').forEach(b => b.click())",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] [data-slot=footer]"
+        },
+        {
+          "texto": "Salvar só para mim",
+          "ancestral": "div.rounded-xl"
+        }
+      ]
+    },
+    "RF509": {
+      "sem": "O protótipo não reproduz a tela atual de Interface > Menus, onde fica o Exportar."
+    }
+  }
+}

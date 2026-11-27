@@ -1,0 +1,728 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/menu-lateral/",
+  "andaime": "Estado",
+  "cenas": {
+    "base": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      }
+    ],
+    "janelaNav": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      },
+      {
+        "js": "__s()['$strilha-personalizar'] = 'navegacao'",
+        "esperar": 1200
+      }
+    ],
+    "janelaInicio": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      },
+      {
+        "js": "__s()['$strilha-personalizar'] = 'inicio'",
+        "esperar": 1200
+      }
+    ],
+    "janelaSecoes": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      },
+      {
+        "js": "__s()['$strilha-personalizar'] = 'secoes'",
+        "esperar": 1200
+      }
+    ],
+    "dirComercial": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      },
+      {
+        "js": "__direito(__trilha('Comercial'))",
+        "esperar": 800
+      }
+    ],
+    "painelComercial": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      },
+      {
+        "js": "__trilha('Comercial').click()",
+        "esperar": 1300
+      }
+    ],
+    "maisDaTrilha": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      },
+      {
+        "clicar": "Mais",
+        "esperar": 800
+      }
+    ],
+    "dirRotina": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      },
+      {
+        "js": "__direito(__titulo('rotina do jurídico'))",
+        "esperar": 800
+      }
+    ],
+    "pairarRotina": [
+      {
+        "js": "window.__s = () => document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state; __s()['$smenu-larguras'] = { barra: 280, trilha: 408 }; window.__trilha = t => [...document.querySelectorAll('button')].find(b => b.innerText.trim() === t && b.getBoundingClientRect().right <= 72); window.__linha = (t, n) => { const s = [...document.querySelectorAll('span[title]')].filter(x => x.getAttribute('title') === t && x.getBoundingClientRect().width > 0)[n || 0]; return s && s.closest('[draggable]') }; window.__titulo = t => [...document.querySelectorAll('button[aria-expanded]')].find(b => b.innerText.trim().toLowerCase().startsWith(t.toLowerCase())); window.__direito = el => { const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + Math.min(30, r.width / 2), clientY: r.y + r.height / 2, button: 2 })) }; window.__toast = p => [...document.querySelectorAll('[data-slot=title]')].find(t => t.innerText.trim().startsWith(p)); window.__arrastar = (a, b, f, soltar) => { const dt = new DataTransfer(); const ev = (el, tipo, y) => el.dispatchEvent(new DragEvent(tipo, { bubbles: true, cancelable: true, dataTransfer: dt, clientX: el.getBoundingClientRect().x + 30, clientY: y })); const r = b.getBoundingClientRect(); const y = r.y + r.height * f; ev(a, 'dragstart', a.getBoundingClientRect().y + 5); ev(b, 'dragenter', y); ev(b, 'dragover', y); if (soltar) { ev(b, 'drop', y); ev(a, 'dragend', y) } }",
+        "esperar": 900
+      },
+      {
+        "pairar": "Rotina do jurídico",
+        "esperar": 600
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "sem": "O protótipo guarda a preferência na memória do navegador; a gravação no servidor não tem tela."
+    },
+    "RF002": {
+      "antes": [
+        {
+          "estado": "Sem personalização",
+          "esperar": 1200
+        }
+      ],
+      "cena": "base",
+      "destacar": [
+        {
+          "css": "div.w-\\[4\\.5rem\\]"
+        },
+        {
+          "css": "aside nav"
+        }
+      ]
+    },
+    "RF003": {
+      "sem": "A exclusão de um item guardado na preferência acontece no servidor e não tem tela no protótipo."
+    },
+    "RF011": {
+      "cena": "dirComercial",
+      "passos": [
+        {
+          "clicar": "Personalizar navegação",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] [role=tablist]"
+      }
+    },
+    "RF012": {
+      "cena": "janelaNav",
+      "passos": [
+        {
+          "js": "(l => { l.closest('li').setAttribute('data-print', 'aud'); l.click() })([...document.querySelectorAll('[role=dialog] label')].find(l => l.innerText.trim() === 'Auditoria'))",
+          "esperar": 750
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=aud]"
+        },
+        {
+          "css": "[role=dialog] [data-slot=footer]"
+        }
+      ]
+    },
+    "RF013": {
+      "cena": "janelaNav",
+      "passos": [
+        {
+          "js": "void 13"
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] [data-slot=footer]"
+      }
+    },
+    "RF014": {
+      "cena": "janelaNav",
+      "passos": [
+        {
+          "js": "(l => { l.closest('li').setAttribute('data-print', 'aud'); l.click() })([...document.querySelectorAll('[role=dialog] label')].find(l => l.innerText.trim() === 'Auditoria'))",
+          "esperar": 700
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] [data-slot=footer] button",
+            "n": 1
+          },
+          "esperar": 700
+        },
+        {
+          "js": "[...document.querySelectorAll('[role=menuitem]')].find(m => m.innerText.trim().startsWith('Salvar só para mim')).click()",
+          "esperar": 900
+        },
+        {
+          "js": "__toast('Menu salvo').dataset.print = 't014'"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=t014]"
+      }
+    },
+    "RF015": {
+      "sem": "O protótipo fecha a janela sem perguntar; a pergunta de descartar as mudanças não tem tela."
+    },
+    "RF021": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "document.querySelector('aside nav').scrollTop = 9999",
+          "esperar": 500
+        }
+      ],
+      "destacar": "Personalizar a barra lateral"
+    },
+    "RF022": {
+      "cena": "dirComercial",
+      "destacar": "Personalizar navegação"
+    },
+    "RF023": {
+      "cena": "maisDaTrilha",
+      "destacar": "Personalizar navegação"
+    },
+    "RI001": {
+      "sem": "A rota que guarda e devolve a preferência é de back-end e não tem tela."
+    },
+    "RF101": {
+      "cena": "janelaNav",
+      "destacar": {
+        "css": "[role=dialog] ul"
+      }
+    },
+    "RF102": {
+      "cena": "janelaNav",
+      "destacar": {
+        "texto": "O Início fica sempre na trilha",
+        "ancestral": "li"
+      }
+    },
+    "RF103": {
+      "cena": "janelaNav",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('[role=dialog] li')].find(l => l.innerText.trim() === 'Comercial').dataset.print = 'com'"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=com]"
+      }
+    },
+    "RF104": {
+      "cena": "janelaNav",
+      "passos": [
+        {
+          "clicar": "Somente ícones",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Somente ícones",
+        "Ícones e rótulos"
+      ]
+    },
+    "RF105": {
+      "cena": "maisDaTrilha",
+      "passos": [
+        {
+          "pairar": "Conhecimento",
+          "esperar": 600
+        }
+      ],
+      "destacar": "Fixar na trilha: Conhecimento"
+    },
+    "RF106": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "(s => { for (const k of ['$strilha-prefs', '$strilha-prefs-rascunho']) s[k].fixadas.push('sec:s-conhecimento') })(__s())",
+          "esperar": 800
+        },
+        {
+          "clicar": "Mais",
+          "esperar": 900
+        },
+        {
+          "pairar": "Comparações",
+          "esperar": 500
+        },
+        {
+          "clicar": "Fixar na trilha: Comparações",
+          "esperar": 900
+        },
+        {
+          "js": "__toast('Comparações entrou').dataset.print = 't106'"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=t106]"
+      }
+    },
+    "RF107": {
+      "cena": "dirComercial",
+      "destacar": [
+        "Mover para cima",
+        "Mover para baixo",
+        "Tirar da trilha"
+      ]
+    },
+    "RF111": {
+      "cena": "painelComercial",
+      "passos": [
+        {
+          "js": "__direito(__linha('Painel de vendas'))",
+          "esperar": 800
+        }
+      ],
+      "destacar": "Ocultar do menu"
+    },
+    "RF112": {
+      "cena": "painelComercial",
+      "passos": [
+        {
+          "js": "__direito(__linha('Painel de vendas'))",
+          "esperar": 800
+        },
+        {
+          "js": "[...document.querySelectorAll('[role=menuitem]')].find(m => m.innerText.trim().startsWith('Ocultar do menu')).click()",
+          "esperar": 900
+        },
+        {
+          "clicar": "1 item oculto",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "1 item oculto",
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RF121": {
+      "cena": "janelaInicio",
+      "destacar": {
+        "css": "[role=dialog] ul"
+      }
+    },
+    "RF122": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Mais' && b.getBoundingClientRect().x > 72).dataset.print = 'mais-inicio'"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=mais-inicio]"
+      }
+    },
+    "RF123": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.innerText.trim() === 'Mais' && b.getBoundingClientRect().x > 72).dataset.print = 'mais-inicio'"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=mais-inicio]"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Fixar no Início: Documentos"
+        },
+        "Personalizar"
+      ]
+    },
+    "RF124": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "__arrastar(__linha('Fornecedores'), __linha('Solicitações de compra e reembolso'), 0.2, true)",
+          "esperar": 900
+        },
+        {
+          "rolar": "Fornecedores"
+        },
+        {
+          "js": "__toast('A ordenação virou').dataset.print = 't124'"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=t124]"
+        },
+        "Fornecedores"
+      ]
+    },
+    "RF131": {
+      "cena": "dirRotina",
+      "passos": [
+        {
+          "clicar": "Mostrar na seção",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Mostrar na seção",
+        {
+          "css": "[role=menu]",
+          "n": 1
+        }
+      ]
+    },
+    "RF132": {
+      "cena": "base",
+      "passos": [
+        {
+          "rolar": "Ver todas as 8 categorias"
+        },
+        {
+          "js": "__direito(__titulo('categorias'))",
+          "esperar": 800
+        },
+        {
+          "clicar": "Mostrar na seção",
+          "esperar": 700
+        }
+      ],
+      "destacar": "5 itens"
+    },
+    "RF133": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "(s => { for (const k of ['$strilha-prefs', '$strilha-prefs-rascunho']) { const p = s[k].pessoais.find(x => x.id === 'p-rotina'); for (const id of ['2', '3', '5', '6']) p.itens.push({ tipo: 'categoria', id }) } s['$slimites-de-secao'] = { categorias: 5, 'p-rotina': 5 } })(__s())",
+          "esperar": 900
+        },
+        {
+          "rolar": "Mais 3"
+        }
+      ],
+      "destacar": "Mais 3"
+    },
+    "RF201": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "__s()['$strilha-criar-secao'] = 'nova'",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        "Escolher ícone",
+        {
+          "css": "[role=dialog] input"
+        }
+      ]
+    },
+    "RF202": {
+      "cena": "base",
+      "passos": [
+        {
+          "pairar": "Rotina do jurídico",
+          "esperar": 650
+        }
+      ],
+      "destacar": [
+        "Mais ações de Rotina do jurídico",
+        "Adicionar em Rotina do jurídico"
+      ]
+    },
+    "RF203": {
+      "cena": "pairarRotina",
+      "passos": [
+        {
+          "clicar": "Mais ações de Rotina do jurídico",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF204": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "__s()['$strilha-criar-secao'] = 'p-rotina'",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] h2"
+        },
+        {
+          "css": "[role=dialog] input"
+        }
+      ]
+    },
+    "RF205": {
+      "cena": "pairarRotina",
+      "passos": [
+        {
+          "clicar": "Mais ações de Rotina do jurídico",
+          "esperar": 800
+        },
+        {
+          "clicar": "Excluir seção",
+          "esperar": 900
+        },
+        {
+          "js": "__toast('Rotina do jurídico foi').dataset.print = 't205'"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=t205]"
+      }
+    },
+    "RF206": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "document.querySelector('aside nav').scrollTop = 170",
+          "esperar": 400
+        },
+        {
+          "js": "(a => { const b = __titulo('rotina do jurídico').closest('[draggable]'); a.setAttribute('data-print', 'r206a'); b.setAttribute('data-print', 'r206b'); __arrastar(a, b, 0.15, false) })(__titulo('favoritos').closest('[draggable]'))",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=r206a]"
+        },
+        {
+          "css": "[data-print=r206b]"
+        }
+      ]
+    },
+    "RF211": {
+      "cena": "base",
+      "passos": [
+        {
+          "clicar": "Adicionar em Rotina do jurídico",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] h2"
+        },
+        "Pesquisar menus e categorias..."
+      ]
+    },
+    "RF212": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "__s()['$strilha-criar-secao'] = 'nova'",
+          "esperar": 1000
+        },
+        {
+          "digitar": "Comercial do dia"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Adicionar à seção"
+    },
+    "RF213": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "__direito(__linha('Políticas internas'))",
+          "esperar": 800
+        }
+      ],
+      "destacar": "Adicionar submenu"
+    },
+    "RF214": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "void 214"
+        }
+      ],
+      "destacar": "Base de Conhecimento"
+    },
+    "RF225": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "void 225"
+        },
+        {
+          "js": "__linha('Políticas internas').querySelector('[class*=chevron-right]').dataset.print = 'r225'",
+          "esperar": 500
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=r225]"
+      }
+    },
+    "RF215": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "(a => { const b = __linha('Políticas internas'); a.setAttribute('data-print', 'r215a'); b.setAttribute('data-print', 'r215b'); __arrastar(a, b, 0.15, false) })(__linha('Contratos'))",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=r215a]"
+        },
+        {
+          "css": "[data-print=r215b]"
+        }
+      ]
+    },
+    "RF216": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "(s => { for (const k of ['$strilha-prefs', '$strilha-prefs-rascunho']) { s[k].pessoais.push({ id: 'p-dia', rotulo: 'Comercial do dia', icone: 'i-lucide-briefcase', ordem: 'personalizada', itens: [{ tipo: 'categoria', id: '2' }] }); s[k].ordemDasSecoes = ['p-rotina', 'p-dia', 'favoritos', 'categorias'] } })(__s())",
+          "esperar": 900
+        },
+        {
+          "js": "__arrastar(__linha('Contratos'), __titulo('comercial do dia').closest('[draggable]'), 0.5, true)",
+          "esperar": 900
+        },
+        {
+          "js": "(g => { g.querySelector('span[title=Contratos]').closest('button').setAttribute('data-print', 'r216'); g.querySelector('button[aria-expanded]').setAttribute('data-print', 'r216t') })([...document.querySelectorAll('[class~=\"group/secao\"]')].find(g => g.innerText.trim().toLowerCase().startsWith('comercial do dia')))"
+        },
+        {
+          "rolar": {
+            "css": "[data-print=r216]"
+          }
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=r216t]"
+        },
+        {
+          "css": "[data-print=r216]"
+        }
+      ]
+    },
+    "RF217": {
+      "cena": "base",
+      "passos": [
+        {
+          "js": "__direito(__linha('Contratos'))",
+          "esperar": 800
+        },
+        {
+          "js": "[...document.querySelectorAll('[role=menuitem]')].find(m => m.innerText.trim().startsWith('Tirar da seção')).click()",
+          "esperar": 900
+        },
+        {
+          "js": "__toast('Contratos saiu').dataset.print = 't217'"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=t217]"
+        },
+        "Desfazer"
+      ]
+    },
+    "RF218": {
+      "sem": "Na seção pessoal, o protótipo ignora o arraste para dentro de um submenu e não mostra o aviso."
+    },
+    "RF219": {
+      "sem": "Na seção pessoal, o protótipo ignora o arraste para dentro de um menu nativo e não mostra o aviso."
+    },
+    "RF221": {
+      "cena": "janelaSecoes",
+      "passos": [
+        {
+          "js": "void 221"
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog] section ul"
+      }
+    },
+    "RF222": {
+      "cena": "janelaSecoes",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('[role=dialog] li')].find(l => l.innerText.trim().startsWith('Favoritos')).dataset.print = 'fav'"
+        },
+        {
+          "pairar": {
+            "css": "[data-print=fav]"
+          },
+          "esperar": 600
+        },
+        {
+          "clicar": "Ocultar seção: Favoritos",
+          "esperar": 800
+        }
+      ],
+      "destacar": [
+        "Mostrar no menu: Favoritos",
+        "Criar seção"
+      ]
+    },
+    "RF223": {
+      "cena": "janelaSecoes",
+      "passos": [
+        {
+          "pairar": {
+            "css": "[role=dialog] li"
+          },
+          "esperar": 600
+        }
+      ],
+      "destacar": [
+        "Excluir seção: Rotina do jurídico",
+        "Ocultar seção: Rotina do jurídico",
+        {
+          "css": "[role=dialog] [aria-label=\"Adicionar em Rotina do jurídico\"]"
+        }
+      ]
+    },
+    "RF224": {
+      "cena": "janelaSecoes",
+      "passos": [
+        {
+          "clicar": {
+            "css": "[role=dialog] [aria-label=\"Mais ações de Políticas internas\"]"
+          },
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    }
+  }
+}

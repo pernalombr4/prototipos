@@ -1,0 +1,266 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/menu-lateral/",
+  "andaime": "Estado",
+  "cenas": {
+    "inicio": [
+      {
+        "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 900
+      }
+    ],
+    "dash": [
+      {
+        "clicar": {
+          "texto": "Análise",
+          "exato": true
+        },
+        "esperar": 1000
+      },
+      {
+        "clicar": {
+          "texto": "Dashboards",
+          "n": 0
+        },
+        "esperar": 1200
+      }
+    ],
+    "botaoDireitoCategoria": [
+      {
+        "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 900
+      },
+      {
+        "js": "(() => { const el = [...document.querySelectorAll('span')].filter(e => e.children.length === 0 && e.textContent.trim() === 'Contratos')[1]; el.scrollIntoView({ block: 'center' }) })()",
+        "esperar": 500
+      },
+      {
+        "js": "(() => { const el = [...document.querySelectorAll('span')].filter(e => e.children.length === 0 && e.textContent.trim() === 'Contratos')[1]; const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + 10, clientY: r.y + 5, button: 2 })) })()",
+        "esperar": 900
+      },
+      {
+        "pairar": "Dashboards no menu",
+        "esperar": 900
+      }
+    ],
+    "dashAberto": [
+      {
+        "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 900
+      },
+      {
+        "clicar": {
+          "texto": "Contratos por status",
+          "n": 0
+        },
+        "esperar": 1200
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "dash",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Contratos por status",
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "h1",
+        "ancestral": "div"
+      }
+    },
+    "RF002": {
+      "cena": "dash",
+      "destacar": [
+        {
+          "css": "thead th:nth-child(2)"
+        },
+        {
+          "css": "tbody tr:nth-child(1) td:nth-child(2)"
+        }
+      ]
+    },
+    "RF003": {
+      "antes": [
+        {
+          "estado": "Workspace novo"
+        },
+        {
+          "esperar": 1200
+        }
+      ],
+      "cena": "dash",
+      "destacar": {
+        "texto": "O dashboard mostra os itens de uma categoria. Crie a primeira categoria para criar um dashboard."
+      }
+    },
+    "RF011": {
+      "cena": "dash",
+      "destacar": [
+        {
+          "css": "thead th:nth-child(5)"
+        },
+        {
+          "css": "button[role=switch]",
+          "n": 0
+        },
+        {
+          "css": "button[role=switch]",
+          "n": 1
+        },
+        {
+          "css": "button[role=switch]",
+          "n": 2
+        },
+        {
+          "css": "button[role=switch]",
+          "n": 3
+        }
+      ]
+    },
+    "RF012": {
+      "cena": "dash",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[role=switch]",
+            "n": 1
+          },
+          "esperar": 900
+        },
+        {
+          "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 600
+        },
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Início' && b.getBoundingClientRect().x < 72).click()",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Vencimentos do trimestre",
+          "n": 0
+        },
+        {
+          "css": "[data-slot=viewport] li"
+        }
+      ]
+    },
+    "RF013": {
+      "cena": "dash",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[role=switch]",
+            "n": 0
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "tbody tr:nth-child(1)"
+        },
+        {
+          "css": "[data-slot=viewport] li"
+        }
+      ]
+    },
+    "RF014": {
+      "cena": "dash",
+      "destacar": {
+        "texto": "Remover um dashboard do menu não o exclui. Ele continua nesta lista."
+      }
+    },
+    "RF015": {
+      "cena": "botaoDireitoCategoria",
+      "destacar": [
+        {
+          "texto": "Dashboards no menu"
+        },
+        {
+          "css": "[role=menu]",
+          "n": 1
+        }
+      ],
+      "passos": [
+        {
+          "js": "void 1"
+        }
+      ]
+    },
+    "RF016": {
+      "cena": "botaoDireitoCategoria",
+      "passos": [
+        {
+          "js": "void 0"
+        }
+      ],
+      "destacar": "Novo dashboard"
+    },
+    "RF017": {
+      "sem": "O protótipo não mostra a chave nem Dashboards no menu desligados para quem não configura o workspace."
+    },
+    "RF021": {
+      "cena": "dashAberto",
+      "destacar": [
+        {
+          "texto": "Contratos por status",
+          "n": 0
+        },
+        {
+          "css": "h1"
+        }
+      ]
+    },
+    "RF022": {
+      "junto": "RF001",
+      "destacar": {
+        "css": "nav[aria-label='Trilha de navegação']",
+        "ancestral": "div"
+      }
+    },
+    "RF023": {
+      "cena": "inicio",
+      "passos": [
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('span')].filter(e => e.children.length === 0 && e.textContent.trim() === 'Contratos por status')[0]; el.scrollIntoView({ block: 'center' }) })()",
+          "esperar": 500
+        },
+        {
+          "js": "(() => { const el = [...document.querySelectorAll('span')].filter(e => e.children.length === 0 && e.textContent.trim() === 'Contratos por status')[0]; const r = el.getBoundingClientRect(); el.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.x + 10, clientY: r.y + 5, button: 2 })) })()",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        "Abrir",
+        "Tirar do menu"
+      ]
+    },
+    "RF024": {
+      "sem": "O protótipo não tem grupos de acesso por dashboard, e a regra de quem vê o dashboard no menu fica no servidor."
+    },
+    "RI001": {
+      "sem": "A lista de dashboards é uma rota do servidor, sem tela no protótipo."
+    },
+    "RI002": {
+      "sem": "Pôr e tirar o dashboard do menu é uma rota do servidor, sem tela no protótipo."
+    },
+    "RF004": {
+      "junto": "RF002",
+      "destacar": [
+        {
+          "css": "thead th:nth-child(3)"
+        },
+        {
+          "css": "tbody tr:nth-child(1) td:nth-child(3)"
+        }
+      ]
+    }
+  }
+}

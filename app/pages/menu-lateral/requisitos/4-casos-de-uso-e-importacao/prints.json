@@ -1,0 +1,732 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/menu-lateral/",
+  "andaime": "Estado",
+  "cenas": {
+    "mais": [
+      {
+        "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 900
+      },
+      {
+        "clicar": {
+          "css": "button[aria-label='Criar'][class*='ml-0.5']"
+        },
+        "esperar": 900
+      }
+    ],
+    "central": [
+      {
+        "js": "(s => { s['$scasos-central'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "detalhe": [
+      {
+        "js": "(s => { s['$scasos-central'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": {
+          "texto": "Gestão de contratos"
+        },
+        "esperar": 1000
+      }
+    ],
+    "usar": [
+      {
+        "js": "(s => { s['$scasos-central'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": {
+          "texto": "Gestão de contratos"
+        },
+        "esperar": 1000
+      },
+      {
+        "clicar": {
+          "texto": "Usar caso de uso",
+          "exato": true
+        },
+        "esperar": 1200
+      }
+    ],
+    "importar": [
+      {
+        "js": "(s => { s['$scasos-importando'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      }
+    ],
+    "importarLido": [
+      {
+        "js": "(s => { s['$scasos-importando'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Usar um arquivo de exemplo",
+        "esperar": 1000
+      }
+    ],
+    "criar": [
+      {
+        "js": "(s => { s['$scasos-central'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Do seu workspace",
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "texto": "Criar caso de uso"
+        },
+        "esperar": 1200
+      }
+    ],
+    "criarComImagens": [
+      {
+        "js": "(s => { s['$scasos-central'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Do seu workspace",
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "texto": "Criar caso de uso"
+        },
+        "esperar": 1200
+      },
+      {
+        "digitar": "Rotina do time jurídico"
+      },
+      {
+        "arquivo": "C:/Users/JardimMikaela/Documents/Github/enspace-prototipos/app/pages/menu-lateral/evidencias/rodada15-personalizar-inicio.png",
+        "esperar": 900
+      },
+      {
+        "arquivo": "C:/Users/JardimMikaela/Documents/Github/enspace-prototipos/app/pages/menu-lateral/evidencias/rodada15-criar-secao.png",
+        "esperar": 900
+      }
+    ],
+    "criadoComImagens": [
+      {
+        "js": "(s => { s['$scasos-central'] = true })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+        "esperar": 1500
+      },
+      {
+        "clicar": "Do seu workspace",
+        "esperar": 700
+      },
+      {
+        "clicar": {
+          "texto": "Criar caso de uso"
+        },
+        "esperar": 1200
+      },
+      {
+        "digitar": "Rotina do time jurídico"
+      },
+      {
+        "arquivo": "C:/Users/JardimMikaela/Documents/Github/enspace-prototipos/app/pages/menu-lateral/evidencias/rodada15-personalizar-inicio.png",
+        "esperar": 900
+      },
+      {
+        "arquivo": "C:/Users/JardimMikaela/Documents/Github/enspace-prototipos/app/pages/menu-lateral/evidencias/rodada15-criar-secao.png",
+        "esperar": 900
+      },
+      {
+        "focar": {
+          "css": "#form-criar-caso input:not([type=file])"
+        }
+      },
+      {
+        "tecla": "Enter",
+        "esperar": 1500
+      }
+    ]
+  },
+  "requisitos": {
+    "RF001": {
+      "cena": "importar",
+      "destacar": "Exportar o meu menu"
+    },
+    "RF002": {
+      "sem": "O nome do workspace e a data ficam dentro do arquivo baixado, que não tem tela no protótipo."
+    },
+    "RF003": {
+      "sem": "O protótipo não mostra Exportar o meu menu desligado para quem não configura o workspace."
+    },
+    "RI001": {
+      "sem": "A exportação do menu é uma rota do servidor, sem tela no protótipo."
+    },
+    "RF101": {
+      "cena": "mais",
+      "destacar": [
+        {
+          "texto": "Importar",
+          "n": 0
+        },
+        "Casos de uso"
+      ]
+    },
+    "RF102": {
+      "cena": "mais",
+      "passos": [
+        {
+          "clicar": "Casos de uso",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "texto": "Destaques",
+        "exato": false
+      }
+    },
+    "RF103": {
+      "sem": "O protótipo não mostra Importar e Casos de uso desligados para quem não configura o workspace."
+    },
+    "RF111": {
+      "cena": "central",
+      "destacar": {
+        "css": "nav[aria-label='Central de casos de uso']"
+      }
+    },
+    "RF112": {
+      "cena": "central",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('fieldset label')].find(l => l.textContent.trim() === 'Menu').click()",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Tipos",
+          "ancestral": "fieldset"
+        },
+        {
+          "texto": "Complexidade",
+          "ancestral": "fieldset"
+        }
+      ]
+    },
+    "RF113": {
+      "cena": "central",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[aria-label='Áreas']"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": {
+            "css": "[role=option]",
+            "n": 0
+          },
+          "esperar": 500
+        },
+        {
+          "clicar": {
+            "css": "[role=option]",
+            "n": 1
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "button[aria-label='Áreas']"
+        },
+        {
+          "css": "input[placeholder='Pesquisar...']"
+        },
+        "Selecionar tudo"
+      ]
+    },
+    "RF114": {
+      "cena": "central",
+      "passos": [
+        {
+          "focar": {
+            "css": "input[placeholder='Pesquisar casos de uso...']"
+          }
+        },
+        {
+          "digitar": "contrato"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "input[placeholder='Pesquisar casos de uso...']"
+        },
+        {
+          "texto": "Gestão de contratos",
+          "n": 0
+        }
+      ]
+    },
+    "RF115": {
+      "antes": [
+        {
+          "js": "(s => { s['$scasos-do-workspace'] = [{ id: 'w1', nome: 'Rotina do time jurídico', icone: 'i-lucide-scale', area: 'Jurídico', tipo: 'menu', complexidade: 'iniciante', descricao: '', origem: 'workspace', criadoEm: '2026-11-20', usos: 0, menus: [], categorias: [], status: [] }, { id: 'w2', nome: 'Aditivos e distratos', icone: 'i-lucide-file-plus', area: 'Jurídico', tipo: 'categoria', complexidade: 'iniciante', descricao: '', origem: 'workspace', criadoEm: '2026-11-21', usos: 0, menus: [], categorias: [], status: [] }] })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 500
+        }
+      ],
+      "cena": "central",
+      "passos": [
+        {
+          "rolar": {
+            "regex": "^ver mais \\d+$"
+          }
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Jurídico",
+          "exato": true
+        },
+        {
+          "regex": "^ver mais \\d+$"
+        }
+      ]
+    },
+    "RF116": {
+      "cena": "central",
+      "passos": [
+        {
+          "clicar": "Do seu workspace",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "texto": "Transforme o seu menu num caso de uso e use em outros workspaces.",
+        "ancestral": "div.rounded-lg"
+      }
+    },
+    "RF121": {
+      "cena": "detalhe",
+      "passos": [
+        {
+          "js": "[...document.querySelectorAll('[role=dialog] button')].find(b => b.textContent.trim() === 'Voltar').dataset.print = 'voltar'"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=voltar]"
+        },
+        {
+          "css": "h3.text-xl",
+          "ancestral": "div.mb-6"
+        }
+      ]
+    },
+    "RF122": {
+      "cena": "detalhe",
+      "passos": [
+        {
+          "clicar": "Próxima",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Anterior",
+        "Próxima",
+        {
+          "css": "button[aria-label^='Ampliar imagem']"
+        },
+        {
+          "css": "button[aria-current=true]",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF123": {
+      "cena": "detalhe",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[aria-label^='Ampliar imagem']"
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { [...document.querySelectorAll('p')].find(p => /^Imagem \\d+ de \\d+$/.test(p.textContent.trim())).dataset.print = 'contador'; document.querySelector('[class*=\"aspect-[16/10]\"]').dataset.print = 'ampliada' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=contador]"
+        },
+        {
+          "css": "[data-print=ampliada]"
+        }
+      ]
+    },
+    "RF124": {
+      "cena": "detalhe",
+      "passos": [
+        {
+          "clicar": "Seções e menus",
+          "esperar": 800
+        },
+        {
+          "rolar": {
+            "texto": "O que vem junto",
+            "exato": true
+          }
+        },
+        {
+          "js": "(() => { const p = [...document.querySelectorAll('p')].find(x => x.textContent.trim() === 'O que vem junto'); [...p.nextElementSibling.children].forEach((b, i) => { b.dataset.print = 'bloco' + i }) })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=bloco0]"
+        },
+        {
+          "css": "[data-print=bloco1]"
+        },
+        {
+          "css": "[data-print=bloco2]"
+        }
+      ]
+    },
+    "RF125": {
+      "cena": "detalhe",
+      "destacar": {
+        "texto": "Criado em",
+        "ancestral": "aside"
+      }
+    },
+    "RF131": {
+      "cena": "usar",
+      "destacar": {
+        "texto": "O que entra",
+        "ancestral": "section"
+      }
+    },
+    "RF132": {
+      "cena": "usar",
+      "destacar": {
+        "css": "[role=radiogroup]"
+      }
+    },
+    "RF133": {
+      "cena": "usar",
+      "passos": [
+        {
+          "clicar": "Substituir o menu",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "texto": "O que sai",
+        "ancestral": "div.rounded-lg"
+      }
+    },
+    "RF134": {
+      "cena": "usar",
+      "passos": [
+        {
+          "clicar": "Substituir o menu",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "css": "button.bg-error"
+      }
+    },
+    "RF135": {
+      "cena": "usar",
+      "destacar": {
+        "texto": "Onde os menus entram",
+        "ancestral": "section"
+      }
+    },
+    "RF136": {
+      "antes": [
+        {
+          "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 900
+        }
+      ],
+      "cena": "usar",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Usar",
+            "exato": true
+          },
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "texto": "Alterações não salvas",
+        "ancestral": "div.rounded-xl"
+      }
+    },
+    "RF137": {
+      "cena": "detalhe",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[aria-label='Mais ações do caso de uso']"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": "Adicionar ao workspace"
+    },
+    "RF138": {
+      "cena": "detalhe",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[aria-label='Mais ações do caso de uso']"
+          },
+          "esperar": 900
+        },
+        {
+          "clicar": "Adicionar ao workspace",
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "[data-slot=viewport] li"
+      }
+    },
+    "RF139": {
+      "cena": "detalhe",
+      "passos": [
+        {
+          "clicar": {
+            "css": "button[aria-label='Mais ações do caso de uso']"
+          },
+          "esperar": 900
+        },
+        {
+          "js": "void 0"
+        }
+      ],
+      "destacar": "Exportar arquivo"
+    },
+    "RI101": {
+      "sem": "A lista de casos de uso é uma rota do servidor, sem tela no protótipo."
+    },
+    "RI102": {
+      "sem": "Aplicar o caso de uso é uma rota do servidor, sem tela no protótipo."
+    },
+    "RI103": {
+      "sem": "Guardar a cópia do caso no workspace é uma rota do servidor, sem tela no protótipo."
+    },
+    "RF201": {
+      "cena": "criar",
+      "passos": [
+        {
+          "js": "void 0"
+        },
+        {
+          "js": "(() => { const f = document.querySelector('#form-criar-caso'); [0, 1, 2].forEach(i => { f.children[i].dataset.print = 'campo' + i }); f.children[4].querySelector('label').dataset.print = 'campo4' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=campo0]"
+        },
+        {
+          "css": "[data-print=campo1]"
+        },
+        {
+          "css": "[data-print=campo2]"
+        },
+        {
+          "css": "[data-print=campo4]"
+        }
+      ]
+    },
+    "RF202": {
+      "cena": "criar",
+      "passos": [
+        {
+          "js": "void 1"
+        },
+        {
+          "js": "document.querySelector('#form-criar-caso').children[0].dataset.print = 'campo0'"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=campo0]"
+        },
+        {
+          "css": "button[form='form-criar-caso']"
+        }
+      ]
+    },
+    "RF203": {
+      "cena": "criar",
+      "passos": [
+        {
+          "digitar": "Rotina do time jurídico"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 1500
+        },
+        {
+          "js": "void 0"
+        }
+      ],
+      "destacar": {
+        "texto": "Rotina do time jurídico",
+        "exato": false
+      }
+    },
+    "RF204": {
+      "cena": "criarComImagens",
+      "destacar": {
+        "texto": "Imagens da galeria",
+        "exato": true
+      }
+    },
+    "RF205": {
+      "cena": "criarComImagens",
+      "destacar": {
+        "css": "#form-criar-caso img"
+      }
+    },
+    "RF206": {
+      "cena": "criadoComImagens",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Rotina do time jurídico"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "button[aria-label^='Ampliar imagem']"
+        },
+        {
+          "css": "button[aria-current=true]",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF207": {
+      "cena": "criadoComImagens",
+      "destacar": {
+        "texto": "Rotina do time jurídico"
+      },
+      "passos": [
+        {
+          "js": "void 0"
+        }
+      ]
+    },
+    "RF208": {
+      "cena": "criar",
+      "passos": [
+        {
+          "digitar": "Rotina do time jurídico"
+        },
+        {
+          "tecla": "Enter",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "texto": "Rotina do time jurídico"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "css": "button[aria-label^='Ampliar imagem']"
+      }
+    },
+    "RI201": {
+      "sem": "Criar o caso de uso e guardar as imagens é uma rota do servidor, sem tela no protótipo."
+    },
+    "RF301": {
+      "cena": "importar",
+      "destacar": {
+        "css": "[role=button][tabindex='0']"
+      }
+    },
+    "RF302": {
+      "cena": "importar",
+      "passos": [
+        {
+          "focar": {
+            "css": "[role=button][tabindex='0']"
+          }
+        }
+      ],
+      "destacar": {
+        "css": "[role=button][tabindex='0']"
+      }
+    },
+    "RF303": {
+      "cena": "importarLido",
+      "destacar": [
+        {
+          "regex": "^de .+, exportado em .+$"
+        },
+        {
+          "texto": "O que entra",
+          "ancestral": "section"
+        }
+      ]
+    },
+    "RF304": {
+      "cena": "importarLido",
+      "destacar": {
+        "css": "[role=radiogroup]"
+      }
+    },
+    "RF305": {
+      "cena": "importarLido",
+      "passos": [
+        {
+          "clicar": "Substituir o menu",
+          "esperar": 800
+        }
+      ],
+      "destacar": {
+        "texto": "O que sai",
+        "ancestral": "div.rounded-lg"
+      }
+    },
+    "RF306": {
+      "antes": [
+        {
+          "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 900
+        }
+      ],
+      "cena": "importarLido",
+      "passos": [
+        {
+          "clicar": {
+            "texto": "Importar",
+            "exato": true
+          },
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "texto": "Alterações não salvas",
+        "ancestral": "div.rounded-xl"
+      }
+    },
+    "RI301": {
+      "sem": "A importação do arquivo é uma rota do servidor, sem tela no protótipo."
+    }
+  }
+}

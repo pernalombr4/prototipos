@@ -389,6 +389,13 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Requisitos em épicos · 2026-11-27
+- **Pedido (literal):** "o menu de 2 níveis já tem cards escritos no enspace. contudo, eles nao foram escritos na logica nova de divisao de epicos. revise a divisao que ta la. [...] reveja e sugira a alteraçao. se eu validar vc aplica"
+- **Pedido (literal):** "pode deletar os cards antigos e fazer do zero com esses."
+- **Mudou:** as 6 fases de 2026-10-20 viram 5 épicos, pelo esforço lido no código do ENSPACE: 1, menu em trilha e painel com o que o produto já tem (só tela, pode ir sozinho ao cliente); 2, personalizar o meu menu; 3, arrumar o menu do workspace na própria barra; 4, casos de uso e importação; 5, dashboard de itens no menu da categoria. Índice em [`requisitos/README.md`](requisitos/README.md); as fases ficam como registro.
+- **Achado no develop:** o grupo do item da seção, em Configurações > Interface > Menu, não tira o item do menu lateral de quem está fora do grupo; o grupo da seção tira. Prints em `evidencias/bug-grupo-por-tela/`.
+- **Fronteira:** muda só o documento de requisitos; o protótipo não muda.
+
 ### Rodada 35 · 2026-11-24
 - **Pedido (literal):** "agora tem que dar conta de 2 novos menus: relatórios e dashboard de tarefas. isso já ta no protótipo? além disso, já temos um módulo de ASSINATURAS que você pode usar como exemplo. veja como funciona hoje no menu em develop e veja como ficaria no seu."
 - **Pedido (literal):** "vamos olhar para os dashboards de itens assim como o clickup olha pros relatórios de tarefas (que funcionam pra eles como nossos itens). Existe uma tela central pra eles/menu centralizado, mas o user pode adicionar a tela de dash em cada menu de categoria ou personalizado se quiser, como tela separada mesmo."
