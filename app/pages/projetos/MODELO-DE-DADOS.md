@@ -3,6 +3,9 @@
 Levantado em 2026-11-27, na rodada 13, a partir do código do protótipo: os tipos em `mocks.ts` e
 `metasEDiscussoes.ts`, as regras em `estado.ts` e as telas que editam cada ligação.
 
+**Situação:** as 18 brechas estão no protótipo desde a rodada 14 (2026-11-27). Os requisitos, com a Relevância de
+cada um, estão em `requisitos/relacoes-entre-entidades.md`; P1 a P4 viraram as suposições S1 a S4 de lá.
+
 ## Resumo
 
 - 22 entidades: 9 do workspace, 13 do projeto.

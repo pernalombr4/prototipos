@@ -33,6 +33,7 @@ import { iniciais, itensDoProjeto, pessoa, type GrupoDeStatus, type ItemDoProjet
 import { textosDoProjeto } from './textosDoProjeto'
 import { useMarcaDeProposta, useProjetos } from './estado'
 import Paginador from './_Paginador.vue'
+import { textosDasRelacoes } from './textosDasRelacoes'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -79,6 +80,9 @@ const aberto = ref<Linha | null>(null)
 const pagina = ref(1)
 const porPagina = ref(25)
 const ordem = ref<EnTableSort | null>({ key: 'prazo', direction: 'asc' })
+/** Rodada 14 (B3): as tarefas ligadas ao item aberto. */
+const tr = useTextos(textosDasRelacoes)
+const tarefasDoItem = computed(() => aberto.value ? prj.tarefas.value.filter(x => x.categoria === aberto.value!.categoria && x.item === aberto.value!.reference) : [])
 
 interface Linha {
   id: number
@@ -496,6 +500,23 @@ function configurarCampos() {
             </dd>
           </div>
         </dl>
+        <!-- rodada 14 (B3): as tarefas do item, vistas e criadas daqui -->
+        <section v-if="aberto" class="mt-6 flex flex-col gap-2 border-t border-default pt-4" :class="marca">
+          <header class="flex items-center gap-2">
+            <h3 class="flex-1 text-sm font-semibold text-highlighted">{{ tr.item.tarefas }}</h3>
+            <UButton :label="tr.item.criarTarefa" icon="i-lucide-plus" size="xs" color="neutral" variant="outline" @click="prj.novaTarefaCom(id, { categoria: aberto.categoria, item: aberto.reference })" />
+          </header>
+          <p v-if="!tarefasDoItem.length" class="text-xs text-muted">{{ tr.item.semTarefas }}</p>
+          <ul v-else class="flex flex-col divide-y divide-default rounded-lg border border-default">
+            <li v-for="x in tarefasDoItem" :key="x.id">
+              <button type="button" class="flex w-full items-center gap-2 px-3 py-2 text-left transition-colors hover:bg-elevated/60" @click="aberto = null; prj.tarefaAberta.value = x.id">
+                <UIcon :name="x.status === 'concluida' ? 'i-lucide-circle-check' : 'i-lucide-circle'" class="size-4 shrink-0" :class="x.status === 'concluida' ? 'text-success' : 'text-muted'" />
+                <span class="min-w-0 flex-1 truncate text-sm" :class="x.status === 'concluida' ? 'text-muted line-through' : 'text-highlighted'">{{ x.titulo }}</span>
+                <span class="shrink-0 text-xs text-muted">{{ pessoa(x.responsavel)?.nome }}</span>
+              </button>
+            </li>
+          </ul>
+        </section>
       </template>
       <template #footer>
         <UButton v-if="aberto" :label="ti.abrirNaCategoria" icon="i-lucide-arrow-up-right" color="neutral" variant="outline" @click="prj.abrirCategoria(aberto.categoria); aberto = null" />

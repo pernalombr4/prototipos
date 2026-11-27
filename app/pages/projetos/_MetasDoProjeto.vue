@@ -11,6 +11,7 @@ import { pessoa } from './mocks'
 import { COR_DA_SITUACAO, ICONE_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 import { useMetasEDiscussoes } from './metasEDiscussoes'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
+import { textosDasRelacoes } from './textosDasRelacoes'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -21,6 +22,33 @@ const idioma = useIdioma()
 const { marca } = useMarcaDeProposta()
 
 const metas = computed(() => md.metasDoProjeto(props.id))
+
+/**
+ * Rodada 14 (B2): o projeto se liga a uma meta daqui, sem abrir Metas. É a mesma ligação do painel da meta: os
+ * marcos do projeto entram na lista, e "Incluir marcos novos" diz se os criados depois entram. Liga quem administra
+ * o projeto ou quem edita a meta (P1, suposição).
+ */
+const tr = useTextos(textosDasRelacoes)
+const toast = useToast()
+const projeto = computed(() => prj.projetos.value.find(p => p.id === props.id))
+const opMetas = computed(() => md.metas.value
+  .filter(g => !g.projetos.includes(props.id) && md.podeLigarProjeto(g, props.id))
+  .map(g => ({ value: g.id, label: g.nome, icon: 'i-lucide-target' })))
+const ligando = ref(false)
+const lMeta = ref<number | undefined>()
+const lNovos = ref(true)
+function abrirLigar() {
+  lMeta.value = opMetas.value[0]?.value
+  lNovos.value = true
+  ligando.value = true
+}
+function ligar() {
+  const g = md.metas.value.find(x => x.id === lMeta.value)
+  if (!g || !projeto.value) return
+  md.ligarProjeto(g, props.id, lNovos.value)
+  ligando.value = false
+  toast.add({ title: tr.value.projeto.ligado(projeto.value.nome, g.nome), icon: 'i-lucide-target', color: 'success' })
+}
 const data = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(idioma.value, { day: '2-digit', month: 'short', year: 'numeric' })
 function caminho(m: (typeof metas.value)[number]) {
   if (m.projetos.includes(props.id)) return tg.value.doProjetoLigado
@@ -36,6 +64,7 @@ function caminho(m: (typeof metas.value)[number]) {
       <UTooltip :text="tg.doProjetoDica">
         <UIcon name="i-lucide-info" class="size-4 text-muted" :aria-label="tg.doProjetoDica" />
       </UTooltip>
+      <UButton v-if="opMetas.length" :label="tr.projeto.ligarMeta" icon="i-lucide-link" size="xs" color="neutral" variant="outline" @click="abrirLigar" />
       <UButton :label="tg.verMetas" trailing-icon="i-lucide-arrow-right" size="xs" color="neutral" variant="outline" @click="prj.tela.value = { tipo: 'metas' }" />
     </header>
     <ul v-if="metas.length" class="divide-y divide-default">
@@ -56,5 +85,20 @@ function caminho(m: (typeof metas.value)[number]) {
       </li>
     </ul>
     <p v-else class="px-4 py-8 text-center text-sm text-muted">{{ tg.doProjetoVazio }}</p>
+
+    <UModal v-model:open="ligando" :title="tr.projeto.ligarMetaTitulo" :description="projeto ? tr.projeto.ligarMetaTexto(projeto.nome) : ''" :ui="{ footer: 'justify-end gap-2' }">
+      <template #body>
+        <div class="flex flex-col gap-4">
+          <UFormField :label="tr.projeto.meta" required>
+            <USelectMenu v-model="lMeta" :items="opMetas" value-key="value" class="w-full" />
+          </UFormField>
+          <UCheckbox v-model="lNovos" :label="tr.meta.incluirNovos" :description="tr.projeto.incluirNovosDica" />
+        </div>
+      </template>
+      <template #footer>
+        <UButton :label="tr.projeto.cancelar" color="neutral" variant="outline" @click="ligando = false" />
+        <UButton :label="tr.projeto.ligar" icon="i-lucide-link" :disabled="!lMeta" @click="ligar" />
+      </template>
+    </UModal>
   </section>
 </template>

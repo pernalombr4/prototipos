@@ -25,6 +25,7 @@ import {
   referenciaDoNome,
   modelosBase,
   grupos,
+  itensDoProjeto,
   MEMBROS_DO_WORKSPACE,
   pessoa,
   pessoas,
@@ -96,6 +97,22 @@ let proximaCat = 700
 let proximaTarefa = 800
 let proximoFluxo = 600
 
+/** Rodada 14 (B8): a tarefa guarda o projeto. O exemplo sem o campo ganha o projeto da categoria do item. */
+const tarefasComProjeto = () => tarefasBase.map(x => ({
+  ...x,
+  projeto: x.projeto !== undefined ? x.projeto : (categoriasBase.find(c => c.id === x.categoria)?.projeto ?? null),
+  colaboradores: x.colaboradores ? [...x.colaboradores] : undefined,
+}))
+
+/** Rodada 14: o que o "Criar tarefa" do item, da discussão e do marco já deixam escolhido na janela Nova tarefa. */
+export interface PreenchimentoDaTarefa {
+  titulo?: string
+  categoria?: number
+  item?: string
+  responsavel?: number
+  origem?: { discussao: number, mensagem: number }
+}
+
 export function useProjetos() {
   const cenario = useState<Cenario>('prj-cenario', () => 'emUso')
   const estadoDaTela = useState<EstadoDaTela>('prj-estado', () => 'normal')
@@ -138,7 +155,8 @@ export function useProjetos() {
   }
 
   /* ---------- rodada 5: o que o projeto reúne ---------- */
-  const tarefas = useState<TarefaDoProjeto[]>('prj-tarefas', () => tarefasBase.map(x => ({ ...x })))
+  const tarefas = useState<TarefaDoProjeto[]>('prj-tarefas', tarefasComProjeto)
+  const preenchimento = useState<PreenchimentoDaTarefa | null>('prj-tarefa-pre', () => null)
   const dashboards = useState<DashboardDoProjeto[]>('prj-dashboards', () => dashboardsBase.map(d => ({ ...d, tarefas: [...d.tarefas], itens: d.itens.map(i => ({ ...i })) })))
   /** O dashboard aberto na aba Painéis e se ele está em edição (Personalizar). */
   const dashboardAberto = useState<number | null>('prj-dash', () => null)
@@ -266,7 +284,7 @@ export function useProjetos() {
     meuMenu.value = {}
     pedidos.value = []
     fluxos.value = fluxosBase.map(f => ({ ...f }))
-    tarefas.value = tarefasBase.map(x => ({ ...x }))
+    tarefas.value = tarefasComProjeto()
     dashboards.value = c === 'semProjetos' ? [] : dashboardsBase.map(d => ({ ...d, tarefas: [...d.tarefas], itens: d.itens.map(i => ({ ...i })) }))
     dashboardAberto.value = null
     editandoDashboard.value = false
@@ -357,8 +375,19 @@ export function useProjetos() {
     return novo
   }
 
+  /** Rodada 14 (B13): os painéis de dashboard de outro projeto que leem a categoria. */
+  const paineisQueLeem = (categoriaId: number, destino: number | null) => dashboards.value
+    .filter(d => d.projeto !== destino)
+    .flatMap(d => d.itens.filter(i => i.categoria === categoriaId).map(i => ({ dashboard: d, painel: i })))
+  /** Rodada 14 (B9): as tarefas ligadas a itens da categoria. Com o projeto guardado na tarefa, elas não mudam de projeto. */
+  const tarefasDaCategoria = (categoriaId: number) => tarefas.value.filter(x => x.categoria === categoriaId)
+  /**
+   * Mover a categoria muda só o dono dela. Rodada 14: as tarefas continuam no projeto delas, com o marco que têm
+   * (B9), e os painéis de dashboard dos outros projetos que liam a categoria saem do dashboard (B13).
+   */
   function moverCategoria(categoriaId: number, destino: number | null) {
     categorias.value = categorias.value.map(c => c.id === categoriaId ? { ...c, projeto: destino } : c)
+    dashboards.value = dashboards.value.map(d => d.projeto === destino ? d : { ...d, itens: d.itens.filter(i => i.categoria !== categoriaId) })
   }
 
   function atualizarProjeto(id: number, mudanca: Partial<Projeto>) {
@@ -373,9 +402,29 @@ export function useProjetos() {
   function restaurar(id: number) {
     atualizarProjeto(id, { status: 'ativo' })
   }
+  /** Rodada 14 (B12): o que sai junto com o projeto. Os marcos, as discussões e as metas ficam em `metasEDiscussoes.ts`. */
+  function efeitosDeExcluir(id: number) {
+    const dele = tarefas.value.filter(x => x.projeto === id)
+    return {
+      categorias: categoriasDe(id).length,
+      dashboards: dashboardsDe(id).length,
+      tarefasSemItem: dele.filter(x => !x.item).length,
+      tarefasComItem: dele.filter(x => !!x.item).length,
+    }
+  }
+  /**
+   * Rodada 14 (B12): excluir o projeto exclui os dashboards e as tarefas sem item. A tarefa com item fica no item,
+   * sem projeto. As categorias voltam para o workspace, como antes.
+   */
   function excluir(id: number) {
     projetos.value = projetos.value.filter(p => p.id !== id)
     categorias.value = categorias.value.map(c => c.projeto === id ? { ...c, projeto: null } : c)
+    dashboards.value = dashboards.value.filter(d => d.projeto !== id)
+    const saem = new Set(tarefas.value.filter(x => x.projeto === id && !x.item).map(x => x.id))
+    tarefas.value = tarefas.value
+      .filter(x => !saem.has(x.id))
+      .map(x => ({ ...x, ...(x.projeto === id ? { projeto: null } : {}), ...(x.mae && saem.has(x.mae) ? { mae: undefined } : {}) }))
+    meuMenu.value = Object.fromEntries(Object.entries(meuMenu.value).map(([k, ids]) => [k, ids.filter(x => x !== id)]))
     tela.value = { tipo: 'diretorio' }
   }
 
@@ -491,8 +540,32 @@ export function useProjetos() {
     tela.value = onde.tela
     return novo
   }
-  /** A tarefa ligada a item fica no projeto da categoria do item; a sem item, no projeto escolhido (rodada 10). */
-  const projetoDaTarefa = (x: TarefaDoProjeto) => x.categoria ? (categorias.value.find(c => c.id === x.categoria)?.projeto ?? null) : (x.projeto ?? null)
+  /** Rodada 14 (B8): o projeto é o que a tarefa guarda, com ou sem item. Antes saía da categoria do item. */
+  const projetoDaTarefa = (x: TarefaDoProjeto) => x.projeto ?? null
+  /**
+   * Rodada 14 (B11): as pessoas que entram no projeto, para responsável e colaboradores. Quem administra o projeto
+   * vê também as outras pessoas do workspace, num grupo à parte; escolher uma delas a inclui como participante.
+   */
+  const pessoasDoProjeto = (projetoId: number) => {
+    const p = projetos.value.find(x => x.id === projetoId)
+    return p ? pessoas.filter(a => entra(p, a.id)) : []
+  }
+  const pessoasDeFora = (projetoId: number) => {
+    const p = projetos.value.find(x => x.id === projetoId)
+    return p && podeAdministrar(p) ? pessoas.filter(a => !a.convidado && !entra(p, a.id)) : []
+  }
+  /** Inclui a pessoa como participante quando ela ainda não entra no projeto. Devolve true se incluiu. */
+  function garantirAcesso(projetoId: number, pessoaId: number) {
+    const p = projetos.value.find(x => x.id === projetoId)
+    if (!p || entra(p, pessoaId)) return false
+    atualizarProjeto(projetoId, { participantes: [...p.participantes, { tipo: 'pessoa', id: pessoaId, papel: 'participante' }] })
+    return true
+  }
+  /** Rodada 14: abre a janela Nova tarefa com campos já escolhidos (item, discussão, marco). */
+  function novaTarefaCom(projetoId: number, dados: PreenchimentoDaTarefa) {
+    preenchimento.value = dados
+    janelas.novaTarefa.value = projetoId
+  }
   const tarefasDoProjeto = (projetoId: number) => tarefas.value.filter(x => projetoDaTarefa(x) === projetoId)
   /** Rodada 10: a subtarefa é uma tarefa rápida com tarefa-mãe (1 nível). */
   /** Rodada 10: a mesma lógica de subtarefa do protótipo pasta-de-apontamentos (1 nível, campo `mae`, na ordem de criação). */
@@ -510,8 +583,10 @@ export function useProjetos() {
     const c = categorias.value.find(x => x.id === catId)
     if (!c) return [] as string[]
     const dasTarefas = tarefas.value.filter(x => x.categoria === catId && x.item).map(x => x.item!)
-    const prefixo = dasTarefas[0]?.slice(0, 2) ?? c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
-    return [...new Set([...dasTarefas, ...[0, 1, 2, 3].map(n => `${prefixo}${4210 - n * 17}`)])]
+    // rodada 14: os itens da aba Itens do projeto entram primeiro, para o "Criar tarefa" do item achar o dele
+    const daAba = itensDoProjeto.filter(i => i.categoria === catId).map(i => i.reference)
+    const prefixo = daAba[0]?.slice(0, 2) ?? dasTarefas[0]?.slice(0, 2) ?? c.name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()
+    return [...new Set([...daAba, ...dasTarefas, ...[0, 1, 2, 3].map(n => `${prefixo}${4210 - n * 17}`)])]
   }
   function criarTarefa(dados: Omit<TarefaDoProjeto, 'id' | 'criadaEm' | 'status'> & { status?: TarefaDoProjeto['status'] }) {
     const id = ++proximaTarefa
@@ -605,7 +680,8 @@ export function useProjetos() {
     ativos, visiveis, queEntro, noMenu, estaNoMenu, mostrarNoMenu, ocultarDoMenu, reordenar, salvarParaTodos,
     categoriasDe, categoriasDoWorkspace, veCategoria, projetoDa,
     aplicarCenario, trocarPessoa, abrirProjeto, abrirCategoria,
-    criarProjeto, referenciaLivre, moverCategoria, atualizarProjeto, arquivar, restaurar, excluir, pedirAcesso, alcance, quantosVeem,
+    criarProjeto, referenciaLivre, moverCategoria, paineisQueLeem, tarefasDaCategoria, atualizarProjeto, arquivar, restaurar, excluir, efeitosDeExcluir, pedirAcesso, alcance, quantosVeem,
+    pessoasDoProjeto, pessoasDeFora, garantirAcesso, preenchimento, novaTarefaCom,
     abaDoProjeto, mapas, fluxos, avisos, modelos, statusAtual, publicarStatus, camposDe, salvarMapa,
     fluxosDoProjeto, avisosDoProjeto, alternarFluxo, salvarComoModelo,
     meusFavoritos, ehFavorito, alternarFavorito, chaveDaTela,

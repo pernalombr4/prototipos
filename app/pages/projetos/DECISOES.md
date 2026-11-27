@@ -800,3 +800,43 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   marco que a mãe (B10); excluir projeto deixa marcos, discussões e painéis sem dono (B12); o marco só entra numa meta
   pela meta (B1); ligar o projeto à meta conta todos os marcos (B6).
 - **Próximo passo:** a redatora escolhe quais brechas viram rodada e responde P1 a P5.
+
+## Rodada 14 · 2026-11-27
+
+- **Pedido:** pôr no protótipo as 18 brechas do modelo de dados e registrar no documento de requisitos qual é
+  Obrigatório, Desejável ou Opcional.
+- **O que muda:** as ligações entre projeto, meta, marco, tarefa, item, discussão e pessoas. **O que não muda:** a casca,
+  o menu, as telas fora dessas ligações e a Relevância que o `MODELO-DE-DADOS.md` já dava a cada brecha.
+- **Suposições** (P1 a P4 do modelo, sem resposta; ficam em "Em aberto" dos requisitos como S1 a S4):
+  - liga o projeto a uma meta quem edita a meta ou administra o projeto;
+  - o marco conta só as tarefas-mãe, e a subtarefa herda o marco da mãe;
+  - a meta não tem discussão própria, e "Sobre" aceita só marco ou item;
+  - no projeto arquivado, os marcos abertos param de contar e os concluídos continuam.
+  - P5 (marcos no modelo de projeto) ficou de fora.
+- **Ajustes vistos no teste:** a janela Nova tarefa abria por baixo do painel da discussão; agora a discussão fecha
+  antes, como o painel do item já fazia. O projeto arquivado não oferece "Criar marco" na meta. O texto de quantos
+  marcos o projeto tem na meta quebra linha em vez de cortar.
+- **Brecha e requisito** (correspondência só para a redatora; o documento de requisitos não cita B<n>):
+
+| Brecha | Relevância | Requisitos |
+|---|---|---|
+| B1 | Obrigatório | RF001 a RF003 |
+| B2 | Desejável | RN008, RF101, RF102 |
+| B3 | Desejável | RF203, RF204 |
+| B4 | Desejável | RF304, RF305 |
+| B5 | Desejável | RN009, RF301, RF302 |
+| B6 | Obrigatório | RN001 a RN003, RF004 a RF006 |
+| B7 | Opcional | RN010, RF307 a RF309 |
+| B8 | Obrigatório | RN004, RF201, RF202 |
+| B9 | Obrigatório | RF205 |
+| B10 | Obrigatório | RN005, RF007 |
+| B11 | Obrigatório | RN007, RF401 a RF403 |
+| B12 | Obrigatório | RF501 a RF504 |
+| B13 | Desejável | RF206, RF207 |
+| B14 | Obrigatório | RF306 |
+| B15 | Desejável | RN006, RF505 |
+| B16 | Desejável | RF303 |
+| B17 | Opcional | RF601 |
+| B18 | Opcional | RF602 |
+
+- **Evidências:** `evidencias/entrega-r14-01` a `entrega-r14-13`, sem ponteiro (detector ok em todas).

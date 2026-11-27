@@ -14,7 +14,8 @@ import type { DropdownMenuItem, SelectItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { iniciais, pessoa } from './mocks'
 import { useMarcaDeProposta, useProjetos } from './estado'
-import { useMetasEDiscussoes, type Discussao, type FormatoDaDiscussao, type Mensagem } from './metasEDiscussoes'
+import { useMetasEDiscussoes, type Discussao, type FormatoDaDiscussao, type Mensagem, type SobreDaDiscussao } from './metasEDiscussoes'
+import { textosDasRelacoes } from './textosDasRelacoes'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 import { textosDeAcoes } from './textosDeAcoes'
 
@@ -68,6 +69,7 @@ function abrirNova() {
   nTitulo.value = ''
   nTexto.value = ''
   nAviso.value = 'todos'
+  nSobre.value = '0'
   novaAberta.value = true
 }
 const publicando = ref(false)
@@ -75,7 +77,7 @@ async function publicar() {
   if (!podePublicar.value) return
   publicando.value = true
   await new Promise(r => setTimeout(r, 350))
-  const d = md.criarDiscussao({ projeto: props.id, formato: nFormato.value, titulo: nTitulo.value.trim(), texto: nTexto.value.trim() })
+  const d = md.criarDiscussao({ projeto: props.id, formato: nFormato.value, titulo: nTitulo.value.trim(), texto: nTexto.value.trim(), sobre: sobreDoValor(nSobre.value) })
   publicando.value = false
   novaAberta.value = false
   situacao.value = 'aberta'
@@ -133,40 +135,55 @@ function alternarResposta(m: Mensagem) {
   if (!d) return
   d.resposta = d.resposta === m.id ? undefined : m.id
 }
-const tituloDaTarefa = (id?: number) => prj.tarefas.value.find(x => x.id === id)?.titulo ?? ''
-
-/* ---------- criar tarefa a partir da mensagem ---------- */
-const mensagemDaTarefa = ref<Mensagem | null>(null)
-const tTitulo = ref('')
-const tCategoria = ref<number | undefined>()
-const tResp = ref<number | undefined>()
-const tPrazo = ref('2026-12-03')
-const opCategoria = computed(() => prj.categoriasDe(props.id).map(c => ({ value: c.id, label: c.name, icon: c.icon ?? 'i-lucide-folder' })))
-const opResp = computed(() => {
-  const p = prj.projetos.value.find(x => x.id === props.id)
-  return p ? [...new Set([prj.eu.value, ...p.participantes.filter(x => x.tipo === 'pessoa').map(x => Number(x.id))])].map(id => ({ value: id, label: pessoa(id)?.nome ?? '' })) : []
-})
+/**
+ * Rodada 14: a mensagem lista as tarefas criadas a partir dela (B5) e mantém "Criar tarefa", que abre a mesma
+ * janela Nova tarefa do projeto, com o texto e o autor da mensagem (B16). A tarefa guarda a origem (B4), então
+ * excluir a tarefa tira a ligação da mensagem (B14).
+ */
+const tr = useTextos(textosDasRelacoes)
 function abrirCriarTarefa(m: Mensagem) {
-  mensagemDaTarefa.value = m
-  tTitulo.value = m.texto.length > 70 ? `${m.texto.slice(0, 70).trim()}...` : m.texto
-  tCategoria.value = opCategoria.value[0]?.value
-  tResp.value = m.autor
-  tPrazo.value = '2026-12-03'
-}
-const modalTarefa = computed({
-  get: () => !!mensagemDaTarefa.value,
-  set: (v: boolean) => { if (!v) mensagemDaTarefa.value = null },
-})
-function criarTarefa() {
-  const m = mensagemDaTarefa.value
-  if (!m || !tTitulo.value.trim() || !tCategoria.value || !tResp.value) return
-  md.criarTarefaDaMensagem(m, { titulo: tTitulo.value.trim(), categoria: tCategoria.value, responsavel: tResp.value, prazo: tPrazo.value })
-  toast.add({ title: td.value.tarefaCriada(tTitulo.value.trim()), icon: 'i-lucide-square-check', color: 'success' })
-  mensagemDaTarefa.value = null
-}
-function abrirTarefas() {
+  const d = aberta.value
+  if (!d) return
   md.discussaoAberta.value = null
-  prj.abrirAba(props.id, 'tarefas')
+  md.criarTarefaDaMensagem(d, m)
+}
+function abrirTarefaLigada(id: number) {
+  md.discussaoAberta.value = null
+  prj.tarefaAberta.value = id
+}
+
+/* ---------- rodada 14 (B7): de que a discussão trata ---------- */
+const nSobre = ref('0')
+const opSobre = computed(() => [
+  [{ value: '0', label: tr.value.discussao.semSobre, icon: 'i-lucide-circle-dashed' }],
+  [
+    { type: 'label' as const, label: tr.value.discussao.grupoMarcos },
+    ...md.marcosDo(props.id).map(m => ({ value: `m:${m.id}`, label: m.nome, icon: 'i-lucide-flag' })),
+  ],
+  [
+    { type: 'label' as const, label: tr.value.discussao.grupoItens },
+    ...prj.categoriasDe(props.id).flatMap(c => prj.itensDaCategoria(c.id).map(ref => ({ value: `i:${c.id}:${ref}`, label: `${ref} · ${c.name}`, icon: c.icon ?? 'i-lucide-folder' }))),
+  ],
+])
+function sobreDoValor(v: string): SobreDaDiscussao | undefined {
+  const [tipo, a, b] = v.split(':')
+  if (tipo === 'm') return { tipo: 'marco', id: Number(a) }
+  if (tipo === 'i') return { tipo: 'item', categoria: Number(a), ref: b! }
+  return undefined
+}
+function rotuloDoSobre(d: Discussao) {
+  if (!d.sobre) return ''
+  if (d.sobre.tipo === 'item') return tr.value.discussao.sobreItem(d.sobre.ref)
+  const id = d.sobre.id
+  return tr.value.discussao.sobreMarco(md.marcos.value.find(m => m.id === id)?.nome ?? '')
+}
+function abrirSobre(d: Discussao) {
+  const s = d.sobre
+  if (!s) return
+  md.discussaoAberta.value = null
+  if (s.tipo === 'item') return prj.abrirCategoria(s.categoria)
+  const m = md.marcos.value.find(x => x.id === s.id)
+  if (m) md.abrirMarco(m)
 }
 </script>
 
@@ -238,7 +255,7 @@ function abrirTarefas() {
               <UBadge v-if="d.fixada" :label="td.fixada" icon="i-lucide-pin" color="primary" variant="soft" size="sm" />
               <UBadge v-if="d.formato === 'pergunta'" :label="d.resposta ? td.respondida : td.semResposta" :icon="d.resposta ? 'i-lucide-circle-check' : 'i-lucide-circle-dashed'" :color="d.resposta ? 'success' : 'neutral'" variant="soft" size="sm" />
             </span>
-            <span class="mt-0.5 block truncate text-xs text-muted">{{ td.formatos[d.formato] }} · {{ td.por(nome(d.mensagens[0]!.autor), quando(d.mensagens[0]!.em)) }}</span>
+            <span class="mt-0.5 block truncate text-xs text-muted">{{ td.formatos[d.formato] }} · {{ td.por(nome(d.mensagens[0]!.autor), quando(d.mensagens[0]!.em)) }}<template v-if="d.sobre"> · {{ rotuloDoSobre(d) }}</template></span>
           </span>
           <span class="flex shrink-0 items-center gap-3 text-xs text-muted">
             <UAvatarGroup size="2xs" :max="3">
@@ -266,6 +283,7 @@ function abrirTarefas() {
         {{ td.formatos[aberta.formato] }}
         <UBadge v-if="aberta.fixada" :label="td.fixada" icon="i-lucide-pin" color="primary" variant="soft" size="sm" />
         <UBadge v-if="aberta.status === 'fechada'" :label="td.fechada" icon="i-lucide-circle-check" color="neutral" variant="soft" size="sm" />
+        <UButton v-if="aberta.sobre" :label="rotuloDoSobre(aberta)" :icon="aberta.sobre.tipo === 'marco' ? 'i-lucide-flag' : 'i-lucide-file-text'" size="xs" color="neutral" variant="outline" :class="marca" @click="abrirSobre(aberta)" />
       </span>
     </template>
     <template v-if="aberta && acoes.length" #actions>
@@ -288,11 +306,13 @@ function abrirTarefas() {
             <UBadge v-if="aberta.resposta === m.id" :label="td.resposta" icon="i-lucide-circle-check" color="success" variant="soft" size="sm" />
             <span class="ml-auto flex items-center gap-1 opacity-0 transition-opacity group-hover/msg:opacity-100 focus-within:opacity-100">
               <UButton v-if="podeMarcar && i > 0" :label="aberta.resposta === m.id ? td.desmarcarResposta : td.marcarResposta" icon="i-lucide-circle-check" color="neutral" variant="outline" size="xs" @click="alternarResposta(m)" />
-              <UButton v-if="!m.tarefa" :label="td.criarTarefa" icon="i-lucide-square-plus" color="neutral" variant="outline" size="xs" @click="abrirCriarTarefa(m)" />
+              <UButton :label="td.criarTarefa" icon="i-lucide-square-plus" color="neutral" variant="outline" size="xs" @click="abrirCriarTarefa(m)" />
             </span>
           </div>
           <p class="mt-2 whitespace-pre-line text-sm text-default">{{ m.texto }}</p>
-          <UButton v-if="m.tarefa" :label="td.tarefaLigada(tituloDaTarefa(m.tarefa))" icon="i-lucide-square-check" color="neutral" variant="outline" size="xs" class="mt-2" :title="td.abrirTarefas" @click="abrirTarefas" />
+          <div v-if="md.tarefasDaMensagem(m).length" class="mt-2 flex flex-wrap items-center gap-1.5" :class="marca" :aria-label="tr.discussao.tarefasCriadas(md.tarefasDaMensagem(m).length)">
+            <UButton v-for="x in md.tarefasDaMensagem(m)" :key="x.id" :label="td.tarefaLigada(x.titulo)" icon="i-lucide-square-check" color="neutral" variant="outline" size="xs" @click="abrirTarefaLigada(x.id)" />
+          </div>
         </li>
       </ol>
     </template>
@@ -329,6 +349,9 @@ function abrirTarefas() {
         <UFormField :label="td.mensagem" required>
           <UTextarea v-model="nTexto" :placeholder="td.mensagemPlaceholder" :rows="4" autoresize class="w-full" />
         </UFormField>
+        <UFormField :label="tr.discussao.sobre" :help="tr.discussao.sobreDica" :class="marca">
+          <USelectMenu v-model="nSobre" :items="opSobre" value-key="value" class="w-full" :ui="{ content: 'min-w-72' }" />
+        </UFormField>
         <UFormField v-if="nFormato === 'anuncio'" :label="td.avisar">
           <USelect v-model="nAviso" :items="opAviso" class="w-full" />
         </UFormField>
@@ -338,33 +361,6 @@ function abrirTarefas() {
     <template #footer>
       <UButton :label="td.cancelar" color="neutral" variant="outline" @click="novaAberta = false" />
       <UButton :label="td.publicar" icon="i-lucide-send" :loading="publicando" :disabled="!podePublicar" @click="publicar" />
-    </template>
-  </UModal>
-
-  <!-- criar tarefa a partir da mensagem -->
-  <UModal v-model:open="modalTarefa" :title="td.criarTarefaTitulo" :ui="{ footer: 'justify-end gap-2' }">
-    <template #body>
-      <div class="flex flex-col gap-4">
-        <p v-if="mensagemDaTarefa" class="rounded-md bg-elevated/60 p-2.5 text-xs text-muted">{{ mensagemDaTarefa.texto }}</p>
-        <UFormField :label="td.tarefaTitulo" required>
-          <UInput v-model="tTitulo" class="w-full" />
-        </UFormField>
-        <div class="grid gap-4 sm:grid-cols-2">
-          <UFormField :label="td.categoria" required>
-            <USelect v-model="tCategoria" :items="opCategoria" class="w-full" />
-          </UFormField>
-          <UFormField :label="td.responsavel" required>
-            <USelect v-model="tResp" :items="opResp" class="w-full" />
-          </UFormField>
-        </div>
-        <UFormField :label="td.prazo">
-          <UInput v-model="tPrazo" type="date" class="w-full" />
-        </UFormField>
-      </div>
-    </template>
-    <template #footer>
-      <UButton :label="td.cancelar" color="neutral" variant="outline" @click="modalTarefa = false" />
-      <UButton :label="td.criar" icon="i-lucide-square-check" :disabled="!tTitulo.trim() || !tCategoria || !tResp" @click="criarTarefa" />
     </template>
   </UModal>
   </div>

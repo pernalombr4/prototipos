@@ -18,8 +18,20 @@ import { textosDoProjeto } from './textosDoProjeto'
 import { textosDeAtalhos } from './textosDeAtalhos'
 import { textosDeAcoes } from './textosDeAcoes'
 import AtalhoDeCriar from './_AtalhoDeCriar.vue'
+import { textosDasRelacoes } from './textosDasRelacoes'
+import { useOpcoesDePessoas } from './pessoasDoProjeto'
 
 const props = defineProps<{ t: Textos, id: number }>()
+/**
+ * Rodada 14: o marco escolhe as metas dele no formulário e no painel (B1), com a mesma lista que o painel da meta
+ * edita; o painel lista as discussões sobre o marco (B7); as subtarefas ficam fora da conta (B10); o responsável sai
+ * de quem entra no projeto (B11).
+ */
+const tr = useTextos(textosDasRelacoes)
+const pes = useOpcoesDePessoas()
+const opMetas = computed(() => md.metas.value.filter(g => g.medicao === 'automatica').map(g => ({ value: g.id, label: g.nome, icon: 'i-lucide-target' })))
+const metasDoAberto = computed(() => aberto.value ? md.metasDoMarco(aberto.value.id).map(g => g.id) : [])
+const discussoesDoAberto = computed(() => aberto.value ? md.discussoesSobre({ tipo: 'marco', id: aberto.value.id }) : [])
 const prj = useProjetos()
 const md = useMetasEDiscussoes()
 const tx = useTextos(textosDeMarcosEMedicao)
@@ -74,7 +86,7 @@ const opAdicionar = computed(() => {
   const m = aberto.value
   if (!m) return []
   return prj.tarefasDoProjeto(props.id)
-    .filter(x => !m.tarefas.includes(x.id) && x.status !== 'concluida')
+    .filter(x => !m.tarefas.includes(x.id) && x.status !== 'concluida' && !x.mae)
     .map(x => ({ value: x.id, label: x.titulo, description: md.marcoDaTarefa(x.id)?.nome }))
 })
 const paraAdicionar = ref<number[]>([])
@@ -109,8 +121,9 @@ const fDescricao = ref('')
 const fResp = ref<number>(prj.eu.value)
 const fData = ref('2026-12-15')
 const fTarefas = ref<number[]>([])
-const opPessoas = computed(() => pessoas.filter(p => !p.convidado).map(p => ({ value: p.id, label: p.nome })))
-const opTarefas = computed(() => prj.tarefasDoProjeto(props.id).map(x => {
+const fMetas = ref<number[]>([])
+const opPessoas = computed(() => pes.opcoes(props.id))
+const opTarefas = computed(() => prj.tarefasDoProjeto(props.id).filter(x => !x.mae).map(x => {
   const outro = md.marcoDaTarefa(x.id)
   return { value: x.id, label: x.titulo, description: outro && outro.id !== fId.value ? outro.nome : undefined }
 }))
@@ -121,12 +134,16 @@ function abrirForm(m?: Marco) {
   fResp.value = m?.responsavel ?? prj.eu.value
   fData.value = m?.dataAlvo ?? '2026-12-15'
   fTarefas.value = m ? [...m.tarefas] : []
+  // o marco novo já vem com as metas que ligaram o projeto com "Incluir marcos novos"
+  fMetas.value = m ? md.metasDoMarco(m.id).map(g => g.id) : md.metas.value.filter(g => g.medicao === 'automatica' && g.novos.includes(props.id)).map(g => g.id)
   form.value = true
 }
 function salvar() {
   if (!fNome.value.trim()) return
   const novo = !fId.value
+  pes.garantir(props.id, fResp.value)
   const m = md.salvarMarco({ id: fId.value, projeto: props.id, nome: fNome.value.trim(), descricao: fDescricao.value.trim(), responsavel: fResp.value, dataAlvo: fData.value, tarefas: fTarefas.value })
+  md.definirMetasDoMarco(m.id, fMetas.value)
   form.value = false
   filtro.value = m.status
   md.marcoAberto.value = m.id
@@ -270,7 +287,11 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
 
           <section class="flex flex-col gap-2">
             <header class="flex items-center gap-2">
-              <h3 class="flex-1 text-sm font-semibold text-highlighted">{{ tm.tarefas }}</h3>
+              <h3 class="text-sm font-semibold text-highlighted">{{ tm.tarefas }}</h3>
+              <UTooltip :text="tr.marco.subtarefasNaoContam">
+                <UIcon name="i-lucide-info" class="size-4 text-muted" :aria-label="tr.marco.subtarefasNaoContam" />
+              </UTooltip>
+              <span class="flex-1" />
               <USelectMenu
                 v-if="podeEditar && aberto.status === 'aberto'"
                 v-model="paraAdicionar"
@@ -314,8 +335,24 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
             </ul>
           </section>
 
-          <section class="flex flex-col gap-2">
-            <h3 class="text-sm font-semibold text-highlighted">{{ tm.contaPara }}</h3>
+          <section class="flex flex-col gap-2" :class="marca">
+            <header class="flex items-center gap-2">
+              <h3 class="flex-1 text-sm font-semibold text-highlighted">{{ tm.contaPara }}</h3>
+              <USelectMenu
+                v-if="podeEditar && opMetas.length"
+                :model-value="metasDoAberto"
+                :items="opMetas"
+                value-key="value"
+                multiple
+                size="xs"
+                class="w-48"
+                :ui="{ content: 'min-w-72' }"
+                :placeholder="tr.marco.metasPlaceholder"
+                @update:model-value="(v: number[]) => md.definirMetasDoMarco(aberto!.id, v)"
+              >
+                <template #default>{{ tr.marco.metasPlaceholder }}</template>
+              </USelectMenu>
+            </header>
             <p v-if="!md.metasDoMarco(aberto.id).length" class="text-xs text-muted">{{ tm.naoConta }}</p>
             <div v-else class="flex flex-wrap gap-1.5">
               <UButton
@@ -327,6 +364,24 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
                 color="neutral"
                 variant="outline"
                 @click="painel = false; md.abrirMeta(g.id)"
+              />
+            </div>
+          </section>
+
+          <!-- rodada 14 (B7): as discussões que tratam deste marco -->
+          <section class="flex flex-col gap-2" :class="marca">
+            <h3 class="text-sm font-semibold text-highlighted">{{ tr.marco.discussoes }}</h3>
+            <p v-if="!discussoesDoAberto.length" class="text-xs text-muted">{{ tr.marco.semDiscussoes }}</p>
+            <div v-else class="flex flex-wrap gap-1.5">
+              <UButton
+                v-for="d in discussoesDoAberto"
+                :key="d.id"
+                :label="d.titulo"
+                icon="i-lucide-messages-square"
+                size="xs"
+                color="neutral"
+                variant="outline"
+                @click="painel = false; md.abrirDiscussao(d)"
               />
             </div>
           </section>
@@ -367,6 +422,9 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
                 <AtalhoDeCriar :termo="buscaForm" :rotulo="ta.tarefa.rotulo" :com="ta.tarefa.com" :dica="ta.tarefa.dica" @criar="(t: string) => criarPeloSeletor('form', t)" />
               </template>
             </USelectMenu>
+          </UFormField>
+          <UFormField :label="tr.marco.metas" :help="opMetas.length ? tr.marco.metasDica : tr.marco.semMetas" :class="marca">
+            <USelectMenu v-model="fMetas" :items="opMetas" value-key="value" multiple class="w-full" :disabled="!opMetas.length" :placeholder="tr.marco.metasPlaceholder" />
           </UFormField>
         </form>
       </template>

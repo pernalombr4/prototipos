@@ -27,6 +27,8 @@ import SalvarComoModelo from './_SalvarComoModelo.vue'
 import { textosDeAtalhos } from './textosDeAtalhos'
 import { textosDoFormulario } from './textosDoFormulario'
 import AtalhoDeCriar from './_AtalhoDeCriar.vue'
+import { useMetasEDiscussoes } from './metasEDiscussoes'
+import { textosDasRelacoes } from './textosDasRelacoes'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -343,9 +345,25 @@ function arquivar() {
   aberto.value = false
   toast.add({ title: props.t.config.arquivado(nome), icon: 'i-lucide-archive', color: 'neutral' })
 }
+/** Rodada 14 (B12): excluir o projeto leva junto marcos, discussões, dashboards e tarefas sem item, e o tira das metas. */
+const mdx = useMetasEDiscussoes()
+const trel = useTextos(textosDasRelacoes)
+const linhasDaExclusao = computed(() => {
+  if (!p.value) return []
+  const e = mdx.efeitosDeExcluirProjeto(p.value.id)
+  const tx = trel.value.excluir
+  return [
+    { chave: 'marcos', n: e.marcos, texto: tx.marcos(e.marcos), icone: 'i-lucide-flag' },
+    { chave: 'discussoes', n: e.discussoes, texto: tx.discussoes(e.discussoes), icone: 'i-lucide-messages-square' },
+    { chave: 'dashboards', n: e.dashboards, texto: tx.dashboards(e.dashboards), icone: 'i-lucide-layout-dashboard' },
+    { chave: 'tarefasSemItem', n: e.tarefasSemItem, texto: tx.tarefasSemItem(e.tarefasSemItem), icone: 'i-lucide-square-check' },
+    { chave: 'tarefasComItem', n: e.tarefasComItem, texto: tx.tarefasComItem(e.tarefasComItem), icone: 'i-lucide-link' },
+    { chave: 'metas', n: e.metas, texto: tx.metas(e.metas), icone: 'i-lucide-target' },
+  ].filter(l => l.n > 0)
+})
 function excluir() {
   const nome = p.value!.nome
-  prj.excluir(p.value!.id)
+  mdx.excluirProjeto(p.value!.id)
   aberto.value = false
   toast.add({ title: props.t.config.excluido(nome), icon: 'i-lucide-trash-2', color: 'neutral' })
 }
@@ -457,6 +475,13 @@ function excluir() {
               <div class="rounded-md border border-error/40 p-4">
                 <p class="text-sm font-semibold text-highlighted">{{ t.config.excluirTitulo }}</p>
                 <p class="mt-1 text-sm text-muted">{{ t.config.excluirTexto }}</p>
+                <!-- rodada 14 (B12): o que sai junto com o projeto, contado -->
+                <div v-if="linhasDaExclusao.length" class="mt-3" :class="marca">
+                  <p class="text-xs font-semibold text-toned">{{ trel.excluir.tambem }}</p>
+                  <ul class="mt-1 space-y-0.5 text-sm text-default">
+                    <li v-for="l in linhasDaExclusao" :key="l.chave" class="flex items-center gap-2"><UIcon :name="l.icone" class="size-3.5 shrink-0 text-muted" />{{ l.texto }}</li>
+                  </ul>
+                </div>
                 <template v-if="prj.souDono.value">
                   <UFormField :label="t.config.excluirConfirmar(p.nome)" class="mt-3">
                     <UInput v-model="confirmacao" class="w-full" />

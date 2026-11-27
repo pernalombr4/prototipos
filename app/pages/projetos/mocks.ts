@@ -675,8 +675,15 @@ export interface TarefaDoProjeto {
   categoria: number | null
   /** A referência do item. A tarefa rápida liga a no máximo 1 item, e o item é opcional. */
   item: string | null
-  /** Inventado (rodada 10): o projeto da tarefa sem item. A ligada a item fica no projeto da categoria. */
-  projeto?: number
+  /**
+   * Inventado (rodada 10; rodada 14, B8): o projeto da tarefa, guardado na própria tarefa, com ou sem item. O item
+   * pode ser de qualquer categoria que a pessoa vê, e mover a categoria não muda o projeto da tarefa. Null só depois
+   * de excluir o projeto: a tarefa com item fica no item, sem projeto (B12). Os dados de exemplo sem o campo ganham o
+   * projeto da categoria ao carregar (`estado.ts`).
+   */
+  projeto?: number | null
+  /** Inventado (rodada 14, B4 e B5): a discussão e a mensagem de onde a tarefa saiu. 1 mensagem cria N tarefas. */
+  origem?: { discussao: number, mensagem: number }
   responsavel: number
   prazo: string
   status: StatusDaTarefa
@@ -706,7 +713,7 @@ export const tarefasBase: TarefaDoProjeto[] = [
   { id: 109, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4206', responsavel: 3, prazo: '2026-11-27', status: 'aberta', prioridade: 'media', criadaEm: '2026-11-24' },
   { id: 110, titulo: 'Pedir nota do almoço', categoria: 6, item: 'RE4189', responsavel: 5, prazo: '2026-11-25', status: 'bloqueada', descricao: 'O restaurante ainda não emitiu a nota. Aguardando o retorno.', prioridade: 'baixa', criadaEm: '2026-11-21' },
   { id: 111, titulo: 'Analisar reembolso', categoria: 6, item: 'RE4172', responsavel: 3, prazo: '2026-11-19', status: 'concluida', prioridade: 'media', criadaEm: '2026-11-15' },
-  { id: 112, titulo: 'Fechar o mês de novembro', categoria: 4, item: 'CP4119', responsavel: 2, prazo: '2026-12-04', status: 'aberta', prioridade: 'alta', etiquetas: ['fechamento'], descricao: 'Fechar o mês com o extrato conciliado, as provisões conferidas e o relatório na diretoria.', colaboradores: [3, 5], criadaEm: '2026-11-25' },
+  { id: 112, titulo: 'Fechar o mês de novembro', categoria: 4, item: 'CP4119', responsavel: 2, prazo: '2026-12-04', status: 'aberta', prioridade: 'alta', etiquetas: ['fechamento'], descricao: 'Fechar o mês com o extrato conciliado, as provisões conferidas e o relatório na diretoria.', colaboradores: [3, 5], origem: { discussao: 3, mensagem: 33 }, criadaEm: '2026-11-25' },
   // Rodada 10: subtarefas e tarefa sem item (inventado: a subtarefa pede back-end novo)
   { id: 113, titulo: 'Conciliar o extrato bancário', categoria: null, item: null, projeto: 1, mae: 112, pontos: 3, responsavel: 3, prazo: '2026-11-28', status: 'concluida', prioridade: 'alta', etiquetas: ['fechamento'], criadaEm: '2026-11-25' },
   { id: 114, titulo: 'Conferir as provisões', categoria: null, item: null, projeto: 1, mae: 112, pontos: 5, responsavel: 2, prazo: '2026-12-01', status: 'andamento', prioridade: 'media', etiquetas: ['fechamento'], criadaEm: '2026-11-25' },

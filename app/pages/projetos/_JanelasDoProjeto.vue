@@ -19,6 +19,8 @@ import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { textosDaTarefa } from './textosDaTarefa'
 import { textosDeAtalhos } from './textosDeAtalhos'
 import AtalhoDeCriar from './_AtalhoDeCriar.vue'
+import { textosDasRelacoes } from './textosDasRelacoes'
+import { useOpcoesDePessoas } from './pessoasDoProjeto'
 
 const prj = useProjetos()
 const r = useTextos(textosDoProjeto)
@@ -63,16 +65,41 @@ const opMarcosDaTarefa = computed(() => [
 ])
 /** Rodada 10: o item é opcional no produto; categoria 0 é "Sem item" e a tarefa fica no projeto. */
 const itensDaCategoria = computed(() => tar.categoria ? prj.itensDaCategoria(tar.categoria) : [])
+/**
+ * Rodada 14: a tarefa guarda o projeto, e o item pode ser de uma categoria do workspace (B8). O responsável sai de
+ * quem entra no projeto (B11). A janela abre já preenchida pelo "Criar tarefa" do item (B3) e da mensagem da
+ * discussão (B16), que é o mesmo formulário de tarefa do resto do projeto.
+ */
+const tr = useTextos(textosDasRelacoes)
+const pes = useOpcoesDePessoas()
 const opCategoriasDaTarefa = computed(() => [
   ...catsTarefa.value.map(c => ({ value: c.id, label: c.name, icon: c.icon })),
+  ...prj.categoriasDoWorkspace.value.map(c => ({ value: c.id, label: c.name, icon: c.icon, description: tr.value.tarefa.itensDoWorkspace })),
   { value: 0, label: tt.value.novaTarefaSemItem, icon: 'i-lucide-circle-dashed' },
 ])
+const origemDaTarefa = ref<{ discussao: number, mensagem: number } | undefined>()
+let preenchendo = false
 watch(abertaTarefa, (v) => {
-  if (!v) return
-  Object.assign(tar, { titulo: '', categoria: catsTarefa.value[0]?.id ?? 0, item: '', responsavel: prj.eu.value, prazo: '2026-11-30', prioridade: 'media', marco: 0 })
+  if (!v) {
+    prj.preenchimento.value = null
+    return
+  }
+  const pre = prj.preenchimento.value ?? {}
+  preenchendo = true
+  Object.assign(tar, {
+    titulo: pre.titulo ?? '',
+    categoria: pre.categoria ?? (pre.origem ? 0 : catsTarefa.value[0]?.id ?? 0),
+    item: pre.item ?? '',
+    responsavel: pre.responsavel && projTarefa.value && prj.pessoasDoProjeto(projTarefa.value.id).some(a => a.id === pre.responsavel) ? pre.responsavel : prj.eu.value,
+    prazo: '2026-11-30',
+    prioridade: 'media',
+    marco: 0,
+  })
+  origemDaTarefa.value = pre.origem
+  nextTick(() => { preenchendo = false })
 })
-watch(() => tar.categoria, () => { tar.item = itensDaCategoria.value[0] ?? '' }, { immediate: true })
-const opPessoas = computed(() => pessoas.filter(x => !x.convidado).map(x => ({ value: x.id, label: x.nome })))
+watch(() => tar.categoria, () => { if (!preenchendo) tar.item = itensDaCategoria.value[0] ?? '' }, { immediate: true })
+const opPessoas = computed(() => projTarefa.value ? pes.opcoes(projTarefa.value.id) : [])
 const opPrioridade = computed(() => (['urgente', 'alta', 'media', 'baixa'] as Prioridade[]).map(x => ({ value: x, label: r.value.tarefas.prioridade[x] })))
 /**
  * Rodada 11: os seletores Categoria e Marco da nova tarefa têm o atalho de criar no pé (`_AtalhoDeCriar.vue`).
@@ -95,13 +122,23 @@ function criarMarcoNaTarefa(nome: string) {
 }
 function criarTarefa() {
   const p = projTarefa.value!
-  const id = prj.criarTarefa(tar.categoria
-    ? { titulo: tar.titulo.trim(), categoria: tar.categoria, item: tar.item, responsavel: tar.responsavel, prazo: tar.prazo, prioridade: tar.prioridade }
-    : { titulo: tar.titulo.trim(), categoria: null, item: null, projeto: p.id, responsavel: tar.responsavel, prazo: tar.prazo, prioridade: tar.prioridade })
+  const veioDeFora = !!prj.preenchimento.value
+  pes.garantir(p.id, tar.responsavel)
+  const id = prj.criarTarefa({
+    titulo: tar.titulo.trim(),
+    categoria: tar.categoria || null,
+    item: tar.categoria ? tar.item : null,
+    projeto: p.id,
+    responsavel: tar.responsavel,
+    prazo: tar.prazo,
+    prioridade: tar.prioridade,
+    ...(origemDaTarefa.value ? { origem: origemDaTarefa.value } : {}),
+  })
   if (tar.marco) md.definirMarcoDaTarefa(id, tar.marco)
   abertaTarefa.value = false
   toast.add({ title: r.value.novaTarefa.criada(tar.titulo.trim()), icon: 'i-lucide-check', color: 'success' })
-  prj.abrirAba(p.id, 'tarefas')
+  // aberta pelo item ou pela discussão, a pessoa continua onde estava
+  if (!veioDeFora) prj.abrirAba(p.id, 'tarefas')
 }
 
 /* ---------- Novo Workflow ---------- */
@@ -173,9 +210,12 @@ function criarFluxo() {
         <UFormField v-if="tar.categoria" :label="r.novaTarefa.item" required>
           <USelect v-model="tar.item" :items="itensDaCategoria" class="w-full" />
         </UFormField>
-        <UFormField :label="r.novaTarefa.responsavel">
-          <USelect v-model="tar.responsavel" :items="opPessoas" class="w-full" />
+        <UFormField :label="r.novaTarefa.responsavel" :class="marca">
+          <USelectMenu v-model="tar.responsavel" :items="opPessoas" value-key="value" class="w-full" :ui="{ content: 'min-w-64' }" />
         </UFormField>
+        <p v-if="origemDaTarefa" class="flex items-center gap-1.5 text-xs text-muted sm:col-span-2" :class="marca">
+          <UIcon name="i-lucide-messages-square" class="size-3.5 shrink-0" />{{ tr.tarefa.criadaNaDiscussao }}: {{ md.discussoes.value.find(d => d.id === origemDaTarefa!.discussao)?.titulo }}
+        </p>
         <UFormField :label="r.novaTarefa.prazo">
           <UInput v-model="tar.prazo" type="date" class="w-full" />
         </UFormField>

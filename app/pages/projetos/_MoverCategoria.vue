@@ -7,6 +7,7 @@
  */
 import type { Textos } from './textos'
 import { useProjetos } from './estado'
+import { textosDasRelacoes } from './textosDasRelacoes'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -46,6 +47,13 @@ const ondeDepois = computed(() => projetoDestino.value
 /** Contas a pagar tem vínculo com Processos; Fornecedores é vinculado por Contas a pagar. */
 const temVinculo = computed(() => [2, 4, 7].includes(categoria.value?.id ?? 0))
 const restringe = computed(() => ondeDepois.value !== props.t.mover.todosOsMembros)
+/**
+ * Rodada 14: as tarefas dos itens da categoria continuam no projeto delas, com o marco que têm (B9), e os painéis de
+ * dashboard de outros projetos que leem a categoria saem do dashboard (B13). A confirmação diz quantos.
+ */
+const tr = useTextos(textosDasRelacoes)
+const nTarefas = computed(() => categoria.value ? prj.tarefasDaCategoria(categoria.value.id).length : 0)
+const nPaineis = computed(() => categoria.value ? prj.paineisQueLeem(categoria.value.id, destino.value || null).length : 0)
 
 async function confirmar() {
   const c = categoria.value!
@@ -70,6 +78,8 @@ async function confirmar() {
             <li class="flex gap-2"><UIcon name="i-lucide-users-round" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ t.mover.quemVeAntes(ondeAntes, prj.quantosVeem(origem)) }} {{ t.mover.quemVeDepois(ondeDepois, prj.quantosVeem(projetoDestino)) }}</span></li>
             <li v-if="restringe" class="flex gap-2"><UIcon name="i-lucide-panel-left" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ t.mover.menu }}</span></li>
             <li v-if="restringe && temVinculo" class="flex gap-2"><UIcon name="i-lucide-link-2-off" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ t.mover.vinculos }}</span></li>
+            <li v-if="nPaineis" class="flex gap-2"><UIcon name="i-lucide-chart-pie" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ tr.mover.paineisSaem(nPaineis) }}</span></li>
+            <li v-if="nTarefas" class="flex gap-2"><UIcon name="i-lucide-square-check" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ tr.mover.tarefasFicam(nTarefas) }}</span></li>
           </ul>
         </div>
 

@@ -25,6 +25,8 @@ import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { useMarcaDeProposta, useProjetos } from './estado'
 import { useMetasEDiscussoes } from './metasEDiscussoes'
+import { textosDasRelacoes } from './textosDasRelacoes'
+import { useOpcoesDePessoas } from './pessoasDoProjeto'
 
 const props = defineProps<{ id: number }>()
 const prj = useProjetos()
@@ -53,7 +55,34 @@ const COR_DO_STATUS: Record<StatusDaTarefa, 'neutral' | 'info' | 'warning' | 'su
 const ICONE_DO_STATUS: Record<StatusDaTarefa, string> = { aberta: 'i-lucide-circle', andamento: 'i-lucide-circle-dot', bloqueada: 'i-lucide-circle-pause', concluida: 'i-lucide-circle-check' }
 const COR_DA_PRIORIDADE: Record<Prioridade, 'error' | 'warning' | 'info' | 'neutral'> = { urgente: 'error', alta: 'warning', media: 'info', baixa: 'neutral' }
 
-const opPessoas = computed(() => pessoas.filter(x => !x.convidado).map(x => ({ value: x.id, label: x.nome, avatar: { text: iniciais(x.nome) } })))
+/**
+ * Rodada 14: a tarefa guarda o projeto, e o item pode ser de uma categoria do workspace (B8); a subtarefa segue o
+ * marco da tarefa-mãe (B10); responsável e colaboradores saem de quem entra no projeto (B11); a tarefa criada numa
+ * discussão mostra de onde veio (B4).
+ */
+const tr = useTextos(textosDasRelacoes)
+const pes = useOpcoesDePessoas()
+const projetoId = computed(() => tarefa.value?.projeto ?? props.id)
+const opPessoas = computed(() => pes.opcoes(projetoId.value))
+function trocarResponsavel(v: number) {
+  pes.garantir(projetoId.value, v)
+  salvar({ responsavel: v })
+}
+function trocarColaboradores(v: number[]) {
+  pes.garantir(projetoId.value, v)
+  salvar({ colaboradores: v })
+}
+const origem = computed(() => {
+  const o = tarefa.value?.origem
+  return o ? md.discussoes.value.find(d => d.id === o.discussao) ?? null : null
+})
+function abrirOrigem() {
+  const d = origem.value
+  if (!d) return
+  prj.tarefaAberta.value = null
+  md.abrirDiscussao(d)
+}
+const marcoDaMae = computed(() => mae.value ? md.marcoDaTarefa(mae.value.id) : null)
 const opStatus = computed(() => (['aberta', 'andamento', 'bloqueada', 'concluida'] as StatusDaTarefa[]).map(v => ({ value: v, label: rt.value.status[v], icon: ICONE_DO_STATUS[v] })))
 const opPrioridade = computed(() => (['urgente', 'alta', 'media', 'baixa'] as Prioridade[]).map(v => ({ value: v, label: rt.value.prioridade[v] })))
 const opEtiquetas = computed(() => prj.etiquetas.value.map(e => ({ value: e.id, label: e.nome })))
@@ -87,12 +116,17 @@ const opMarcos = computed(() => [
 /** O item: "Sem item" ou um item de uma categoria do projeto (a tarefa liga a no máximo 1). */
 const opItens = computed(() => [
   { value: '0', label: tt.value.semItem, icon: 'i-lucide-circle-dashed' },
-  ...prj.categoriasDe(props.id).flatMap(c => prj.itensDaCategoria(c.id).map(ref => ({ value: `${c.id}:${ref}`, label: `${ref} · ${c.name}`, icon: c.icon ?? 'i-lucide-folder' }))),
+  ...[...prj.categoriasDe(projetoId.value), ...prj.categoriasDoWorkspace.value].flatMap(c => prj.itensDaCategoria(c.id).map(ref => ({
+    value: `${c.id}:${ref}`,
+    label: `${ref} · ${c.name}`,
+    icon: c.icon ?? 'i-lucide-folder',
+    ...(c.projeto === null ? { description: tr.value.tarefa.itensDoWorkspace } : {}),
+  }))),
 ])
 const valorDoItem = computed(() => tarefa.value?.item ? `${tarefa.value.categoria}:${tarefa.value.item}` : '0')
 const nomeDaCategoria = (id: number | null) => prj.categorias.value.find(c => c.id === id)?.name ?? ''
 const iconeDaCategoria = (id: number | null) => prj.categorias.value.find(c => c.id === id)?.icon ?? 'i-lucide-folder'
-const nomeDoProjeto = computed(() => prj.projetos.value.find(p => p.id === props.id)?.nome ?? '')
+const nomeDoProjeto = computed(() => tarefa.value?.projeto === null ? '' : prj.projetos.value.find(p => p.id === projetoId.value)?.nome ?? '')
 const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(idioma.value, { day: '2-digit', month: 'short', year: 'numeric' })
 
 function salvar(dados: Partial<TarefaDoProjeto>) {
@@ -100,9 +134,10 @@ function salvar(dados: Partial<TarefaDoProjeto>) {
   prj.atualizarTarefa(tarefa.value.id, dados)
 }
 function trocarItem(v: string) {
-  if (v === '0') return salvar({ categoria: null, item: null, projeto: props.id })
+  // B8: trocar o item não muda o projeto da tarefa
+  if (v === '0') return salvar({ categoria: null, item: null })
   const [cat, ref] = v.split(':')
-  salvar({ categoria: Number(cat), item: ref, projeto: undefined })
+  salvar({ categoria: Number(cat), item: ref })
 }
 
 /* ---------- título e descrição: editam no lugar e salvam ao sair do campo ---------- */
@@ -144,14 +179,14 @@ function salvarSub() {
   const x = tarefa.value
   const nome = rascunho.nome.trim()
   if (!x || !nome) return focar()
-  prj.criarTarefa({ titulo: nome, categoria: null, item: null, projeto: props.id, mae: x.id, responsavel: rascunho.responsavel ?? x.responsavel, prazo: rascunho.data || x.prazo, prioridade: rascunho.prioridade, pontos: rascunho.pontos || undefined })
+  prj.criarTarefa({ titulo: nome, categoria: null, item: null, projeto: projetoId.value, mae: x.id, responsavel: rascunho.responsavel ?? x.responsavel, prazo: rascunho.data || x.prazo, prioridade: rascunho.prioridade, pontos: rascunho.pontos || undefined })
   toast.add({ title: td.value.subCriada(nome), icon: 'i-lucide-git-branch', color: 'success', duration: 2500 })
   limparRascunho()
   focar()
 }
-const responsaveisDoRascunho = computed<DropdownMenuItem[]>(() => [
-  { label: td.value.semResponsavel, icon: 'i-lucide-user-x', onSelect: () => { rascunho.responsavel = undefined } },
-  ...pessoas.filter(x => !x.convidado).map(x => ({ label: x.nome, avatar: { text: iniciais(x.nome), alt: x.nome }, onSelect: () => { rascunho.responsavel = x.id } })),
+const responsaveisDoRascunho = computed<DropdownMenuItem[][]>(() => [
+  [{ label: td.value.semResponsavel, icon: 'i-lucide-user-x', onSelect: () => { rascunho.responsavel = undefined } }],
+  ...pes.menu(projetoId.value, (id) => { pes.garantir(projetoId.value, id); rascunho.responsavel = id }),
 ])
 const prioridadesDoRascunho = computed<DropdownMenuItem[]>(() => (['urgente', 'alta', 'media', 'baixa'] as Prioridade[]).map(v => ({
   label: rt.value.prioridade[v],
@@ -168,6 +203,9 @@ const limpar = ref(0)
 function vincular(id: number | undefined) {
   const y = prj.tarefas.value.find(t => t.id === id)
   if (!y || !tarefa.value) return
+  // B10: a tarefa vinculada passa a seguir o marco da tarefa-mãe e sai do marco que tinha
+  const m = md.marcoDaTarefa(y.id)
+  if (m) md.tirarTarefa(m, y.id)
   prj.atualizarTarefa(y.id, { mae: tarefa.value.id })
   limpar.value++
   toast.add({ title: td.value.vinculada(y.titulo), icon: 'i-lucide-link', color: 'success', duration: 2500 })
@@ -346,6 +384,13 @@ function excluir() {
               </div>
               <p v-else class="mt-1 text-sm text-toned">{{ td.semItemTexto }}</p>
             </div>
+            <div v-if="origem" class="rounded-lg border border-default p-3" :class="marca">
+              <p class="text-xs text-muted">{{ tr.tarefa.criadaNaDiscussao }}</p>
+              <button type="button" class="mt-1 flex w-full items-center gap-2 text-left text-sm text-highlighted hover:underline" @click="abrirOrigem">
+                <UIcon name="i-lucide-messages-square" class="size-4 shrink-0 text-muted" />
+                <span class="truncate">{{ origem.titulo }}</span>
+              </button>
+            </div>
             <div v-if="mae" class="rounded-lg border border-default p-3">
               <p class="text-xs text-muted">{{ td.tarefaMae }}</p>
               <button type="button" class="mt-1 flex w-full items-center gap-2 text-left text-sm text-highlighted hover:underline" @click="prj.tarefaAberta.value = mae.id">
@@ -361,11 +406,11 @@ function excluir() {
           <p class="bg-elevated/50 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-muted">{{ tl.daTarefa }}</p>
           <div class="flex flex-col gap-1 px-4 py-2">
             <span class="text-xs font-medium text-muted">{{ tl.responsavel }}</span>
-            <USelectMenu :model-value="tarefa.responsavel" :items="opPessoas" value-key="value" size="sm" variant="ghost" class="w-full" :aria-label="tl.responsavel" @update:model-value="(v: number) => salvar({ responsavel: v })" />
+            <USelectMenu :model-value="tarefa.responsavel" :items="opPessoas" value-key="value" size="sm" variant="ghost" class="w-full" :ui="{ content: 'min-w-60' }" :aria-label="tl.responsavel" @update:model-value="trocarResponsavel" />
           </div>
           <div class="flex flex-col gap-1 px-4 py-2">
             <span class="text-xs font-medium text-muted">{{ tl.colaboradores }}</span>
-            <USelectMenu :model-value="tarefa.colaboradores ?? []" :items="opPessoas" value-key="value" multiple size="sm" variant="ghost" class="w-full" :placeholder="tl.nenhum" :aria-label="tl.colaboradores" @update:model-value="(v: number[]) => salvar({ colaboradores: v })" />
+            <USelectMenu :model-value="tarefa.colaboradores ?? []" :items="opPessoas" value-key="value" multiple size="sm" variant="ghost" class="w-full" :ui="{ content: 'min-w-60' }" :placeholder="tl.nenhum" :aria-label="tl.colaboradores" @update:model-value="trocarColaboradores" />
           </div>
           <div class="flex flex-col gap-1 px-4 py-2">
             <span class="text-xs font-medium text-muted">{{ tl.status }}</span>
@@ -410,11 +455,16 @@ function excluir() {
           <div class="flex flex-col gap-0.5 px-4 py-2">
             <span class="text-xs font-medium text-muted">{{ tl.projeto }}</span>
             <span class="text-sm text-highlighted">{{ nomeDoProjeto }}</span>
-            <span class="text-[11px] text-dimmed">{{ tarefa.item ? tl.peloItem : tl.semItem }}</span>
+            <span class="text-[11px] text-dimmed" :class="marca">{{ tarefa.projeto === null ? tr.tarefa.semProjeto : tr.tarefa.projetoProprio }}</span>
           </div>
           <div class="flex flex-col gap-1 px-4 py-2" :class="marca">
             <span class="text-xs font-medium text-muted">{{ tl.marco }}</span>
-            <UTooltip :text="tl.marcoSoAdmin" :disabled="podeMarco">
+            <!-- B10: a subtarefa segue o marco da tarefa-mãe -->
+            <template v-if="mae">
+              <span class="flex items-center gap-1.5 text-sm text-highlighted"><UIcon name="i-lucide-flag" class="size-3.5 text-muted" />{{ marcoDaMae?.nome ?? tmm.marcos.semMarco }}</span>
+              <span class="text-[11px] text-dimmed">{{ marcoDaMae ? tr.tarefa.marcoDaMae : tr.tarefa.semMarcoNaMae }}</span>
+            </template>
+            <UTooltip v-else :text="tl.marcoSoAdmin" :disabled="podeMarco">
               <USelectMenu v-model:search-term="buscaMarco" :model-value="md.marcoDaTarefa(tarefa.id)?.id ?? 0" :items="opMarcos" value-key="value" size="sm" variant="ghost" class="w-full" :disabled="!podeMarco" :ui="{ content: 'min-w-64' }" :aria-label="tl.marco" @update:model-value="(v: number) => md.definirMarcoDaTarefa(tarefa!.id, v || null)">
                 <template #content-bottom>
                   <AtalhoDeCriar :termo="buscaMarco" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" @criar="criarMarco" />

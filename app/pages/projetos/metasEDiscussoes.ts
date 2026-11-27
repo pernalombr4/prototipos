@@ -29,8 +29,6 @@ export interface Mensagem {
   /** ISO, com hora. */
   em: string
   texto: string
-  /** A tarefa criada a partir da mensagem (a ponte discussão → trabalho). */
-  tarefa?: number
 }
 
 export interface Discussao {
@@ -45,7 +43,11 @@ export interface Discussao {
   resposta?: number
   /** A 1ª mensagem é o corpo da discussão. */
   mensagens: Mensagem[]
+  /** Inventado (rodada 14, B7): de que a discussão trata, opcional: um marco ou um item do mesmo projeto. */
+  sobre?: SobreDaDiscussao
 }
+
+export type SobreDaDiscussao = { tipo: 'marco', id: number } | { tipo: 'item', categoria: number, ref: string }
 
 export const discussoesBase: Discussao[] = [
   {
@@ -85,7 +87,7 @@ export const discussoesBase: Discussao[] = [
     mensagens: [
       { id: 31, autor: 2, em: '2026-11-24T11:00', texto: 'Proposta: pagamento até R$ 500 passa só pela aprovação da coordenação. Hoje 40% das aprovações são abaixo desse valor.' },
       { id: 32, autor: 3, em: '2026-11-24T11:45', texto: 'Concordo, com relatório mensal dos pagamentos que pularam a segunda assinatura.' },
-      { id: 33, autor: 5, em: '2026-11-24T13:10', texto: 'Preciso ajustar o fluxo de aprovação de pagamento para essa regra.', tarefa: 112 },
+      { id: 33, autor: 5, em: '2026-11-24T13:10', texto: 'Preciso ajustar o fluxo de aprovação de pagamento para essa regra.' },
     ],
   },
   {
@@ -106,6 +108,7 @@ export const discussoesBase: Discussao[] = [
     titulo: 'Plano para a infiltração do bloco B',
     status: 'aberta',
     fixada: false,
+    sobre: { tipo: 'marco', id: 5 },
     mensagens: [
       { id: 51, autor: 9, em: '2026-11-20T08:30', texto: 'A impermeabilização do bloco B falhou no teste. Proponho refazer a manta antes da medição de novembro.' },
       { id: 52, autor: 2, em: '2026-11-20T09:15', texto: 'Refazer antes atrasa a medição em 5 dias. Dá para medir o bloco A primeiro.' },
@@ -174,8 +177,12 @@ export interface Meta {
   medicao: Medicao
   /** Só na medição por valor. O valor atual é o da última atualização que trouxe valor. */
   valor?: { inicial: number, alvo: number, unidade: Unidade }
+  /** Os projetos ligados. Rodada 14 (B6): ligar o projeto é um atalho que põe os marcos dele em `marcos`. */
   projetos: number[]
+  /** Rodada 14 (B6): a única lista que conta. Qualquer marco sai dela, mesmo o que veio pelo projeto. */
   marcos: number[]
+  /** Rodada 14 (B6): os projetos ligados cujos marcos novos entram na meta ("Incluir marcos novos"). */
+  novos: number[]
   /** Da mais nova para a mais antiga. A situação da meta é a da última. */
   atualizacoes: AtualizacaoDaMeta[]
 }
@@ -189,7 +196,8 @@ export const metasBase: Meta[] = [
     dataAlvo: '2026-12-31',
     medicao: 'automatica',
     projetos: [1],
-    marcos: [3],
+    marcos: [1, 2, 3],
+    novos: [1],
     atualizacoes: [
       { situacao: 'emRisco', texto: 'As notas de outubro atrasaram. O fechamento de novembro segue no prazo.', autor: 1, em: '2026-11-24' },
       { situacao: 'noPrazo', texto: 'Plano aprovado com o Financeiro e o Jurídico.', autor: 1, em: '2026-11-03' },
@@ -204,7 +212,8 @@ export const metasBase: Meta[] = [
     medicao: 'valor',
     valor: { inicial: 0, alvo: 20, unidade: 'percentual' },
     projetos: [3, 4],
-    marcos: [],
+    marcos: [4, 5],
+    novos: [3, 4],
     atualizacoes: [
       { situacao: 'noPrazo', texto: '2 propostas em negociação e o bloco B dentro do cronograma.', autor: 3, em: '2026-11-20', valor: 6 },
       { situacao: 'noPrazo', texto: 'Primeiro contrato assinado.', autor: 3, em: '2026-10-15', valor: 2 },
@@ -241,7 +250,7 @@ export function useMetasEDiscussoes() {
     const p = prj.projetos.value.find(x => x.id === d.projeto)
     return !!p && (prj.podeAdministrar(p) || d.mensagens[0]?.autor === prj.eu.value)
   }
-  function criarDiscussao(dados: { projeto: number, formato: FormatoDaDiscussao, titulo: string, texto: string }) {
+  function criarDiscussao(dados: { projeto: number, formato: FormatoDaDiscussao, titulo: string, texto: string, sobre?: SobreDaDiscussao }) {
     const d: Discussao = {
       id: ++proxima,
       projeto: dados.projeto,
@@ -249,6 +258,7 @@ export function useMetasEDiscussoes() {
       titulo: dados.titulo,
       status: 'aberta',
       fixada: dados.formato === 'anuncio',
+      ...(dados.sobre ? { sobre: dados.sobre } : {}),
       mensagens: [{ id: ++proxima, autor: prj.eu.value, em: agora(), texto: dados.texto }],
     }
     discussoes.value = [d, ...discussoes.value]
@@ -257,14 +267,27 @@ export function useMetasEDiscussoes() {
   function responder(d: Discussao, texto: string) {
     d.mensagens.push({ id: ++proxima, autor: prj.eu.value, em: agora(), texto })
   }
-  function criarTarefaDaMensagem(m: Mensagem, dados: { titulo: string, categoria: number, responsavel: number, prazo: string }) {
-    prj.criarTarefa({ ...dados, item: '', prioridade: 'media' })
-    m.tarefa = prj.tarefas.value[0]!.id
+  /**
+   * Rodada 14 (B4, B5, B14, B16): a tarefa guarda a mensagem de onde saiu. A mensagem lista as tarefas que a apontam,
+   * então 1 mensagem cria N tarefas, a tarefa mostra a origem e excluir a tarefa não deixa ligação para trás. O
+   * "Criar tarefa" abre a mesma janela Nova tarefa do projeto, com o texto da mensagem.
+   */
+  const tarefasDaMensagem = (m: Mensagem) => prj.tarefas.value.filter(x => x.origem?.mensagem === m.id)
+  function criarTarefaDaMensagem(d: Discussao, m: Mensagem) {
+    const titulo = m.texto.length > 70 ? `${m.texto.slice(0, 70).trim()}...` : m.texto
+    prj.novaTarefaCom(d.projeto, { titulo, responsavel: m.autor, origem: { discussao: d.id, mensagem: m.id } })
+  }
+  const discussoesSobre = (s: SobreDaDiscussao) => discussoes.value.filter(d => d.sobre?.tipo === s.tipo
+    && (s.tipo === 'marco' ? (d.sobre as { id: number }).id === s.id : (d.sobre as { ref: string }).ref === s.ref))
+  function abrirDiscussao(d: Discussao) {
+    discussaoAberta.value = d.id
+    prj.abrirAba(d.projeto, 'discussoes')
   }
 
   /* ---------- marcos ---------- */
   const marcosDo = (projeto: number) => marcos.value.filter(m => m.projeto === projeto).sort((a, b) => a.dataAlvo.localeCompare(b.dataAlvo))
-  const tarefasDoMarco = (m: Marco) => prj.tarefas.value.filter(x => m.tarefas.includes(x.id))
+  /** Rodada 14 (B10): o marco conta só a tarefa-mãe; a subtarefa segue o marco da mãe e não soma à parte. */
+  const tarefasDoMarco = (m: Marco) => prj.tarefas.value.filter(x => m.tarefas.includes(x.id) && !x.mae)
   /** A parte concluída das tarefas do marco. Marco concluído fica com 100%; marco sem tarefa, com 0%. */
   function progressoDoMarco(m: Marco) {
     if (m.status === 'concluido') return 100
@@ -272,14 +295,20 @@ export function useMetasEDiscussoes() {
     if (!ts.length) return 0
     return Math.round(ts.filter(x => x.status === 'concluida').length / ts.length * 100)
   }
-  const marcoDaTarefa = (tarefa: number) => marcos.value.find(m => m.tarefas.includes(tarefa)) ?? null
+  /** A subtarefa responde pelo marco da tarefa-mãe (B10). */
+  const marcoDaTarefa = (tarefa: number): Marco | null => {
+    const mae = prj.tarefas.value.find(x => x.id === tarefa)?.mae
+    if (mae) return marcoDaTarefa(mae)
+    return marcos.value.find(m => m.tarefas.includes(tarefa)) ?? null
+  }
   /** Cria, edita, conclui e exclui marco quem administra o projeto. */
   function podeEditarMarcos(projeto: number) {
     const p = prj.projetos.value.find(x => x.id === projeto)
     return !!p && prj.podeAdministrar(p)
   }
   /** A tarefa fica em 1 marco só: ligar a um marco tira do outro. */
-  function ligarTarefas(m: Marco, ids: number[]) {
+  function ligarTarefas(m: Marco, idsPedidos: number[]) {
+    const ids = idsPedidos.filter(id => !prj.tarefas.value.find(x => x.id === id)?.mae)
     for (const outro of marcos.value) if (outro.id !== m.id) outro.tarefas = outro.tarefas.filter(id => !ids.includes(id))
     m.tarefas = [...new Set([...m.tarefas, ...ids])]
   }
@@ -287,6 +316,7 @@ export function useMetasEDiscussoes() {
     m.tarefas = m.tarefas.filter(x => x !== id)
   }
   function definirMarcoDaTarefa(tarefa: number, marco: number | null) {
+    if (prj.tarefas.value.find(x => x.id === tarefa)?.mae) return
     for (const m of marcos.value) m.tarefas = m.tarefas.filter(id => id !== tarefa)
     const m = marcos.value.find(x => x.id === marco)
     if (m) m.tarefas = [...m.tarefas, tarefa]
@@ -300,6 +330,8 @@ export function useMetasEDiscussoes() {
     else {
       marcos.value = [...marcos.value, { ...dados, id: ++proxima, status: 'aberto', tarefas: [] }]
       m = marcos.value.at(-1)!
+      // B6: o marco novo entra nas metas que ligaram o projeto com "Incluir marcos novos"
+      for (const g of metas.value) if (g.novos.includes(dados.projeto)) g.marcos = [...g.marcos, m.id]
     }
     ligarTarefas(m, dados.tarefas)
     return m
@@ -321,8 +353,30 @@ export function useMetasEDiscussoes() {
   /** Excluir o marco: as tarefas continuam no projeto, e as metas deixam de contar o marco. */
   function excluirMarco(m: Marco) {
     for (const g of metas.value) g.marcos = g.marcos.filter(id => id !== m.id)
+    for (const d of discussoes.value) if (d.sobre?.tipo === 'marco' && d.sobre.id === m.id) d.sobre = undefined
     marcos.value = marcos.value.filter(x => x.id !== m.id)
     if (marcoAberto.value === m.id) marcoAberto.value = null
+  }
+  /** Rodada 14 (B12): o que sai junto com o projeto, para a confirmação da exclusão. */
+  function efeitosDeExcluirProjeto(projeto: number) {
+    return {
+      ...prj.efeitosDeExcluir(projeto),
+      marcos: marcosDo(projeto).length,
+      discussoes: discussoesDo(projeto).length,
+      metas: metasDoProjeto(projeto).length,
+    }
+  }
+  /** Rodada 14 (B12): excluir o projeto exclui os marcos e as discussões dele e o tira das metas. */
+  function excluirProjeto(projeto: number) {
+    const deles = new Set(marcosDo(projeto).map(m => m.id))
+    for (const g of metas.value) {
+      g.projetos = g.projetos.filter(x => x !== projeto)
+      g.novos = g.novos.filter(x => x !== projeto)
+      g.marcos = g.marcos.filter(id => !deles.has(id))
+    }
+    marcos.value = marcos.value.filter(m => m.projeto !== projeto)
+    discussoes.value = discussoes.value.filter(d => d.projeto !== projeto)
+    prj.excluir(projeto)
   }
   function abrirMarco(m: Marco) {
     marcoAberto.value = m.id
@@ -330,23 +384,20 @@ export function useMetasEDiscussoes() {
   }
 
   /* ---------- metas ---------- */
-  /** Os marcos que contam na meta automática: os ligados e todos os dos projetos ligados, sem repetir. */
-  function marcosQueContam(meta: Meta) {
-    const ids = new Set([...meta.marcos, ...marcos.value.filter(m => meta.projetos.includes(m.projeto)).map(m => m.id)])
-    return marcos.value.filter(m => ids.has(m.id))
-  }
+  /** Rodada 14 (B15): o marco aberto de projeto arquivado não conta; o concluído continua contando. */
+  const projetoArquivado = (projeto: number) => prj.projetos.value.find(p => p.id === projeto)?.status === 'arquivado'
+  const contaNaMeta = (m: Marco) => m.status === 'concluido' || !projetoArquivado(m.projeto)
+  /** Todos os marcos da lista da meta, contem ou não (B15). */
+  const marcosDaMeta = (meta: Meta) => marcos.value.filter(m => meta.marcos.includes(m.id))
+  /** Rodada 14 (B6): os marcos que contam são os da lista da meta, menos os que o arquivamento tira (B15). */
+  const marcosQueContam = (meta: Meta) => marcosDaMeta(meta).filter(contaNaMeta)
   /** O projeto, na meta, vale a média dos marcos dele. Projeto sem marco não entra na conta (null). */
   function progressoDoProjeto(projeto: number) {
     const ms = marcosDo(projeto)
     if (!ms.length) return null
     return Math.round(ms.reduce((a, m) => a + progressoDoMarco(m), 0) / ms.length)
   }
-  /**
-   * Rodada 12: a regra do andamento, numa frase. A meta automática é medida só por marcos: a média da lista
-   * "Marcos" dela. Essa lista junta os marcos ligados um a um e todos os marcos de cada projeto ligado,
-   * inclusive os criados depois. O projeto aparece na meta quando está ligado ou quando tem marco ligado, e o
-   * andamento dele ali é a média dos marcos dele que estão na lista (não a de todos os marcos do projeto).
-   */
+  /** O projeto aparece na meta quando está ligado ou quando tem marco na lista. */
   function projetosDaMeta(meta: Meta) {
     const ids = [...meta.projetos]
     for (const id of meta.marcos) {
@@ -360,7 +411,34 @@ export function useMetasEDiscussoes() {
     if (!ms.length) return null
     return Math.round(ms.reduce((a, m) => a + progressoDoMarco(m), 0) / ms.length)
   }
-  const marcosDoProjetoNaMeta = (meta: Meta, projeto: number) => marcosQueContam(meta).filter(m => m.projeto === projeto)
+  const marcosDoProjetoNaMeta = (meta: Meta, projeto: number) => marcosDaMeta(meta).filter(m => m.projeto === projeto)
+  /** Rodada 14 (B6): ligar o projeto põe na meta os marcos que ele tem hoje; com `novos`, os criados depois também. */
+  function ligarProjeto(meta: Meta, projeto: number, novos = true) {
+    if (!meta.projetos.includes(projeto)) meta.projetos = [...meta.projetos, projeto]
+    meta.marcos = [...new Set([...meta.marcos, ...marcosDo(projeto).map(m => m.id)])]
+    if (novos && !meta.novos.includes(projeto)) meta.novos = [...meta.novos, projeto]
+  }
+  /** Desligar o projeto o tira da meta e tira os marcos dele da lista. */
+  function desligarProjeto(meta: Meta, projeto: number) {
+    meta.projetos = meta.projetos.filter(x => x !== projeto)
+    meta.novos = meta.novos.filter(x => x !== projeto)
+    const deles = new Set(marcosDo(projeto).map(m => m.id))
+    meta.marcos = meta.marcos.filter(id => !deles.has(id))
+  }
+  function alternarNovos(meta: Meta, projeto: number) {
+    meta.novos = meta.novos.includes(projeto) ? meta.novos.filter(x => x !== projeto) : [...meta.novos, projeto]
+  }
+  /** Rodada 14 (B1): as metas do marco, editadas pelo marco. É a mesma lista que o painel da meta edita. */
+  function definirMetasDoMarco(marco: number, ids: number[]) {
+    for (const g of metas.value) {
+      if (g.medicao !== 'automatica') continue
+      const tem = g.marcos.includes(marco)
+      if (ids.includes(g.id) && !tem) g.marcos = [...g.marcos, marco]
+      if (!ids.includes(g.id) && tem) g.marcos = g.marcos.filter(x => x !== marco)
+    }
+  }
+  /** Rodada 14 (P1, suposição): liga o projeto à meta quem administra o projeto ou quem edita a meta. */
+  const podeLigarProjeto = (meta: Meta, projeto: number) => podeEditarMeta(meta) || podeEditarMarcos(projeto)
   const valorAtual = (meta: Meta) => meta.atualizacoes.find(a => a.valor !== undefined)?.valor ?? meta.valor?.inicial ?? 0
   function progressoDaMeta(meta: Meta) {
     if (meta.medicao === 'valor' && meta.valor) {
@@ -374,25 +452,29 @@ export function useMetasEDiscussoes() {
   }
   const situacaoDaMeta = (meta: Meta): Situacao | null => meta.atualizacoes[0]?.situacao ?? null
   const metasDoProjeto = (projeto: number) => metas.value.filter(m => m.projetos.includes(projeto) || m.marcos.some(id => marcos.value.find(x => x.id === id)?.projeto === projeto))
-  /** As metas para as quais o marco conta: ligado direto ou pelo projeto, só nas metas automáticas. */
-  const metasDoMarco = (marco: number) => {
-    const m = marcos.value.find(x => x.id === marco)
-    return metas.value.filter(g => g.medicao === 'automatica' && (g.marcos.includes(marco) || (!!m && g.projetos.includes(m.projeto))))
-  }
+  /** As metas automáticas que têm o marco na lista (B1, B6). */
+  const metasDoMarco = (marco: number) => metas.value.filter(g => g.medicao === 'automatica' && g.marcos.includes(marco))
   /** O projeto que a pessoa não vê aparece sem nome na meta. */
   const veProjeto = (projeto: number) => {
     const p = prj.projetos.value.find(x => x.id === projeto)
     return !!p && prj.enxerga(p)
   }
   const podeEditarMeta = (meta: Meta) => prj.souDono.value || meta.dono === prj.eu.value
-  function salvarMeta(dados: Omit<Meta, 'id' | 'atualizacoes'> & { id?: number }) {
-    const m = metas.value.find(x => x.id === dados.id)
-    if (m) {
-      Object.assign(m, { ...dados, id: m.id })
-      return m
+  /**
+   * Rodada 14 (B6): o projeto que entra pelo formulário põe os marcos dele na lista, com "Incluir marcos novos"; o
+   * que sai tira os marcos dele. Os marcos escolhidos um a um ficam como a pessoa deixou.
+   */
+  function salvarMeta(dados: Omit<Meta, 'id' | 'atualizacoes' | 'novos'> & { id?: number }) {
+    let m = metas.value.find(x => x.id === dados.id)
+    const antes = m ? [...m.projetos] : []
+    if (m) Object.assign(m, { ...dados, id: m.id, projetos: antes })
+    else {
+      metas.value = [...metas.value, { ...dados, projetos: [], novos: [], id: ++proxima, atualizacoes: [] }]
+      m = metas.value.at(-1)!
     }
-    metas.value = [...metas.value, { ...dados, id: ++proxima, atualizacoes: [] }]
-    return metas.value.at(-1)!
+    for (const p of antes.filter(x => !dados.projetos.includes(x))) desligarProjeto(m, p)
+    for (const p of dados.projetos.filter(x => !antes.includes(x))) ligarProjeto(m, p)
+    return m
   }
   function excluirMeta(meta: Meta) {
     metas.value = metas.value.filter(m => m.id !== meta.id)
@@ -407,10 +489,11 @@ export function useMetasEDiscussoes() {
   }
 
   return {
-    discussoes, discussaoAberta, discussoesDo, podeAbrir, podeModerar, criarDiscussao, responder, criarTarefaDaMensagem,
+    discussoes, discussaoAberta, discussoesDo, podeAbrir, podeModerar, criarDiscussao, responder, criarTarefaDaMensagem, tarefasDaMensagem, discussoesSobre, abrirDiscussao,
     marcos, marcoAberto, marcosDo, progressoDoMarco, tarefasDoMarco, marcoDaTarefa, podeEditarMarcos, ligarTarefas, tirarTarefa,
     definirMarcoDaTarefa, salvarMarco, criarMarcoRapido, concluirMarco, reabrirMarco, excluirMarco, abrirMarco,
-    metas, metaAberta, marcosQueContam, progressoDoProjeto, projetosDaMeta, progressoDoProjetoNaMeta, marcosDoProjetoNaMeta, valorAtual, progressoDaMeta, situacaoDaMeta, metasDoProjeto, metasDoMarco,
+    efeitosDeExcluirProjeto, excluirProjeto,
+    metas, metaAberta, marcosQueContam, marcosDaMeta, contaNaMeta, projetoArquivado, ligarProjeto, desligarProjeto, alternarNovos, definirMetasDoMarco, podeLigarProjeto, progressoDoProjeto, projetosDaMeta, progressoDoProjetoNaMeta, marcosDoProjetoNaMeta, valorAtual, progressoDaMeta, situacaoDaMeta, metasDoProjeto, metasDoMarco,
     veProjeto, podeEditarMeta, salvarMeta, excluirMeta, publicarAtualizacao, abrirMeta,
   }
 }
