@@ -1,35 +1,46 @@
 <script setup lang="ts">
 /**
- * Um painel do dashboard: a moldura do SDK (`EnDashboardPanel`) e o gráfico que a
- * configuração pede. O mesmo componente desenha a prévia do construtor, então o
+ * Um painel do dashboard. O mesmo componente desenha a prévia do construtor, então o
  * que a pessoa vê enquanto configura é o que vai para a grade.
  *
- * O rodapé diz o que muda a leitura do número: o período que o painel usa, o filtro
- * do topo que não vale nele, a múltipla seleção e quantos grupos foram para "Outros".
+ * Rodada 2:
+ * - o Cartão (o "Card" do Power BI) é o `EnStatCard` do SDK, o mesmo do painel de tarefas
+ *   no develop: rótulo, número grande e a linha da tendência. O cartão inteiro é
+ *   clicável e abre os itens; sem botão "Ver N itens";
+ * - os outros painéis usam o `EnDashboardPanel`, com o subtítulo logo abaixo do título,
+ *   como "Entrada e saída" no painel de tarefas. Sem selo de período no rodapé;
+ * - o ícone de ajuda só existe quando a pessoa escreveu a descrição do painel;
+ * - o ícone de filtro mostra os filtros que valem no painel e aceita filtros só da visão.
  */
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnChartBarListItem } from '@be-enlighten/enspace-sdk-ui/base'
-import type { ConfigDoPainel, Grupo, Resultado } from './agregacao'
+import type { ConfigDoPainel, FiltroDeCampo, Grupo, Resultado } from './agregacao'
 import { OUTROS, campoDe, ehMoeda } from './agregacao'
 import { categoriaPorSlug } from './mocks'
 import type { Textos } from './textos'
 import { corDaSerie, formatarValor, porcentagem } from './formatar'
 import GraficoBarras from './_GraficoBarras.vue'
+import FiltroDoPainel from './_FiltroDoPainel.vue'
 
 const props = defineProps<{
   t: Textos
   cfg: ConfigDoPainel
   resultado: Resultado
+  /** A tendência do cartão, 1 valor por pedaço do período. */
+  serie?: number[]
   estado: 'pronto' | 'carregando' | 'erro'
-  /** Na grade em modo Personalizar: o menu do painel some (o da grade assume). */
-  editavel?: boolean
-  /** Na prévia do construtor: sem menu e com altura fixa. */
+  /** Altura útil do painel na grade, em px. */
+  altura?: number
+  /** Na prévia do construtor: sem menu, sem filtro e sem clique. */
   previa?: boolean
   /** Rótulo do período do topo, já no idioma ("Este ano"). */
   rotuloDoPeriodo: string
   /** Quem só lê o dashboard não edita, não duplica nem exclui. */
   somenteLeitura?: boolean
+  filtrosDoDashboard?: FiltroDeCampo[]
 }>()
+
+const filtrosDaVisao = defineModel<FiltroDeCampo[]>('filtrosDaVisao', { default: () => [] })
 
 const emit = defineEmits<{
   editar: []
@@ -44,13 +55,14 @@ const categoria = computed(() => categoriaPorSlug.get(props.cfg.categoria))
 const medida = computed(() => campoDe(props.cfg.categoria, props.cfg.medida))
 const dim = computed(() => campoDe(props.cfg.categoria, props.cfg.agruparPor))
 const quebra = computed(() => campoDe(props.cfg.categoria, props.cfg.quebrarPor))
+const cartao = computed(() => props.cfg.visualizacao === 'numero')
 
 const frase = computed(() => props.t.frase(
   props.cfg.funcao,
   categoria.value?.name ?? '',
   props.cfg.funcao === 'contagem' ? undefined : medida.value?.name,
-  props.cfg.visualizacao === 'numero' ? undefined : dim.value?.name,
-  props.cfg.visualizacao === 'numero' ? undefined : quebra.value?.name,
+  cartao.value ? undefined : dim.value?.name,
+  cartao.value ? undefined : quebra.value?.name,
 ))
 const titulo = computed(() => props.cfg.titulo.trim() || frase.value)
 
@@ -61,30 +73,30 @@ const fmt = (v: number, compacto = false) => formatarValor(v, {
   compacto,
 })
 
-/* -------------------------------- o período -------------------------------- */
+/* ------------------------------- o subtítulo ------------------------------- */
 
-const campoDeData = computed(() => campoDe(props.cfg.categoria, props.cfg.campoDeData))
-const textoDoPeriodo = computed(() => {
-  if (props.cfg.periodo === 'todo') return props.t.painel.todoPeriodo
-  const base = props.rotuloDoPeriodo
-  return props.cfg.campoDeData === 'created_at' ? base : `${base}. ${props.t.painel.periodoPor(campoDeData.value?.name ?? '')}`
+/** "Contratos · Este ano, por Data de assinatura": a categoria e o período que o número usa. */
+const subtitulo = computed(() => {
+  const campoDeData = campoDe(props.cfg.categoria, props.cfg.campoDeData)
+  const periodo = props.cfg.periodo === 'todo'
+    ? props.t.painel.todoPeriodo
+    : props.cfg.campoDeData === 'created_at' ? props.rotuloDoPeriodo : props.t.painel.periodoPor(props.rotuloDoPeriodo, campoDeData?.name ?? '')
+  const partes = [categoria.value?.name, periodo]
+  if (props.resultado.multiplo && !cartao.value) partes.push(props.t.painel.multiploCurto)
+  return partes.filter(Boolean).join(' · ')
 })
-
-const info = computed(() => [
-  props.t.painel.comoCalculamos(frase.value, textoDoPeriodo.value, props.cfg.condicoes.length),
-  props.resultado.multiplo ? props.t.painel.multiplo : '',
-  props.t.painel.permissao,
-].filter(Boolean).join(' '))
 
 /* ---------------------------------- estados -------------------------------- */
 
 const semDados = computed(() => props.estado === 'pronto' && props.resultado.itens === 0)
-const altura = computed(() => props.previa ? 200 : Math.max(150, props.cfg.h * 80 + (props.cfg.h - 1) * 16 - 150))
+/** A altura do gráfico: a do painel menos o cabeçalho com título e subtítulo. */
+/* Cabeçalho do EnDashboardPanel (41 px), subtítulo (32 px) e respiro de baixo: 140 px fora do gráfico. */
+const alturaDoGrafico = computed(() => props.previa ? 220 : Math.max(100, (props.altura ?? 320) - 140))
 
 /* ----------------------------------- menu ---------------------------------- */
 
 const menu = computed<DropdownMenuItem[][] | undefined>(() => {
-  if (props.previa || props.editavel) return undefined
+  if (props.previa) return undefined
   const ver = [{ label: props.t.painel.menu.verItens, icon: 'i-lucide-list', onSelect: () => emit('detalhar') }, { label: props.t.painel.menu.baixarCsv, icon: 'i-lucide-download', onSelect: () => emit('csv') }]
   if (props.somenteLeitura) return [ver]
   return [
@@ -121,6 +133,9 @@ const seriesDaLinha = computed(() => props.resultado.quebras.length
   ? props.resultado.quebras.map((q, k) => ({ key: q.chave, label: q.rotulo, color: corDaSerie(q.chave, k) }))
   : [{ key: 'valor', label: medida.value?.name ?? props.t.funcoes.contagem, color: 'var(--ui-color-primary-500)', area: true }])
 
+/** Remonta a linha quando as séries mudam: o unovis não tira a série que saiu. */
+const chaveDasSeries = computed(() => seriesDaLinha.value.map(x => x.key).join('|'))
+
 const escapar = (s: string) => s.replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!)
 function dicaDaLinha(d: Record<string, unknown>) {
   const partes = seriesDaLinha.value
@@ -149,43 +164,73 @@ function selecionarDoRanking(item: EnChartBarListItem) {
 </script>
 
 <template>
+  <!-- ─────────── Cartão: o EnStatCard do SDK, clicável inteiro ─────────── -->
+  <div v-if="cartao && estado !== 'erro'" class="relative h-full [&>:first-child]:h-full [&>:first-child]:min-h-0">
+    <EnStatCard
+      :label="titulo"
+      :value="semDados ? fmt(0, true) : fmt(resultado.total, true)"
+      :hint="semDados ? t.painel.semDadosTitulo : subtitulo"
+      :series="semDados ? undefined : serie"
+      :loading="estado === 'carregando'"
+      :interactive="!previa && !semDados"
+      :locale="t.locale"
+      @click="emit('detalhar')"
+    />
+    <div v-if="!previa" class="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-md bg-default/80 backdrop-blur-sm">
+      <UPopover v-if="cfg.descricao.trim()" :content="{ align: 'end' }">
+        <UButton icon="i-lucide-info" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.ajuda" />
+        <template #content><p class="max-w-xs p-3 text-sm text-muted">{{ cfg.descricao }}</p></template>
+      </UPopover>
+      <FiltroDoPainel
+        v-model="filtrosDaVisao"
+        :t="t"
+        :cfg="cfg"
+        :do-dashboard="filtrosDoDashboard ?? []"
+        :pode-editar="!somenteLeitura"
+        @editar="emit('editar')"
+      />
+      <UDropdownMenu v-if="menu" :items="menu" :content="{ align: 'end' }">
+        <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="t.painel.acoes" />
+      </UDropdownMenu>
+    </div>
+  </div>
+
+  <!-- ─────────── Gráficos: o EnDashboardPanel do SDK ─────────── -->
   <EnDashboardPanel
-    :label="categoria?.name"
+    v-else
     :title="titulo"
-    :value="cfg.visualizacao === 'numero' && estado === 'pronto' && !semDados ? fmt(resultado.total, true) : undefined"
-    :info="info"
+    :info="cfg.descricao.trim() || undefined"
     :loading="estado === 'carregando'"
     :error="estado === 'erro' ? new Error(t.painel.erroTitulo) : undefined"
     :empty="semDados"
     :state-title="semDados ? t.painel.semDadosTitulo : estado === 'erro' ? t.painel.erroTitulo : undefined"
     :state-description="semDados ? t.painel.semDadosDescricao : estado === 'erro' ? t.painel.erroDescricao : undefined"
     :state-icon="semDados ? 'i-lucide-calendar-search' : undefined"
-    :body-height="cfg.visualizacao === 'numero' ? 0 : altura"
+    :body-height="cartao ? 80 : alturaDoGrafico"
     :menu="menu"
-    :draggable="editavel"
     :locale="(t.locale as any)"
     class="h-full"
     @retry="emit('tentar')"
   >
-    <!-- Número: o valor sai do cabeçalho do painel; aqui, o atalho para os itens. -->
-    <div v-if="cfg.visualizacao === 'numero'" class="pt-1">
-      <UButton
-        v-if="!previa"
-        :label="t.painel.verItens(resultado.itens)"
-        color="neutral"
-        variant="link"
-        size="xs"
-        trailing-icon="i-lucide-arrow-right"
-        class="-ml-2"
-        @click="emit('detalhar')"
+    <template v-if="!previa" #actions>
+      <FiltroDoPainel
+        v-model="filtrosDaVisao"
+        :t="t"
+        :cfg="cfg"
+        :do-dashboard="filtrosDoDashboard ?? []"
+        :pode-editar="!somenteLeitura"
+        @editar="emit('editar')"
       />
-      <p v-else class="text-xs text-muted">{{ t.painel.itens(resultado.itens) }}</p>
-    </div>
+    </template>
+
+    <div class="px-4 pb-4">
+    <!-- O subtítulo, logo abaixo do título, como no painel de tarefas -->
+    <p class="-mt-0.5 mb-3 truncate text-sm text-muted">{{ subtitulo }}</p>
 
     <GraficoBarras
-      v-else-if="cfg.visualizacao === 'barras'"
+      v-if="cfg.visualizacao === 'barras'"
       :resultado="resultado"
-      :altura="resultado.quebras.length ? altura - 32 : altura"
+      :altura="resultado.quebras.length ? alturaDoGrafico - 32 : alturaDoGrafico"
       :mostrar-valores="cfg.mostrarValores"
       :formatar="(v: number) => fmt(v, true)"
       :rotulo-total="t.painel.total"
@@ -194,7 +239,7 @@ function selecionarDoRanking(item: EnChartBarListItem) {
       @detalhar="(g: Grupo, p?: string) => emit('detalhar', g, p)"
     />
 
-    <div v-else-if="cfg.visualizacao === 'barrasHorizontais'" class="overflow-y-auto pr-1" :style="{ maxHeight: `${altura}px` }">
+    <div v-else-if="cfg.visualizacao === 'barrasHorizontais'" class="overflow-y-auto pr-1" :style="{ maxHeight: `${alturaDoGrafico}px` }">
       <EnChartBarList
         :items="itensDoRanking"
         :segments-legend="legendaDoRanking.length ? legendaDoRanking : undefined"
@@ -210,33 +255,36 @@ function selecionarDoRanking(item: EnChartBarListItem) {
       formatValue e o eixo sai "3000000". Com divisão, as linhas são do EnChartLine.
     -->
     <EnChartArea
+      :key="chaveDasSeries"
       v-else-if="cfg.visualizacao === 'linha' && !resultado.quebras.length"
       :data="linhas"
       x="x"
       :series="seriesDaLinha"
-      :height="altura"
+      :height="alturaDoGrafico"
       :format-value="(v: number) => fmt(v, true)"
       :aria-label="titulo"
       :locale="(t.locale as any)"
     />
     <EnChartLine
+      :key="chaveDasSeries"
       v-else-if="cfg.visualizacao === 'linha'"
       :data="linhas"
       x="x"
       :series="seriesDaLinha"
-      :height="altura"
+      :height="alturaDoGrafico"
       :tooltip="dicaDaLinha"
       :aria-label="titulo"
       :locale="(t.locale as any)"
     />
 
     <EnChartArea
+      :key="chaveDasSeries"
       v-else-if="cfg.visualizacao === 'area'"
       :data="linhas"
       x="x"
       :series="seriesDaLinha"
       :stacked="resultado.quebras.length > 0"
-      :height="altura"
+      :height="alturaDoGrafico"
       :legend="resultado.quebras.length > 0"
       :format-value="(v: number) => fmt(v, true)"
       :aria-label="titulo"
@@ -253,7 +301,7 @@ function selecionarDoRanking(item: EnChartBarListItem) {
           :arc-width="22"
           :central-label="fmt(total, true)"
           :central-sub-label="t.funcoes[cfg.funcao]"
-          :height="Math.min(altura, 220)"
+          :height="Math.min(alturaDoGrafico, 220)"
           :aria-label="titulo"
           :locale="(t.locale as any)"
         />
@@ -275,7 +323,7 @@ function selecionarDoRanking(item: EnChartBarListItem) {
       </ul>
     </div>
 
-    <ol v-else-if="cfg.visualizacao === 'funil'" class="space-y-1.5 overflow-y-auto" :style="{ maxHeight: `${altura}px` }">
+    <ol v-else-if="cfg.visualizacao === 'funil'" class="space-y-1.5 overflow-y-auto" :style="{ maxHeight: `${alturaDoGrafico}px` }">
       <li v-for="(e, i) in etapas" :key="e.grupo.chave">
         <button
           type="button"
@@ -298,7 +346,7 @@ function selecionarDoRanking(item: EnChartBarListItem) {
       </li>
     </ol>
 
-    <div v-else-if="cfg.visualizacao === 'tabela'" class="overflow-auto" :style="{ maxHeight: `${altura}px` }">
+    <div v-else-if="cfg.visualizacao === 'tabela'" class="overflow-auto" :style="{ maxHeight: `${alturaDoGrafico}px` }">
       <table class="w-full text-sm">
         <thead class="sticky top-0 bg-default">
           <tr class="border-b border-default text-left text-xs text-muted">
@@ -328,25 +376,6 @@ function selecionarDoRanking(item: EnChartBarListItem) {
       </table>
     </div>
 
-    <template #footer>
-      <div v-if="estado === 'pronto'" class="flex flex-wrap items-center gap-1.5">
-        <UTooltip :text="textoDoPeriodo">
-          <UBadge
-            :label="cfg.periodo === 'todo' ? t.painel.todoPeriodo : (cfg.campoDeData === 'created_at' ? rotuloDoPeriodo : t.painel.periodoPor(campoDeData?.name ?? ''))"
-            :icon="cfg.periodo === 'todo' ? 'i-lucide-infinity' : 'i-lucide-calendar'"
-            color="neutral"
-            variant="soft"
-            size="sm"
-          />
-        </UTooltip>
-        <UTooltip v-for="f in resultado.filtrosIgnorados" :key="f" :text="t.painel.filtroNaoSeAplica(f)">
-          <UBadge :label="t.painel.filtroNaoSeAplicaCurto(f)" icon="i-lucide-filter-x" color="warning" variant="soft" size="sm" />
-        </UTooltip>
-        <UTooltip v-if="resultado.multiplo && cfg.visualizacao !== 'numero'" :text="t.painel.multiplo">
-          <UBadge :label="t.painel.multiploCurto" icon="i-lucide-list-checks" color="info" variant="soft" size="sm" />
-        </UTooltip>
-        <UBadge v-if="resultado.emOutros" :label="t.painel.outros(resultado.emOutros)" icon="i-lucide-layers" color="neutral" variant="soft" size="sm" />
-      </div>
-    </template>
+    </div>
   </EnDashboardPanel>
 </template>

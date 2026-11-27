@@ -145,3 +145,13 @@ Copiada de `https://develop.enspace.io/workspaces/teste-ux/pages/aud_paineis` em
 
 **A única proposta na casca:** a entrada **Dashboards** no grupo Membro, ativa e com o selo "Novo", no lugar de
 cada tela do tipo Painéis entrar no menu à mão por Interface > Menus. A trilha segue a entrada nova.
+
+## Rodada 2 · 2026-11-27: o develop de novo
+
+Visitado em 27/11/2026 no workspace de exploração (print `evidencias/24-develop-painel-de-tarefas.jpg`):
+
+- o painel de tarefas mostra os números em cartões; o cartão inteiro é o clique, e o que o número conta aparece como
+  subtítulo, em texto corrido, sem selo;
+- o menu Membro passou a mostrar "Relatórios" (antes, a chave crua "menu.member.reports.label");
+- Tarefas tem os filhos Painel (selo Novo), Agendadas e Rápidas. A proposta leva o Painel de tarefas para dentro de
+  Relatórios, ao lado de Dashboards.

@@ -6,11 +6,14 @@
  *
  * Nome das coisas (achado U9 da pesquisa de UX): a página é o "dashboard"; cada bloco
  * dele é um "painel", como o SDK já chama ("Adicionar painel", "Ocultar painel").
+ * Rodada 2: o painel de número chama "Cartão", como o "Card" do Power BI em português.
  */
 import type { Idioma } from '~/composables/useIdioma'
 import type { Funcao, Granularidade, Operador, Ordem, PresetDePeriodo, Visualizacao } from './agregacao'
+import type { Proposta } from './beni'
 
 type Plural = (n: number) => string
+type Motivo = (campo: string, categoria: string) => string
 
 export interface Textos {
   locale: string
@@ -35,14 +38,14 @@ export interface Textos {
     itens: Record<string, string>
   }
   workspace: string
+  trilhaRelatorios: string
   trilhaDashboards: string
 
   pagina: {
     trocarDashboard: string
     novoDashboard: string
     novoPainel: string
-    personalizar: string
-    concluir: string
+    pedirAoBeni: string
     maisAcoes: string
     editarDashboard: string
     atualizarDados: string
@@ -55,50 +58,97 @@ export interface Textos {
     dadosAtualizados: string
     duplicado: string
     excluido: string
+    arrasteDica: string
+    fecharDica: string
   }
 
-  filtros: {
+  filtro: {
     adicionar: string
-    filtrarPor: string
-    ajuda: string
-    semCampoComum: string
-    emCategorias: Plural
-    buscarValor: string
-    remover: (nome: string) => string
+    ajudaDoDashboard: string
+    buscarCampo: string
+    buscarOpcao: string
+    semCampo: string
+    semOpcao: string
+    operadores: Record<Operador, string>
+    ou: string
+    condicao: string
+    maisAcoes: string
+    excluir: string
+    limparSelecao: string
+    numero: string
     limpar: string
-    selecionados: Plural
-    escolherValores: string
+  }
+
+  filtroDoPainel: {
+    botao: Plural
+    salvos: string
+    nenhum: string
+    editar: string
+    daBarra: string
+    daVisao: string
+    daVisaoAjuda: string
+  }
+
+  visoes: {
+    rotulo: string
+    semVisao: string
+    minhas: string
+    doWorkspace: string
+    salvarNova: string
+    salvar: string
+    salvarAlteracoes: string
+    alterada: string
+    excluir: (nome: string) => string
+    excluida: (nome: string) => string
+    salva: (nome: string) => string
+    atualizada: (nome: string) => string
+    salvarTitulo: string
+    salvarDescricao: string
+    nome: string
+    nomePlaceholder: string
+    nomeErro: string
+    nomeRepetido: string
+    paraQuem: string
+    soParaMim: string
+    soParaMimAjuda: string
+    paraTodos: string
+    paraTodosAjuda: string
+    paraTodosBloqueado: string
+    oQueEntra: string
+    filtrosDoPainel: (painel: string, filtros: string) => string
+    confirmarTitulo: string
+    confirmarDescricao: (nome: string) => string
+    confirmarAviso: string
+    confirmar: string
+    voltar: string
+    cancelar: string
+    salvarBotao: string
   }
 
   painel: {
     menu: { editar: string, verItens: string, duplicar: string, baixarCsv: string, excluir: string }
     todoPeriodo: string
-    periodoPor: (campo: string) => string
-    filtroNaoSeAplica: (nome: string) => string
-    filtroNaoSeAplicaCurto: (nome: string) => string
+    periodoPor: (periodo: string, campo: string) => string
     multiplo: string
     multiploCurto: string
     outros: Plural
     itens: Plural
-    verItens: Plural
     semDadosTitulo: string
     semDadosDescricao: string
     erroTitulo: string
     erroDescricao: string
-    colunaValor: string
     colunaDoTotal: string
     total: string
     daEtapaAnterior: (p: string) => string
     primeiraEtapa: string
-    permissao: string
-    comoCalculamos: (frase: string, periodo: string, condicoes: number) => string
-    condicoes: Plural
     csvBaixado: string
-    clique: string
     excluido: string
     duplicado: string
     desfazer: string
     restaurado: string
+    arrastar: string
+    ajuda: string
+    acoes: string
   }
 
   frase: (f: Funcao, categoria: string, medida?: string, agrupar?: string, quebra?: string) => string
@@ -110,47 +160,43 @@ export interface Textos {
     tituloEditar: string
     descricao: string
     previa: string
-    secaoDados: string
-    secaoVisualizacao: string
-    secaoIdentificacao: string
+    previaSemEixo: (eixo: string) => string
+    passos: { fonte: string, visualizacao: string, campos: string, filtros: string, periodo: string, ordem: string, titulo: string }
     categoria: string
     buscarCategoria: string
     buscarCampo: string
-    calcular: string
-    campoDaMedida: string
+    visualizacao: string
+    visualizacoes: Record<Visualizacao, string>
+    ajudaVisualizacao: Record<Visualizacao, string>
+    tipoSemCampo: (eixo: string) => string
+    eixos: Record<Visualizacao, string>
+    ajudaDoEixo: Record<Visualizacao, string>
+    eixoErro: string
+    escolhaCampo: string
+    granularidade: string
+    granularidades: Record<Granularidade, string>
+    valor: string
+    valorAjudaCartao: string
+    campoDoValor: string
     medidaPlaceholder: string
     medidaErro: string
     medidaVazia: string
     virtual: string
-    agruparPor: string
-    agruparNenhum: string
-    agruparAjuda: string
-    textoNaoAgrupa: string
-    granularidade: string
-    granularidades: Record<Granularidade, string>
-    quebrarPor: string
-    quebrarNenhum: string
-    quebrarAjuda: string
+    legenda: string
+    legendaNenhuma: string
+    legendaAjuda: string
+    colunas: string
+    colunasAjuda: string
     multiploAviso: string
     relacaoAviso: (categoria: string) => string
-    condicoes: string
-    condicoesVazio: string
-    adicionarCondicao: string
-    juncao: { e: string, ou: string }
-    operadores: Record<Operador, string>
-    valorPlaceholder: string
-    removerCondicao: string
+    filtrosAjuda: string
     periodo: string
     periodoDashboard: string
+    periodoDashboardAjuda: (periodo: string) => string
     periodoTodo: string
     periodoTodoAjuda: string
     campoDeData: string
-    visualizacao: string
-    visualizacoes: Record<Visualizacao, string>
-    ajudaVisualizacao: Record<Visualizacao, string>
-    sugerido: string
-    visualizacaoAjuda: string
-    soNumero: string
+    campoDeDataAjuda: string
     ordem: string
     ordens: Record<Ordem, string>
     limite: string
@@ -160,6 +206,10 @@ export interface Textos {
     mostrarValores: string
     titulo: string
     tituloAjuda: string
+    descricaoDoPainel: string
+    descricaoAjuda: string
+    descricaoPlaceholder: string
+    faltaAlgo: string
     cancelar: string
     salvar: string
     adicionar: string
@@ -201,9 +251,78 @@ export interface Textos {
   estados: {
     vazioTitulo: string
     vazioDescricao: string
+    vazioDescricaoComBeni: string
+    vazioLeitor: string
     semAcessoTitulo: string
     semAcessoDescricao: string
-    tentarNovamente: string
+  }
+
+  inicial: {
+    titulo: string
+    descricaoA: string
+    descricaoB: string
+    comBeni: string
+    doZero: string
+    criar: string
+    leTitulo: string
+    leTexto: string
+    perguntaTitulo: string
+    perguntaTexto: string
+    passos: string[]
+    semCategoriasTitulo: string
+    semCategoriasDescricao: string
+    criarCategoria: string
+    criarCategoriaAviso: string
+    leitorTitulo: string
+    leitorDescricao: string
+  }
+
+  beni: {
+    titulo: string
+    passo: (i: number, n: number) => string
+    cancelar: string
+    voltar: string
+    ola: string
+    limite: string
+    categorias: string
+    categoriasErro: string
+    resumoDaCategoria: (campos: number, itens: number) => string
+    pedido: string
+    pedidoAjuda: string
+    pedidoPlaceholder: string
+    ler: string
+    lendo: string
+    leitura: (campos: number, itens: number, selecoes: number, numeros: number, datas: number) => string
+    confirmar: string
+    palpite: string
+    perguntaMedida: (campo: string) => string
+    perguntaData: (categoria: string) => string
+    perguntaEtapas: (campo: string, opcoes: string) => string
+    usos: { soma: string, media: string, ignorar: string }
+    etapasSim: string
+    etapasNao: string
+    verPropostas: string
+    propostas: Plural
+    nomeDoDashboard: string
+    depois: string
+    criar: Plural
+    e: string
+    motivos: Record<Proposta['motivo']['tipo'], Motivo>
+    criado: string
+    criadoDescricao: string
+  }
+
+  pedir: {
+    titulo: string
+    descricao: string
+    pedido: string
+    pedidoErro: string
+    placeholder: string
+    pensando: string
+    sugestoes: string
+    sugerir: string
+    adicionar: Plural
+    adicionados: Plural
   }
 
   rotulos: { vazio: string, outros: string, sim: string, nao: string }
@@ -215,6 +334,8 @@ const listaPt = (l: string[]) => l.length <= 1 ? l.join('') : `${l.slice(0, -1).
 const listaEn = (l: string[]) => l.length <= 1 ? l.join('') : `${l.slice(0, -1).join(', ')} and ${l[l.length - 1]}`
 const listaEs = (l: string[]) => l.length <= 1 ? l.join('') : `${l.slice(0, -1).join(', ')} y ${l[l.length - 1]}`
 
+/* ================================== pt-BR ================================== */
+
 const pt: Textos = {
   locale: 'pt-BR',
   casca: {
@@ -224,21 +345,23 @@ const pt: Textos = {
     notificacoes: 'Notificações', idioma: 'Idioma', tema: 'Tema', conta: 'Sua conta', novo: 'Novo',
     itens: {
       inicio: 'Início', spaceflows: 'Spaceflows', categorias: 'Categorias', tarefas: 'Tarefas',
-      agenda: 'Agenda', dashboards: 'Dashboards', relatorios: 'menu.member.reports.label', knowledge: 'Knowledge',
+      agendadas: 'Agendadas', rapidas: 'Rápidas',
+      agenda: 'Agenda', relatorios: 'Relatórios', relatoriosExportados: 'Relatórios exportados',
+      painelDeTarefas: 'Painel de tarefas', dashboards: 'Dashboards', knowledge: 'Knowledge',
       visaoGeral: 'Visão Geral', sistema: 'Sistema', estrutura: 'Estrutura', gestaoDeMembros: 'Gestão de Membros',
       interface: 'Interface', emails: 'E-mails', integracoes: 'Integrações', agentesDeIa: 'Agentes de IA',
       logs: 'Logs', releases: 'Releases', documentacao: 'Documentação',
     },
   },
   workspace: 'teste ux 2',
+  trilhaRelatorios: 'Relatórios',
   trilhaDashboards: 'Dashboards',
 
   pagina: {
     trocarDashboard: 'Trocar de dashboard',
     novoDashboard: 'Novo dashboard',
     novoPainel: 'Novo painel',
-    personalizar: 'Personalizar',
-    concluir: 'Concluir',
+    pedirAoBeni: 'Pedir ao BENI',
     maisAcoes: 'Mais ações do dashboard',
     editarDashboard: 'Editar dashboard',
     atualizarDados: 'Atualizar dados',
@@ -251,50 +374,97 @@ const pt: Textos = {
     dadosAtualizados: 'Dados atualizados',
     duplicado: 'Dashboard duplicado',
     excluido: 'Dashboard excluído',
+    arrasteDica: 'Para mover um painel, arraste pela alça no topo. Para mudar o tamanho, arraste o canto inferior direito.',
+    fecharDica: 'Fechar a dica',
   },
 
-  filtros: {
+  filtro: {
     adicionar: 'Filtro',
-    filtrarPor: 'Filtrar o dashboard por',
-    ajuda: 'Campos que existem em mais de uma categoria deste dashboard.',
-    semCampoComum: 'As categorias deste dashboard não têm campo em comum.',
-    emCategorias: n => n === 1 ? 'em 1 categoria' : `em ${n} categorias`,
-    buscarValor: 'Buscar valor',
-    remover: n => `Remover o filtro ${n}`,
+    ajudaDoDashboard: 'Cada campo pertence a 1 categoria. O filtro vale nos painéis dessa categoria.',
+    buscarCampo: 'Buscar campo',
+    buscarOpcao: 'Buscar opção',
+    semCampo: 'Nenhum campo encontrado.',
+    semOpcao: 'Nenhuma opção encontrada.',
+    operadores: { em: 'é', foraDe: 'não é', maior: 'maior que', menor: 'menor que', preenchido: 'está preenchido', vazio: 'está vazio' },
+    ou: ' ou ',
+    condicao: 'Condição do filtro',
+    maisAcoes: 'Mais ações do filtro',
+    excluir: 'Excluir filtro',
+    limparSelecao: 'Limpar seleção',
+    numero: 'Valor',
     limpar: 'Limpar filtros',
-    selecionados: n => n === 1 ? '1 selecionado' : `${n} selecionados`,
-    escolherValores: 'Escolha os valores',
+  },
+
+  filtroDoPainel: {
+    botao: n => n === 0 ? 'Filtros do painel' : n === 1 ? 'Filtros do painel: 1 ativo' : `Filtros do painel: ${n} ativos`,
+    salvos: 'Filtros salvos no painel',
+    nenhum: 'Nenhum. O painel conta todos os itens da categoria.',
+    editar: 'Editar painel',
+    daBarra: 'Filtros do dashboard que valem aqui',
+    daVisao: 'Filtros só nesta visão',
+    daVisaoAjuda: 'Somam aos outros filtros, sem editar o painel. Para guardar, salve a visão.',
+  },
+
+  visoes: {
+    rotulo: 'Visões',
+    semVisao: 'Sem visão salva',
+    minhas: 'Minhas visões',
+    doWorkspace: 'Visões do workspace',
+    salvarNova: 'Salvar como nova visão',
+    salvar: 'Salvar visão',
+    salvarAlteracoes: 'Salvar alterações',
+    alterada: '(alterada)',
+    excluir: n => `Excluir a visão "${n}"`,
+    excluida: n => `Visão "${n}" excluída`,
+    salva: n => `Visão "${n}" salva`,
+    atualizada: n => `Visão "${n}" atualizada`,
+    salvarTitulo: 'Salvar visão',
+    salvarDescricao: 'Guarde o período e os filtros com um nome, para voltar ao mesmo recorte depois.',
+    nome: 'Nome da visão',
+    nomePlaceholder: 'Ex.: Unidade São Paulo, este trimestre',
+    nomeErro: 'Dê um nome à visão.',
+    nomeRepetido: 'Já existe uma visão com esse nome.',
+    paraQuem: 'Para quem',
+    soParaMim: 'Só para mim',
+    soParaMimAjuda: 'Aparece só na sua lista de visões.',
+    paraTodos: 'Todo o workspace',
+    paraTodosAjuda: 'Aparece para todos que veem este dashboard.',
+    paraTodosBloqueado: 'Só owner e full salvam visão para o workspace.',
+    oQueEntra: 'O que a visão guarda',
+    filtrosDoPainel: (p, f) => `No painel ${p}: ${f}`,
+    confirmarTitulo: 'Salvar para todo o workspace?',
+    confirmarDescricao: n => `A visão "${n}" aparece para todos que veem este dashboard.`,
+    confirmarAviso: 'Quem vê o dashboard passa a ver esta visão na lista. Só owner e full podem mudar ou excluir.',
+    confirmar: 'Salvar para todos',
+    voltar: 'Voltar',
+    cancelar: 'Cancelar',
+    salvarBotao: 'Salvar visão',
   },
 
   painel: {
     menu: { editar: 'Editar painel', verItens: 'Ver os itens', duplicar: 'Duplicar painel', baixarCsv: 'Baixar CSV', excluir: 'Excluir painel' },
     todoPeriodo: 'Todo o período',
-    periodoPor: c => `Período por ${c}`,
-    filtroNaoSeAplica: n => `O filtro ${n} não vale neste painel: a categoria não tem esse campo.`,
-    filtroNaoSeAplicaCurto: n => `Sem o filtro ${n}`,
+    periodoPor: (p, c) => `${p}, por ${c}`,
     multiplo: 'Um item pode ter mais de uma opção marcada e conta em cada uma. A soma dos grupos passa do total de itens.',
     multiploCurto: 'Conta em cada opção',
     outros: n => n === 1 ? 'Outros junta 1 grupo' : `Outros junta ${n} grupos`,
     itens: n => n === 1 ? '1 item' : `${n.toLocaleString('pt-BR')} itens`,
-    verItens: n => n === 1 ? 'Ver 1 item' : `Ver ${n.toLocaleString('pt-BR')} itens`,
     semDadosTitulo: 'Nenhum item no período',
     semDadosDescricao: 'Mude o período do topo ou os filtros do painel.',
     erroTitulo: 'Este painel não carregou',
     erroDescricao: 'Os outros painéis continuam valendo.',
-    colunaValor: 'Valor',
     colunaDoTotal: 'Do total',
     total: 'Total',
     daEtapaAnterior: p => `${p} seguiram da etapa anterior`,
     primeiraEtapa: 'Primeira etapa',
-    permissao: 'Conta só os itens que você pode ver. Quem vê outros itens pode ver outro número.',
-    comoCalculamos: (f, p, c) => `${f}. ${p}.${c ? ` Com ${c === 1 ? '1 condição' : `${c} condições`} do painel.` : ''}`,
-    condicoes: n => n === 1 ? '1 condição' : `${n} condições`,
     csvBaixado: 'CSV baixado',
-    clique: 'Clique numa barra para ver os itens.',
     excluido: 'Painel excluído',
     duplicado: 'Painel duplicado',
     desfazer: 'Desfazer',
     restaurado: 'Painel restaurado',
+    arrastar: 'Arrastar o painel',
+    ajuda: 'Sobre este painel',
+    acoes: 'Ações do painel',
   },
 
   frase: (f, cat, medida, agrupar, quebra) => {
@@ -315,67 +485,84 @@ const pt: Textos = {
   construtor: {
     tituloNovo: 'Novo painel',
     tituloEditar: 'Editar painel',
-    descricao: 'Escolha o dado primeiro. O tipo de gráfico se ajusta ao que você escolher.',
+    descricao: 'Escolha a categoria, o tipo de visualização e os campos. A prévia mostra o resultado com os itens de agora.',
     previa: 'Prévia',
-    secaoDados: 'Dados',
-    secaoVisualizacao: 'Visualização',
-    secaoIdentificacao: 'Identificação',
+    previaSemEixo: e => `Escolha o campo de ${e.toLowerCase()} para ver a prévia.`,
+    passos: {
+      fonte: 'Fonte de dados',
+      visualizacao: 'Visualização',
+      campos: 'Campos',
+      filtros: 'Filtros do painel',
+      periodo: 'Período',
+      ordem: 'Ordem e limite',
+      titulo: 'Título e descrição',
+    },
     categoria: 'Categoria',
     buscarCategoria: 'Buscar categoria',
     buscarCampo: 'Buscar campo',
-    calcular: 'Calcular',
-    campoDaMedida: 'Campo',
-    medidaPlaceholder: 'Escolha um campo de número',
-    medidaErro: 'Escolha o campo que a função calcula.',
-    medidaVazia: 'Esta categoria não tem campo de número, de moeda nem campo virtual.',
-    virtual: 'Campo virtual',
-    agruparPor: 'Agrupar por',
-    agruparNenhum: 'Não agrupar (um número só)',
-    agruparAjuda: 'Cada valor do campo vira uma barra, uma fatia ou uma linha da tabela.',
-    textoNaoAgrupa: 'Texto livre não agrupa',
+    visualizacao: 'Tipo de visualização',
+    visualizacoes: { numero: 'Cartão', barras: 'Colunas', barrasHorizontais: 'Barras', linha: 'Linha', area: 'Área', rosca: 'Rosca', funil: 'Funil', tabela: 'Tabela' },
+    ajudaVisualizacao: {
+      numero: 'Um número em destaque, como os cartões do painel de tarefas. Clicar no cartão abre os itens.',
+      barras: 'Compara grupos em colunas. Com legenda, as colunas ficam empilhadas.',
+      barrasHorizontais: 'Ranking em barras deitadas. Serve para nomes longos e muitos grupos.',
+      linha: 'Evolução no tempo, pelo campo de data.',
+      area: 'Evolução no tempo, com as partes empilhadas.',
+      rosca: 'Parte do todo, para até 8 grupos.',
+      funil: 'Etapas na ordem das opções. Cada etapa conta os itens que chegaram até ela.',
+      tabela: 'Os números exatos de cada grupo, em linhas e colunas.',
+    },
+    tipoSemCampo: e => `Esta categoria não tem campo que sirva de ${e.toLowerCase()}.`,
+    eixos: { numero: 'Valor', barras: 'Eixo', barrasHorizontais: 'Eixo', linha: 'Eixo de tempo', area: 'Eixo de tempo', rosca: 'Fatias', funil: 'Etapas', tabela: 'Linhas' },
+    ajudaDoEixo: {
+      numero: '',
+      barras: 'Cada opção do campo vira uma coluna.',
+      barrasHorizontais: 'Cada opção do campo vira uma barra.',
+      linha: 'O campo de data que forma a linha do tempo.',
+      area: 'O campo de data que forma a linha do tempo.',
+      rosca: 'Cada opção do campo vira uma fatia. Servem campos com até 8 opções.',
+      funil: 'Cada opção vira uma etapa, na ordem cadastrada no campo. Servem campos de seleção simples.',
+      tabela: 'Cada opção do campo vira uma linha.',
+    },
+    eixoErro: 'Escolha o campo.',
+    escolhaCampo: 'Escolha um campo',
     granularidade: 'Agrupar as datas por',
     granularidades: { dia: 'Dia', semana: 'Semana', mes: 'Mês', trimestre: 'Trimestre', ano: 'Ano' },
-    quebrarPor: 'Dividir por (opcional)',
-    quebrarNenhum: 'Não dividir',
-    quebrarAjuda: 'Divide cada grupo pelas opções de outro campo, em barras empilhadas.',
+    valor: 'Valor',
+    valorAjudaCartao: 'O número que o cartão mostra.',
+    campoDoValor: 'Campo do valor',
+    medidaPlaceholder: 'Escolha um campo de número',
+    medidaErro: 'Escolha o campo que o cálculo usa.',
+    medidaVazia: 'Esta categoria não tem campo de número, de moeda nem campo virtual.',
+    virtual: 'Campo virtual',
+    legenda: 'Legenda (opcional)',
+    legendaNenhuma: 'Sem legenda',
+    legendaAjuda: 'Separa cada coluna, barra ou linha em partes, uma cor para cada opção de outro campo.',
+    colunas: 'Colunas (opcional)',
+    colunasAjuda: 'Cada opção de outro campo vira uma coluna da tabela.',
     multiploAviso: 'Múltipla seleção: o item conta em cada opção marcada.',
     relacaoAviso: c => `Relação: agrupa pelo item de ${c} ligado a cada item.`,
-    condicoes: 'Filtros do painel',
-    condicoesVazio: 'Sem filtro, o painel conta todos os itens da categoria.',
-    adicionarCondicao: 'Adicionar condição',
-    juncao: { e: 'Todas as condições', ou: 'Qualquer condição' },
-    operadores: { igual: 'é', diferente: 'não é', maior: 'maior que', menor: 'menor que', preenchido: 'está preenchido', vazio: 'está vazio' },
-    valorPlaceholder: 'Valor',
-    removerCondicao: 'Remover condição',
-    periodo: 'Período',
+    filtrosAjuda: 'Salvos no painel: valem para todos que veem o dashboard. Sem filtro, o painel conta todos os itens da categoria.',
+    periodo: 'Período do painel',
     periodoDashboard: 'Seguir o período do dashboard',
+    periodoDashboardAjuda: p => `Muda junto com o período do topo. Agora: ${p}.`,
     periodoTodo: 'Todo o período',
-    periodoTodoAjuda: 'Para o que existe agora, como os contratos em negociação.',
+    periodoTodoAjuda: 'Ignora o período do topo. Serve para o que existe agora, como os contratos em negociação.',
     campoDeData: 'Data que o período lê',
-    visualizacao: 'Tipo de gráfico',
-    visualizacoes: { numero: 'Número', barras: 'Barras', barrasHorizontais: 'Barras horizontais', linha: 'Linha', area: 'Área', rosca: 'Rosca', funil: 'Funil', tabela: 'Tabela' },
-    ajudaVisualizacao: {
-      numero: 'Um número em destaque, sem agrupamento.',
-      barras: 'Compara grupos. Com divisão, as barras ficam empilhadas.',
-      barrasHorizontais: 'Ranking. Bom para nomes longos e muitos grupos.',
-      linha: 'Evolução no tempo.',
-      area: 'Evolução no tempo, com as partes empilhadas.',
-      rosca: 'Parte do todo, para até 6 grupos.',
-      funil: 'Etapas na ordem das opções. Cada etapa conta os itens que chegaram até ela: os que estão nela e nas seguintes.',
-      tabela: 'Os números exatos de cada grupo.',
-    },
-    sugerido: 'Sugerido',
-    visualizacaoAjuda: 'A lista mostra só os tipos que servem para o dado escolhido.',
-    soNumero: 'Para ver gráficos, escolha um campo em Agrupar por.',
+    campoDeDataAjuda: 'O item entra no período por esta data.',
     ordem: 'Ordem',
     ordens: { natural: 'Ordem das opções', valorDesc: 'Maior valor primeiro', valorAsc: 'Menor valor primeiro', rotulo: 'Ordem alfabética' },
     limite: 'Mostrar no máximo',
     limites: n => `${n} grupos`,
     semLimite: 'Todos os grupos',
     limiteAjuda: 'O resto entra em Outros.',
-    mostrarValores: 'Mostrar o valor em cada barra',
-    titulo: 'Título',
+    mostrarValores: 'Mostrar o valor em cada coluna',
+    titulo: 'Título (opcional)',
     tituloAjuda: 'Vazio, o título é a frase da configuração.',
+    descricaoDoPainel: 'Descrição (opcional)',
+    descricaoAjuda: 'Aparece no ícone de ajuda do painel. Sem descrição, o painel não mostra o ícone.',
+    descricaoPlaceholder: 'Ex.: Soma o valor dos contratos com data de assinatura no período.',
+    faltaAlgo: 'Preencha os campos obrigatórios.',
     cancelar: 'Cancelar',
     salvar: 'Salvar painel',
     adicionar: 'Adicionar ao dashboard',
@@ -417,15 +604,103 @@ const pt: Textos = {
   estados: {
     vazioTitulo: 'Este dashboard ainda não tem painéis',
     vazioDescricao: 'Um painel conta, soma ou compara os itens de uma categoria. Comece pelo dado que você quer acompanhar.',
+    vazioDescricaoComBeni: 'Um painel conta, soma ou compara os itens de uma categoria. Monte o primeiro ou descreva ao BENI o que você quer ver.',
+    vazioLeitor: 'Quem administra o dashboard ainda não adicionou painéis.',
     semAcessoTitulo: 'Você não tem acesso a este dashboard',
     semAcessoDescricao: 'Peça acesso a quem administra o workspace.',
-    tentarNovamente: 'Tentar novamente',
+  },
+
+  inicial: {
+    titulo: 'Monte o primeiro dashboard',
+    descricaoA: 'Um dashboard junta números e gráficos dos itens das suas categorias. O BENI lê as categorias e propõe os primeiros painéis; você confirma o que cada campo significa antes de criar.',
+    descricaoB: 'Um dashboard junta painéis com números e gráficos dos itens das suas categorias. Cada painel conta, soma ou compara um campo.',
+    comBeni: 'Construir com o BENI',
+    doZero: 'Começar do zero',
+    criar: 'Criar dashboard',
+    leTitulo: 'O que o BENI lê',
+    leTexto: 'Os campos de cada categoria, o tipo de cada um e quantos itens existem.',
+    perguntaTitulo: 'O que o BENI pergunta',
+    perguntaTexto: 'O que o nome do campo não diz: se um número se soma ou se tira a média, e qual data vale.',
+    passos: [
+      'Dê um nome ao dashboard e escolha quem vê.',
+      'Adicione painéis: a categoria, o tipo de visualização e os campos.',
+      'Arraste e redimensione os painéis até o dashboard ficar do seu jeito.',
+    ],
+    semCategoriasTitulo: 'Ainda não há categorias',
+    semCategoriasDescricao: 'Os painéis são montados com os campos das categorias. Crie uma categoria e cadastre itens para montar o primeiro dashboard.',
+    criarCategoria: 'Criar categoria',
+    criarCategoriaAviso: 'No produto, abre Estrutura > Categorias.',
+    leitorTitulo: 'Nenhum dashboard compartilhado com você',
+    leitorDescricao: 'Quando alguém compartilhar um dashboard com o seu grupo, ele aparece aqui.',
+  },
+
+  beni: {
+    titulo: 'Construir com o BENI',
+    passo: (i, n) => `Passo ${i} de ${n}`,
+    cancelar: 'Cancelar',
+    voltar: 'Voltar',
+    ola: 'Eu leio as categorias que você escolher e proponho os primeiros painéis.',
+    limite: 'Eu sei o tipo de cada campo, mas não o que ele significa. Antes de propor, pergunto o que o nome não diz.',
+    categorias: 'Categorias do dashboard',
+    categoriasErro: 'Escolha pelo menos 1 categoria.',
+    resumoDaCategoria: (c, i) => `${c} campos · ${i.toLocaleString('pt-BR')} itens`,
+    pedido: 'O que você quer acompanhar? (opcional)',
+    pedidoAjuda: 'Nome de campo citado aqui entra nos primeiros painéis.',
+    pedidoPlaceholder: 'Ex.: valor assinado por mês e contratos por unidade',
+    ler: 'Ler as categorias',
+    lendo: 'Lendo os campos e os itens...',
+    leitura: (c, i, s, n, d) => `${c} campos (${s} de seleção, ${n} de número, ${d} de data) e ${i.toLocaleString('pt-BR')} itens`,
+    confirmar: 'Confirme o que eu não consigo saber pelo nome do campo. Já deixei um palpite em cada um.',
+    palpite: 'Palpite do BENI',
+    perguntaMedida: c => `Como usar "${c}" nos painéis?`,
+    perguntaData: c => `Qual data marca o fato principal de ${c}?`,
+    perguntaEtapas: (c, o) => `As opções de "${c}" (${o}...) são etapas em ordem?`,
+    usos: {
+      soma: 'Somar: é dinheiro ou quantidade',
+      media: 'Tirar a média: é nota, prazo ou taxa',
+      ignorar: 'Não usar no dashboard',
+    },
+    etapasSim: 'Sim: dá para montar um funil',
+    etapasNao: 'Não: são categorias sem ordem',
+    verPropostas: 'Ver os painéis sugeridos',
+    propostas: n => n === 1 ? 'Proponho 1 painel. Tire o que não fizer sentido.' : `Proponho ${n} painéis. Tire o que não fizer sentido.`,
+    nomeDoDashboard: 'Nome do dashboard',
+    depois: 'Depois de criar, cada painel se edita, se arrasta e se exclui como qualquer outro.',
+    criar: n => n === 1 ? 'Criar dashboard com 1 painel' : `Criar dashboard com ${n} painéis`,
+    e: ' e ',
+    motivos: {
+      contagem: (_c, cat) => `Quantos itens de ${cat} existem no período.`,
+      soma: c => `Você disse que "${c}" se soma.`,
+      media: c => `Você disse que "${c}" é nota, prazo ou taxa.`,
+      tempo: c => `"${c}" é data: a linha mostra a evolução mês a mês.`,
+      distribuicao: c => `"${c}" é seleção: cada coluna é uma opção.`,
+      etapas: c => `Você disse que "${c}" segue etapas em ordem.`,
+      relacao: c => `"${c}" liga a outra categoria: o ranking mostra os que mais aparecem.`,
+      multiplo: c => `"${c}" aceita mais de uma opção: o item conta em cada uma.`,
+    },
+    criado: 'Dashboard criado com o BENI',
+    criadoDescricao: 'Confira os painéis: o BENI pode ter entendido errado o sentido de algum campo.',
+  },
+
+  pedir: {
+    titulo: 'Pedir ao BENI',
+    descricao: 'Descreva o que você quer ver. O BENI sugere até 3 painéis, e você escolhe quais entram.',
+    pedido: 'O que você quer ver?',
+    pedidoErro: 'Descreva o painel que você quer.',
+    placeholder: 'Ex.: soma do valor por unidade',
+    pensando: 'O BENI está montando as sugestões...',
+    sugestoes: 'Sugestões do BENI',
+    sugerir: 'Sugerir painéis',
+    adicionar: n => n === 1 ? 'Adicionar 1 painel' : `Adicionar ${n} painéis`,
+    adicionados: n => n === 1 ? '1 painel adicionado' : `${n} painéis adicionados`,
   },
 
   rotulos: { vazio: 'Sem valor', outros: 'Outros', sim: 'Sim', nao: 'Não' },
   periodos: { '7d': 'Últimos 7 dias', '30d': 'Últimos 30 dias', '90d': 'Últimos 90 dias', 'month': 'Este mês', 'quarter': 'Este trimestre', 'year': 'Este ano' },
   periodoPersonalizado: (de, ate) => `${de} a ${ate}`,
 }
+
+/* =================================== en ==================================== */
 
 const en: Textos = {
   locale: 'en',
@@ -436,21 +711,23 @@ const en: Textos = {
     notificacoes: 'Notifications', idioma: 'Language', tema: 'Theme', conta: 'Your account', novo: 'New',
     itens: {
       inicio: 'Home', spaceflows: 'Spaceflows', categorias: 'Categories', tarefas: 'Tasks',
-      agenda: 'Schedule', dashboards: 'Dashboards', relatorios: 'menu.member.reports.label', knowledge: 'Knowledge',
+      agendadas: 'Scheduled', rapidas: 'Quick',
+      agenda: 'Schedule', relatorios: 'Reports', relatoriosExportados: 'Exported reports',
+      painelDeTarefas: 'Task dashboard', dashboards: 'Dashboards', knowledge: 'Knowledge',
       visaoGeral: 'Overview', sistema: 'System', estrutura: 'Structure', gestaoDeMembros: 'Member management',
       interface: 'Interface', emails: 'Emails', integracoes: 'Integrations', agentesDeIa: 'AI agents',
       logs: 'Logs', releases: 'Releases', documentacao: 'Documentation',
     },
   },
   workspace: 'teste ux 2',
+  trilhaRelatorios: 'Reports',
   trilhaDashboards: 'Dashboards',
 
   pagina: {
     trocarDashboard: 'Switch dashboard',
     novoDashboard: 'New dashboard',
     novoPainel: 'New panel',
-    personalizar: 'Customize',
-    concluir: 'Done',
+    pedirAoBeni: 'Ask BENI',
     maisAcoes: 'More dashboard actions',
     editarDashboard: 'Edit dashboard',
     atualizarDados: 'Refresh data',
@@ -463,50 +740,97 @@ const en: Textos = {
     dadosAtualizados: 'Data refreshed',
     duplicado: 'Dashboard duplicated',
     excluido: 'Dashboard deleted',
+    arrasteDica: 'To move a panel, drag it by the handle at the top. To resize it, drag the bottom right corner.',
+    fecharDica: 'Close the tip',
   },
 
-  filtros: {
+  filtro: {
     adicionar: 'Filter',
-    filtrarPor: 'Filter the dashboard by',
-    ajuda: 'Fields that exist in more than one category of this dashboard.',
-    semCampoComum: 'The categories of this dashboard have no field in common.',
-    emCategorias: n => n === 1 ? 'in 1 category' : `in ${n} categories`,
-    buscarValor: 'Search value',
-    remover: n => `Remove the ${n} filter`,
+    ajudaDoDashboard: 'Each field belongs to 1 category. The filter applies to the panels of that category.',
+    buscarCampo: 'Search field',
+    buscarOpcao: 'Search option',
+    semCampo: 'No field found.',
+    semOpcao: 'No option found.',
+    operadores: { em: 'is', foraDe: 'is not', maior: 'greater than', menor: 'less than', preenchido: 'is filled', vazio: 'is empty' },
+    ou: ' or ',
+    condicao: 'Filter condition',
+    maisAcoes: 'More filter actions',
+    excluir: 'Delete filter',
+    limparSelecao: 'Clear selection',
+    numero: 'Value',
     limpar: 'Clear filters',
-    selecionados: n => `${n} selected`,
-    escolherValores: 'Choose the values',
+  },
+
+  filtroDoPainel: {
+    botao: n => n === 0 ? 'Panel filters' : n === 1 ? 'Panel filters: 1 active' : `Panel filters: ${n} active`,
+    salvos: 'Filters saved in the panel',
+    nenhum: 'None. The panel counts all items of the category.',
+    editar: 'Edit panel',
+    daBarra: 'Dashboard filters that apply here',
+    daVisao: 'Filters for this view only',
+    daVisaoAjuda: 'They add to the other filters without editing the panel. To keep them, save the view.',
+  },
+
+  visoes: {
+    rotulo: 'Views',
+    semVisao: 'No saved view',
+    minhas: 'My views',
+    doWorkspace: 'Workspace views',
+    salvarNova: 'Save as a new view',
+    salvar: 'Save view',
+    salvarAlteracoes: 'Save changes',
+    alterada: '(changed)',
+    excluir: n => `Delete the view "${n}"`,
+    excluida: n => `View "${n}" deleted`,
+    salva: n => `View "${n}" saved`,
+    atualizada: n => `View "${n}" updated`,
+    salvarTitulo: 'Save view',
+    salvarDescricao: 'Keep the period and the filters under a name, to return to the same slice later.',
+    nome: 'View name',
+    nomePlaceholder: 'E.g.: São Paulo unit, this quarter',
+    nomeErro: 'Give the view a name.',
+    nomeRepetido: 'A view with this name already exists.',
+    paraQuem: 'For whom',
+    soParaMim: 'Only for me',
+    soParaMimAjuda: 'Appears only in your list of views.',
+    paraTodos: 'The whole workspace',
+    paraTodosAjuda: 'Appears for everyone who sees this dashboard.',
+    paraTodosBloqueado: 'Only owner and full users save views for the workspace.',
+    oQueEntra: 'What the view keeps',
+    filtrosDoPainel: (p, f) => `In the ${p} panel: ${f}`,
+    confirmarTitulo: 'Save for the whole workspace?',
+    confirmarDescricao: n => `The view "${n}" appears for everyone who sees this dashboard.`,
+    confirmarAviso: 'Everyone who sees the dashboard sees this view in the list. Only owner and full users can change or delete it.',
+    confirmar: 'Save for everyone',
+    voltar: 'Back',
+    cancelar: 'Cancel',
+    salvarBotao: 'Save view',
   },
 
   painel: {
     menu: { editar: 'Edit panel', verItens: 'View the items', duplicar: 'Duplicate panel', baixarCsv: 'Download CSV', excluir: 'Delete panel' },
     todoPeriodo: 'All time',
-    periodoPor: c => `Period by ${c}`,
-    filtroNaoSeAplica: n => `The ${n} filter does not apply to this panel: the category does not have this field.`,
-    filtroNaoSeAplicaCurto: n => `Without the ${n} filter`,
+    periodoPor: (p, c) => `${p}, by ${c}`,
     multiplo: 'An item can have more than one option checked and counts in each one. The sum of the groups exceeds the total of items.',
     multiploCurto: 'Counts in each option',
     outros: n => n === 1 ? 'Others groups 1 group' : `Others groups ${n} groups`,
     itens: n => n === 1 ? '1 item' : `${n.toLocaleString('en')} items`,
-    verItens: n => n === 1 ? 'View 1 item' : `View ${n.toLocaleString('en')} items`,
     semDadosTitulo: 'No items in the period',
     semDadosDescricao: 'Change the period at the top or the panel filters.',
     erroTitulo: 'This panel did not load',
     erroDescricao: 'The other panels are still valid.',
-    colunaValor: 'Value',
     colunaDoTotal: 'Of total',
     total: 'Total',
     daEtapaAnterior: p => `${p} moved on from the previous stage`,
     primeiraEtapa: 'First stage',
-    permissao: 'Counts only the items you can see. People who see other items may see another number.',
-    comoCalculamos: (f, p, c) => `${f}. ${p}.${c ? ` With ${c === 1 ? '1 panel condition' : `${c} panel conditions`}.` : ''}`,
-    condicoes: n => n === 1 ? '1 condition' : `${n} conditions`,
     csvBaixado: 'CSV downloaded',
-    clique: 'Click a bar to view the items.',
     excluido: 'Panel deleted',
     duplicado: 'Panel duplicated',
     desfazer: 'Undo',
     restaurado: 'Panel restored',
+    arrastar: 'Drag the panel',
+    ajuda: 'About this panel',
+    acoes: 'Panel actions',
   },
 
   frase: (f, cat, medida, agrupar, quebra) => {
@@ -527,67 +851,84 @@ const en: Textos = {
   construtor: {
     tituloNovo: 'New panel',
     tituloEditar: 'Edit panel',
-    descricao: 'Choose the data first. The chart type adjusts to what you choose.',
+    descricao: 'Choose the category, the visualization type and the fields. The preview shows the result with the current items.',
     previa: 'Preview',
-    secaoDados: 'Data',
-    secaoVisualizacao: 'Visualization',
-    secaoIdentificacao: 'Identification',
+    previaSemEixo: e => `Choose the ${e.toLowerCase()} field to see the preview.`,
+    passos: {
+      fonte: 'Data source',
+      visualizacao: 'Visualization',
+      campos: 'Fields',
+      filtros: 'Panel filters',
+      periodo: 'Period',
+      ordem: 'Order and limit',
+      titulo: 'Title and description',
+    },
     categoria: 'Category',
     buscarCategoria: 'Search category',
     buscarCampo: 'Search field',
-    calcular: 'Calculate',
-    campoDaMedida: 'Field',
-    medidaPlaceholder: 'Choose a number field',
-    medidaErro: 'Choose the field the function calculates.',
-    medidaVazia: 'This category has no number, currency or virtual field.',
-    virtual: 'Virtual field',
-    agruparPor: 'Group by',
-    agruparNenhum: 'Do not group (a single number)',
-    agruparAjuda: 'Each value of the field becomes a bar, a slice or a table row.',
-    textoNaoAgrupa: 'Free text does not group',
+    visualizacao: 'Visualization type',
+    visualizacoes: { numero: 'Card', barras: 'Columns', barrasHorizontais: 'Bars', linha: 'Line', area: 'Area', rosca: 'Donut', funil: 'Funnel', tabela: 'Table' },
+    ajudaVisualizacao: {
+      numero: 'A highlighted number, like the cards of the task dashboard. Clicking the card opens the items.',
+      barras: 'Compares groups in columns. With a legend, the columns are stacked.',
+      barrasHorizontais: 'Ranking in horizontal bars. Fits long names and many groups.',
+      linha: 'Evolution over time, by the date field.',
+      area: 'Evolution over time, with the parts stacked.',
+      rosca: 'Part of the whole, for up to 8 groups.',
+      funil: 'Stages in the order of the options. Each stage counts the items that reached it.',
+      tabela: 'The exact numbers of each group, in rows and columns.',
+    },
+    tipoSemCampo: e => `This category has no field that works as ${e.toLowerCase()}.`,
+    eixos: { numero: 'Value', barras: 'Axis', barrasHorizontais: 'Axis', linha: 'Time axis', area: 'Time axis', rosca: 'Slices', funil: 'Stages', tabela: 'Rows' },
+    ajudaDoEixo: {
+      numero: '',
+      barras: 'Each option of the field becomes a column.',
+      barrasHorizontais: 'Each option of the field becomes a bar.',
+      linha: 'The date field that forms the timeline.',
+      area: 'The date field that forms the timeline.',
+      rosca: 'Each option of the field becomes a slice. Fields with up to 8 options fit.',
+      funil: 'Each option becomes a stage, in the order registered in the field. Single select fields fit.',
+      tabela: 'Each option of the field becomes a row.',
+    },
+    eixoErro: 'Choose the field.',
+    escolhaCampo: 'Choose a field',
     granularidade: 'Group dates by',
     granularidades: { dia: 'Day', semana: 'Week', mes: 'Month', trimestre: 'Quarter', ano: 'Year' },
-    quebrarPor: 'Split by (optional)',
-    quebrarNenhum: 'Do not split',
-    quebrarAjuda: 'Splits each group by the options of another field, in stacked bars.',
+    valor: 'Value',
+    valorAjudaCartao: 'The number the card shows.',
+    campoDoValor: 'Value field',
+    medidaPlaceholder: 'Choose a number field',
+    medidaErro: 'Choose the field the calculation uses.',
+    medidaVazia: 'This category has no number, currency or virtual field.',
+    virtual: 'Virtual field',
+    legenda: 'Legend (optional)',
+    legendaNenhuma: 'No legend',
+    legendaAjuda: 'Splits each column, bar or line into parts, one color for each option of another field.',
+    colunas: 'Columns (optional)',
+    colunasAjuda: 'Each option of another field becomes a table column.',
     multiploAviso: 'Multi-select: the item counts in each checked option.',
     relacaoAviso: c => `Relationship: groups by the ${c} item linked to each item.`,
-    condicoes: 'Panel filters',
-    condicoesVazio: 'Without a filter, the panel counts all items of the category.',
-    adicionarCondicao: 'Add condition',
-    juncao: { e: 'All conditions', ou: 'Any condition' },
-    operadores: { igual: 'is', diferente: 'is not', maior: 'greater than', menor: 'less than', preenchido: 'is filled', vazio: 'is empty' },
-    valorPlaceholder: 'Value',
-    removerCondicao: 'Remove condition',
-    periodo: 'Period',
+    filtrosAjuda: 'Saved in the panel: they apply to everyone who sees the dashboard. Without a filter, the panel counts all items of the category.',
+    periodo: 'Panel period',
     periodoDashboard: 'Follow the dashboard period',
+    periodoDashboardAjuda: p => `Changes with the period at the top. Now: ${p}.`,
     periodoTodo: 'All time',
-    periodoTodoAjuda: 'For what exists now, such as contracts under negotiation.',
+    periodoTodoAjuda: 'Ignores the period at the top. Fits what exists now, such as contracts under negotiation.',
     campoDeData: 'Date the period reads',
-    visualizacao: 'Chart type',
-    visualizacoes: { numero: 'Number', barras: 'Bars', barrasHorizontais: 'Horizontal bars', linha: 'Line', area: 'Area', rosca: 'Donut', funil: 'Funnel', tabela: 'Table' },
-    ajudaVisualizacao: {
-      numero: 'A highlighted number, without grouping.',
-      barras: 'Compares groups. With a split, the bars are stacked.',
-      barrasHorizontais: 'Ranking. Good for long names and many groups.',
-      linha: 'Evolution over time.',
-      area: 'Evolution over time, with the parts stacked.',
-      rosca: 'Part of the whole, for up to 6 groups.',
-      funil: 'Stages in the order of the options. Each stage counts the items that reached it: those in it and in the following stages.',
-      tabela: 'The exact numbers of each group.',
-    },
-    sugerido: 'Suggested',
-    visualizacaoAjuda: 'The list shows only the types that fit the chosen data.',
-    soNumero: 'To see charts, choose a field in Group by.',
+    campoDeDataAjuda: 'The item enters the period by this date.',
     ordem: 'Order',
     ordens: { natural: 'Order of the options', valorDesc: 'Highest value first', valorAsc: 'Lowest value first', rotulo: 'Alphabetical order' },
     limite: 'Show at most',
     limites: n => `${n} groups`,
     semLimite: 'All groups',
     limiteAjuda: 'The rest goes into Others.',
-    mostrarValores: 'Show the value on each bar',
-    titulo: 'Title',
+    mostrarValores: 'Show the value on each column',
+    titulo: 'Title (optional)',
     tituloAjuda: 'When empty, the title is the configuration sentence.',
+    descricaoDoPainel: 'Description (optional)',
+    descricaoAjuda: 'Appears in the help icon of the panel. Without a description, the panel does not show the icon.',
+    descricaoPlaceholder: 'E.g.: Adds up the value of contracts with a signing date in the period.',
+    faltaAlgo: 'Fill in the required fields.',
     cancelar: 'Cancel',
     salvar: 'Save panel',
     adicionar: 'Add to dashboard',
@@ -629,15 +970,103 @@ const en: Textos = {
   estados: {
     vazioTitulo: 'This dashboard has no panels yet',
     vazioDescricao: 'A panel counts, adds up or compares the items of a category. Start with the data you want to follow.',
+    vazioDescricaoComBeni: 'A panel counts, adds up or compares the items of a category. Build the first one or describe to BENI what you want to see.',
+    vazioLeitor: 'The dashboard administrator has not added panels yet.',
     semAcessoTitulo: 'You do not have access to this dashboard',
     semAcessoDescricao: 'Ask the workspace administrator for access.',
-    tentarNovamente: 'Try again',
+  },
+
+  inicial: {
+    titulo: 'Build the first dashboard',
+    descricaoA: 'A dashboard brings together numbers and charts from the items of your categories. BENI reads the categories and proposes the first panels; you confirm what each field means before creating it.',
+    descricaoB: 'A dashboard brings together panels with numbers and charts from the items of your categories. Each panel counts, adds up or compares a field.',
+    comBeni: 'Build with BENI',
+    doZero: 'Start from scratch',
+    criar: 'Create dashboard',
+    leTitulo: 'What BENI reads',
+    leTexto: 'The fields of each category, the type of each one and how many items exist.',
+    perguntaTitulo: 'What BENI asks',
+    perguntaTexto: 'What the field name does not say: whether a number is added up or averaged, and which date counts.',
+    passos: [
+      'Name the dashboard and choose who can see it.',
+      'Add panels: the category, the visualization type and the fields.',
+      'Drag and resize the panels until the dashboard fits your needs.',
+    ],
+    semCategoriasTitulo: 'There are no categories yet',
+    semCategoriasDescricao: 'Panels are built with the fields of the categories. Create a category and register items to build the first dashboard.',
+    criarCategoria: 'Create category',
+    criarCategoriaAviso: 'In the product, this opens Structure > Categories.',
+    leitorTitulo: 'No dashboard shared with you',
+    leitorDescricao: 'When someone shares a dashboard with your group, it appears here.',
+  },
+
+  beni: {
+    titulo: 'Build with BENI',
+    passo: (i, n) => `Step ${i} of ${n}`,
+    cancelar: 'Cancel',
+    voltar: 'Back',
+    ola: 'I read the categories you choose and propose the first panels.',
+    limite: 'I know the type of each field, but not what it means. Before proposing, I ask what the name does not say.',
+    categorias: 'Dashboard categories',
+    categoriasErro: 'Choose at least 1 category.',
+    resumoDaCategoria: (c, i) => `${c} fields · ${i.toLocaleString('en')} items`,
+    pedido: 'What do you want to follow? (optional)',
+    pedidoAjuda: 'Field names mentioned here go into the first panels.',
+    pedidoPlaceholder: 'E.g.: signed value per month and contracts per unit',
+    ler: 'Read the categories',
+    lendo: 'Reading the fields and the items...',
+    leitura: (c, i, s, n, d) => `${c} fields (${s} select, ${n} number, ${d} date) and ${i.toLocaleString('en')} items`,
+    confirmar: 'Confirm what I cannot tell from the field name. I left a guess in each one.',
+    palpite: 'BENI guess',
+    perguntaMedida: c => `How should "${c}" be used in the panels?`,
+    perguntaData: c => `Which date marks the main event of ${c}?`,
+    perguntaEtapas: (c, o) => `Are the options of "${c}" (${o}...) stages in order?`,
+    usos: {
+      soma: 'Add up: it is money or quantity',
+      media: 'Average: it is a score, a time or a rate',
+      ignorar: 'Do not use in the dashboard',
+    },
+    etapasSim: 'Yes: a funnel can be built',
+    etapasNao: 'No: they are categories without order',
+    verPropostas: 'See the suggested panels',
+    propostas: n => n === 1 ? 'I propose 1 panel. Remove what does not make sense.' : `I propose ${n} panels. Remove what does not make sense.`,
+    nomeDoDashboard: 'Dashboard name',
+    depois: 'After creating, each panel can be edited, dragged and deleted like any other.',
+    criar: n => n === 1 ? 'Create dashboard with 1 panel' : `Create dashboard with ${n} panels`,
+    e: ' and ',
+    motivos: {
+      contagem: (_c, cat) => `How many ${cat} items exist in the period.`,
+      soma: c => `You said "${c}" is added up.`,
+      media: c => `You said "${c}" is a score, a time or a rate.`,
+      tempo: c => `"${c}" is a date: the line shows the evolution month by month.`,
+      distribuicao: c => `"${c}" is a select field: each column is one option.`,
+      etapas: c => `You said "${c}" follows stages in order.`,
+      relacao: c => `"${c}" links to another category: the ranking shows the most frequent ones.`,
+      multiplo: c => `"${c}" accepts more than one option: the item counts in each one.`,
+    },
+    criado: 'Dashboard created with BENI',
+    criadoDescricao: 'Check the panels: BENI may have misunderstood the meaning of a field.',
+  },
+
+  pedir: {
+    titulo: 'Ask BENI',
+    descricao: 'Describe what you want to see. BENI suggests up to 3 panels, and you choose which ones go in.',
+    pedido: 'What do you want to see?',
+    pedidoErro: 'Describe the panel you want.',
+    placeholder: 'E.g.: sum of the value per unit',
+    pensando: 'BENI is building the suggestions...',
+    sugestoes: 'BENI suggestions',
+    sugerir: 'Suggest panels',
+    adicionar: n => n === 1 ? 'Add 1 panel' : `Add ${n} panels`,
+    adicionados: n => n === 1 ? '1 panel added' : `${n} panels added`,
   },
 
   rotulos: { vazio: 'No value', outros: 'Others', sim: 'Yes', nao: 'No' },
   periodos: { '7d': 'Last 7 days', '30d': 'Last 30 days', '90d': 'Last 90 days', 'month': 'This month', 'quarter': 'This quarter', 'year': 'This year' },
   periodoPersonalizado: (de, ate) => `${de} to ${ate}`,
 }
+
+/* =================================== es ==================================== */
 
 const es: Textos = {
   locale: 'es',
@@ -648,21 +1077,23 @@ const es: Textos = {
     notificacoes: 'Notificaciones', idioma: 'Idioma', tema: 'Tema', conta: 'Su cuenta', novo: 'Nuevo',
     itens: {
       inicio: 'Inicio', spaceflows: 'Spaceflows', categorias: 'Categorías', tarefas: 'Tareas',
-      agenda: 'Agenda', dashboards: 'Dashboards', relatorios: 'menu.member.reports.label', knowledge: 'Knowledge',
+      agendadas: 'Programadas', rapidas: 'Rápidas',
+      agenda: 'Agenda', relatorios: 'Informes', relatoriosExportados: 'Informes exportados',
+      painelDeTarefas: 'Panel de tareas', dashboards: 'Dashboards', knowledge: 'Knowledge',
       visaoGeral: 'Visión General', sistema: 'Sistema', estrutura: 'Estructura', gestaoDeMembros: 'Gestión de Miembros',
       interface: 'Interfaz', emails: 'Correos', integracoes: 'Integraciones', agentesDeIa: 'Agentes de IA',
       logs: 'Registros', releases: 'Releases', documentacao: 'Documentación',
     },
   },
   workspace: 'teste ux 2',
+  trilhaRelatorios: 'Informes',
   trilhaDashboards: 'Dashboards',
 
   pagina: {
     trocarDashboard: 'Cambiar de dashboard',
     novoDashboard: 'Nuevo dashboard',
     novoPainel: 'Nuevo panel',
-    personalizar: 'Personalizar',
-    concluir: 'Concluir',
+    pedirAoBeni: 'Pedir a BENI',
     maisAcoes: 'Más acciones del dashboard',
     editarDashboard: 'Editar dashboard',
     atualizarDados: 'Actualizar datos',
@@ -675,50 +1106,97 @@ const es: Textos = {
     dadosAtualizados: 'Datos actualizados',
     duplicado: 'Dashboard duplicado',
     excluido: 'Dashboard eliminado',
+    arrasteDica: 'Para mover un panel, arrástrelo por el asa de arriba. Para cambiar el tamaño, arrastre la esquina inferior derecha.',
+    fecharDica: 'Cerrar el consejo',
   },
 
-  filtros: {
+  filtro: {
     adicionar: 'Filtro',
-    filtrarPor: 'Filtrar el dashboard por',
-    ajuda: 'Campos que existen en más de una categoría de este dashboard.',
-    semCampoComum: 'Las categorías de este dashboard no tienen campos en común.',
-    emCategorias: n => n === 1 ? 'en 1 categoría' : `en ${n} categorías`,
-    buscarValor: 'Buscar valor',
-    remover: n => `Quitar el filtro ${n}`,
+    ajudaDoDashboard: 'Cada campo pertenece a 1 categoría. El filtro vale en los paneles de esa categoría.',
+    buscarCampo: 'Buscar campo',
+    buscarOpcao: 'Buscar opción',
+    semCampo: 'Ningún campo encontrado.',
+    semOpcao: 'Ninguna opción encontrada.',
+    operadores: { em: 'es', foraDe: 'no es', maior: 'mayor que', menor: 'menor que', preenchido: 'está lleno', vazio: 'está vacío' },
+    ou: ' o ',
+    condicao: 'Condición del filtro',
+    maisAcoes: 'Más acciones del filtro',
+    excluir: 'Eliminar filtro',
+    limparSelecao: 'Limpiar selección',
+    numero: 'Valor',
     limpar: 'Limpiar filtros',
-    selecionados: n => n === 1 ? '1 seleccionado' : `${n} seleccionados`,
-    escolherValores: 'Elija los valores',
+  },
+
+  filtroDoPainel: {
+    botao: n => n === 0 ? 'Filtros del panel' : n === 1 ? 'Filtros del panel: 1 activo' : `Filtros del panel: ${n} activos`,
+    salvos: 'Filtros guardados en el panel',
+    nenhum: 'Ninguno. El panel cuenta todos los ítems de la categoría.',
+    editar: 'Editar panel',
+    daBarra: 'Filtros del dashboard que valen aquí',
+    daVisao: 'Filtros solo en esta vista',
+    daVisaoAjuda: 'Se suman a los demás filtros, sin editar el panel. Para conservarlos, guarde la vista.',
+  },
+
+  visoes: {
+    rotulo: 'Vistas',
+    semVisao: 'Sin vista guardada',
+    minhas: 'Mis vistas',
+    doWorkspace: 'Vistas del workspace',
+    salvarNova: 'Guardar como nueva vista',
+    salvar: 'Guardar vista',
+    salvarAlteracoes: 'Guardar cambios',
+    alterada: '(modificada)',
+    excluir: n => `Eliminar la vista "${n}"`,
+    excluida: n => `Vista "${n}" eliminada`,
+    salva: n => `Vista "${n}" guardada`,
+    atualizada: n => `Vista "${n}" actualizada`,
+    salvarTitulo: 'Guardar vista',
+    salvarDescricao: 'Guarde el período y los filtros con un nombre, para volver al mismo recorte después.',
+    nome: 'Nombre de la vista',
+    nomePlaceholder: 'Ej.: Unidad São Paulo, este trimestre',
+    nomeErro: 'Dé un nombre a la vista.',
+    nomeRepetido: 'Ya existe una vista con ese nombre.',
+    paraQuem: 'Para quién',
+    soParaMim: 'Solo para mí',
+    soParaMimAjuda: 'Aparece solo en su lista de vistas.',
+    paraTodos: 'Todo el workspace',
+    paraTodosAjuda: 'Aparece para todos los que ven este dashboard.',
+    paraTodosBloqueado: 'Solo owner y full guardan vistas para el workspace.',
+    oQueEntra: 'Lo que guarda la vista',
+    filtrosDoPainel: (p, f) => `En el panel ${p}: ${f}`,
+    confirmarTitulo: '¿Guardar para todo el workspace?',
+    confirmarDescricao: n => `La vista "${n}" aparece para todos los que ven este dashboard.`,
+    confirmarAviso: 'Quien ve el dashboard pasa a ver esta vista en la lista. Solo owner y full pueden cambiarla o eliminarla.',
+    confirmar: 'Guardar para todos',
+    voltar: 'Volver',
+    cancelar: 'Cancelar',
+    salvarBotao: 'Guardar vista',
   },
 
   painel: {
     menu: { editar: 'Editar panel', verItens: 'Ver los ítems', duplicar: 'Duplicar panel', baixarCsv: 'Descargar CSV', excluir: 'Eliminar panel' },
     todoPeriodo: 'Todo el período',
-    periodoPor: c => `Período por ${c}`,
-    filtroNaoSeAplica: n => `El filtro ${n} no vale en este panel: la categoría no tiene ese campo.`,
-    filtroNaoSeAplicaCurto: n => `Sin el filtro ${n}`,
+    periodoPor: (p, c) => `${p}, por ${c}`,
     multiplo: 'Un ítem puede tener más de una opción marcada y cuenta en cada una. La suma de los grupos supera el total de ítems.',
     multiploCurto: 'Cuenta en cada opción',
     outros: n => n === 1 ? 'Otros reúne 1 grupo' : `Otros reúne ${n} grupos`,
     itens: n => n === 1 ? '1 ítem' : `${n.toLocaleString('es')} ítems`,
-    verItens: n => n === 1 ? 'Ver 1 ítem' : `Ver ${n.toLocaleString('es')} ítems`,
     semDadosTitulo: 'Ningún ítem en el período',
     semDadosDescricao: 'Cambie el período de arriba o los filtros del panel.',
     erroTitulo: 'Este panel no cargó',
     erroDescricao: 'Los demás paneles siguen siendo válidos.',
-    colunaValor: 'Valor',
     colunaDoTotal: 'Del total',
     total: 'Total',
     daEtapaAnterior: p => `${p} avanzaron desde la etapa anterior`,
     primeiraEtapa: 'Primera etapa',
-    permissao: 'Cuenta solo los ítems que usted puede ver. Quien ve otros ítems puede ver otro número.',
-    comoCalculamos: (f, p, c) => `${f}. ${p}.${c ? ` Con ${c === 1 ? '1 condición' : `${c} condiciones`} del panel.` : ''}`,
-    condicoes: n => n === 1 ? '1 condición' : `${n} condiciones`,
     csvBaixado: 'CSV descargado',
-    clique: 'Haga clic en una barra para ver los ítems.',
     excluido: 'Panel eliminado',
     duplicado: 'Panel duplicado',
     desfazer: 'Deshacer',
     restaurado: 'Panel restaurado',
+    arrastar: 'Arrastrar el panel',
+    ajuda: 'Sobre este panel',
+    acoes: 'Acciones del panel',
   },
 
   frase: (f, cat, medida, agrupar, quebra) => {
@@ -739,67 +1217,84 @@ const es: Textos = {
   construtor: {
     tituloNovo: 'Nuevo panel',
     tituloEditar: 'Editar panel',
-    descricao: 'Elija primero el dato. El tipo de gráfico se ajusta a lo que elija.',
+    descricao: 'Elija la categoría, el tipo de visualización y los campos. La vista previa muestra el resultado con los ítems actuales.',
     previa: 'Vista previa',
-    secaoDados: 'Datos',
-    secaoVisualizacao: 'Visualización',
-    secaoIdentificacao: 'Identificación',
+    previaSemEixo: e => `Elija el campo de ${e.toLowerCase()} para ver la vista previa.`,
+    passos: {
+      fonte: 'Fuente de datos',
+      visualizacao: 'Visualización',
+      campos: 'Campos',
+      filtros: 'Filtros del panel',
+      periodo: 'Período',
+      ordem: 'Orden y límite',
+      titulo: 'Título y descripción',
+    },
     categoria: 'Categoría',
     buscarCategoria: 'Buscar categoría',
     buscarCampo: 'Buscar campo',
-    calcular: 'Calcular',
-    campoDaMedida: 'Campo',
-    medidaPlaceholder: 'Elija un campo de número',
-    medidaErro: 'Elija el campo que la función calcula.',
-    medidaVazia: 'Esta categoría no tiene campo de número, de moneda ni campo virtual.',
-    virtual: 'Campo virtual',
-    agruparPor: 'Agrupar por',
-    agruparNenhum: 'No agrupar (un solo número)',
-    agruparAjuda: 'Cada valor del campo se vuelve una barra, una porción o una fila de la tabla.',
-    textoNaoAgrupa: 'El texto libre no agrupa',
+    visualizacao: 'Tipo de visualización',
+    visualizacoes: { numero: 'Tarjeta', barras: 'Columnas', barrasHorizontais: 'Barras', linha: 'Línea', area: 'Área', rosca: 'Dona', funil: 'Embudo', tabela: 'Tabla' },
+    ajudaVisualizacao: {
+      numero: 'Un número destacado, como las tarjetas del panel de tareas. Hacer clic en la tarjeta abre los ítems.',
+      barras: 'Compara grupos en columnas. Con leyenda, las columnas quedan apiladas.',
+      barrasHorizontais: 'Ranking en barras horizontales. Sirve para nombres largos y muchos grupos.',
+      linha: 'Evolución en el tiempo, por el campo de fecha.',
+      area: 'Evolución en el tiempo, con las partes apiladas.',
+      rosca: 'Parte del todo, para hasta 8 grupos.',
+      funil: 'Etapas en el orden de las opciones. Cada etapa cuenta los ítems que llegaron a ella.',
+      tabela: 'Los números exactos de cada grupo, en filas y columnas.',
+    },
+    tipoSemCampo: e => `Esta categoría no tiene campo que sirva de ${e.toLowerCase()}.`,
+    eixos: { numero: 'Valor', barras: 'Eje', barrasHorizontais: 'Eje', linha: 'Eje de tiempo', area: 'Eje de tiempo', rosca: 'Porciones', funil: 'Etapas', tabela: 'Filas' },
+    ajudaDoEixo: {
+      numero: '',
+      barras: 'Cada opción del campo se vuelve una columna.',
+      barrasHorizontais: 'Cada opción del campo se vuelve una barra.',
+      linha: 'El campo de fecha que forma la línea de tiempo.',
+      area: 'El campo de fecha que forma la línea de tiempo.',
+      rosca: 'Cada opción del campo se vuelve una porción. Sirven campos con hasta 8 opciones.',
+      funil: 'Cada opción se vuelve una etapa, en el orden registrado en el campo. Sirven campos de selección simple.',
+      tabela: 'Cada opción del campo se vuelve una fila.',
+    },
+    eixoErro: 'Elija el campo.',
+    escolhaCampo: 'Elija un campo',
     granularidade: 'Agrupar las fechas por',
     granularidades: { dia: 'Día', semana: 'Semana', mes: 'Mes', trimestre: 'Trimestre', ano: 'Año' },
-    quebrarPor: 'Dividir por (opcional)',
-    quebrarNenhum: 'No dividir',
-    quebrarAjuda: 'Divide cada grupo por las opciones de otro campo, en barras apiladas.',
+    valor: 'Valor',
+    valorAjudaCartao: 'El número que muestra la tarjeta.',
+    campoDoValor: 'Campo del valor',
+    medidaPlaceholder: 'Elija un campo de número',
+    medidaErro: 'Elija el campo que usa el cálculo.',
+    medidaVazia: 'Esta categoría no tiene campo de número, de moneda ni campo virtual.',
+    virtual: 'Campo virtual',
+    legenda: 'Leyenda (opcional)',
+    legendaNenhuma: 'Sin leyenda',
+    legendaAjuda: 'Separa cada columna, barra o línea en partes, un color para cada opción de otro campo.',
+    colunas: 'Columnas (opcional)',
+    colunasAjuda: 'Cada opción de otro campo se vuelve una columna de la tabla.',
     multiploAviso: 'Selección múltiple: el ítem cuenta en cada opción marcada.',
     relacaoAviso: c => `Relación: agrupa por el ítem de ${c} vinculado a cada ítem.`,
-    condicoes: 'Filtros del panel',
-    condicoesVazio: 'Sin filtro, el panel cuenta todos los ítems de la categoría.',
-    adicionarCondicao: 'Agregar condición',
-    juncao: { e: 'Todas las condiciones', ou: 'Cualquier condición' },
-    operadores: { igual: 'es', diferente: 'no es', maior: 'mayor que', menor: 'menor que', preenchido: 'está lleno', vazio: 'está vacío' },
-    valorPlaceholder: 'Valor',
-    removerCondicao: 'Quitar condición',
-    periodo: 'Período',
+    filtrosAjuda: 'Guardados en el panel: valen para todos los que ven el dashboard. Sin filtro, el panel cuenta todos los ítems de la categoría.',
+    periodo: 'Período del panel',
     periodoDashboard: 'Seguir el período del dashboard',
+    periodoDashboardAjuda: p => `Cambia junto con el período de arriba. Ahora: ${p}.`,
     periodoTodo: 'Todo el período',
-    periodoTodoAjuda: 'Para lo que existe ahora, como los contratos en negociación.',
+    periodoTodoAjuda: 'Ignora el período de arriba. Sirve para lo que existe ahora, como los contratos en negociación.',
     campoDeData: 'Fecha que lee el período',
-    visualizacao: 'Tipo de gráfico',
-    visualizacoes: { numero: 'Número', barras: 'Barras', barrasHorizontais: 'Barras horizontales', linha: 'Línea', area: 'Área', rosca: 'Dona', funil: 'Embudo', tabela: 'Tabla' },
-    ajudaVisualizacao: {
-      numero: 'Un número destacado, sin agrupamiento.',
-      barras: 'Compara grupos. Con división, las barras quedan apiladas.',
-      barrasHorizontais: 'Ranking. Bueno para nombres largos y muchos grupos.',
-      linha: 'Evolución en el tiempo.',
-      area: 'Evolución en el tiempo, con las partes apiladas.',
-      rosca: 'Parte del todo, para hasta 6 grupos.',
-      funil: 'Etapas en el orden de las opciones. Cada etapa cuenta los ítems que llegaron a ella: los que están en ella y en las siguientes.',
-      tabela: 'Los números exactos de cada grupo.',
-    },
-    sugerido: 'Sugerido',
-    visualizacaoAjuda: 'La lista muestra solo los tipos que sirven para el dato elegido.',
-    soNumero: 'Para ver gráficos, elija un campo en Agrupar por.',
+    campoDeDataAjuda: 'El ítem entra en el período por esta fecha.',
     ordem: 'Orden',
     ordens: { natural: 'Orden de las opciones', valorDesc: 'Mayor valor primero', valorAsc: 'Menor valor primero', rotulo: 'Orden alfabético' },
     limite: 'Mostrar como máximo',
     limites: n => `${n} grupos`,
     semLimite: 'Todos los grupos',
     limiteAjuda: 'El resto entra en Otros.',
-    mostrarValores: 'Mostrar el valor en cada barra',
-    titulo: 'Título',
+    mostrarValores: 'Mostrar el valor en cada columna',
+    titulo: 'Título (opcional)',
     tituloAjuda: 'Vacío, el título es la frase de la configuración.',
+    descricaoDoPainel: 'Descripción (opcional)',
+    descricaoAjuda: 'Aparece en el ícono de ayuda del panel. Sin descripción, el panel no muestra el ícono.',
+    descricaoPlaceholder: 'Ej.: Suma el valor de los contratos con fecha de firma en el período.',
+    faltaAlgo: 'Complete los campos obligatorios.',
     cancelar: 'Cancelar',
     salvar: 'Guardar panel',
     adicionar: 'Agregar al dashboard',
@@ -841,9 +1336,95 @@ const es: Textos = {
   estados: {
     vazioTitulo: 'Este dashboard todavía no tiene paneles',
     vazioDescricao: 'Un panel cuenta, suma o compara los ítems de una categoría. Empiece por el dato que quiere seguir.',
+    vazioDescricaoComBeni: 'Un panel cuenta, suma o compara los ítems de una categoría. Arme el primero o describa a BENI lo que quiere ver.',
+    vazioLeitor: 'Quien administra el dashboard todavía no agregó paneles.',
     semAcessoTitulo: 'Usted no tiene acceso a este dashboard',
     semAcessoDescricao: 'Pida acceso a quien administra el workspace.',
-    tentarNovamente: 'Intentar de nuevo',
+  },
+
+  inicial: {
+    titulo: 'Arme el primer dashboard',
+    descricaoA: 'Un dashboard reúne números y gráficos de los ítems de sus categorías. BENI lee las categorías y propone los primeros paneles; usted confirma lo que significa cada campo antes de crear.',
+    descricaoB: 'Un dashboard reúne paneles con números y gráficos de los ítems de sus categorías. Cada panel cuenta, suma o compara un campo.',
+    comBeni: 'Construir con BENI',
+    doZero: 'Empezar de cero',
+    criar: 'Crear dashboard',
+    leTitulo: 'Lo que lee BENI',
+    leTexto: 'Los campos de cada categoría, el tipo de cada uno y cuántos ítems existen.',
+    perguntaTitulo: 'Lo que pregunta BENI',
+    perguntaTexto: 'Lo que el nombre del campo no dice: si un número se suma o se promedia, y qué fecha vale.',
+    passos: [
+      'Dé un nombre al dashboard y elija quién lo ve.',
+      'Agregue paneles: la categoría, el tipo de visualización y los campos.',
+      'Arrastre y redimensione los paneles hasta que el dashboard quede a su manera.',
+    ],
+    semCategoriasTitulo: 'Todavía no hay categorías',
+    semCategoriasDescricao: 'Los paneles se arman con los campos de las categorías. Cree una categoría y registre ítems para armar el primer dashboard.',
+    criarCategoria: 'Crear categoría',
+    criarCategoriaAviso: 'En el producto, abre Estructura > Categorías.',
+    leitorTitulo: 'Ningún dashboard compartido con usted',
+    leitorDescricao: 'Cuando alguien comparte un dashboard con su grupo, aparece aquí.',
+  },
+
+  beni: {
+    titulo: 'Construir con BENI',
+    passo: (i, n) => `Paso ${i} de ${n}`,
+    cancelar: 'Cancelar',
+    voltar: 'Volver',
+    ola: 'Leo las categorías que usted elija y propongo los primeros paneles.',
+    limite: 'Conozco el tipo de cada campo, pero no lo que significa. Antes de proponer, pregunto lo que el nombre no dice.',
+    categorias: 'Categorías del dashboard',
+    categoriasErro: 'Elija al menos 1 categoría.',
+    resumoDaCategoria: (c, i) => `${c} campos · ${i.toLocaleString('es')} ítems`,
+    pedido: '¿Qué quiere seguir? (opcional)',
+    pedidoAjuda: 'Los nombres de campo citados aquí entran en los primeros paneles.',
+    pedidoPlaceholder: 'Ej.: valor firmado por mes y contratos por unidad',
+    ler: 'Leer las categorías',
+    lendo: 'Leyendo los campos y los ítems...',
+    leitura: (c, i, s, n, d) => `${c} campos (${s} de selección, ${n} de número, ${d} de fecha) y ${i.toLocaleString('es')} ítems`,
+    confirmar: 'Confirme lo que no logro saber por el nombre del campo. Dejé una suposición en cada uno.',
+    palpite: 'Suposición de BENI',
+    perguntaMedida: c => `¿Cómo usar "${c}" en los paneles?`,
+    perguntaData: c => `¿Qué fecha marca el hecho principal de ${c}?`,
+    perguntaEtapas: (c, o) => `¿Las opciones de "${c}" (${o}...) son etapas en orden?`,
+    usos: {
+      soma: 'Sumar: es dinero o cantidad',
+      media: 'Promediar: es nota, plazo o tasa',
+      ignorar: 'No usar en el dashboard',
+    },
+    etapasSim: 'Sí: se puede armar un embudo',
+    etapasNao: 'No: son categorías sin orden',
+    verPropostas: 'Ver los paneles sugeridos',
+    propostas: n => n === 1 ? 'Propongo 1 panel. Quite lo que no tenga sentido.' : `Propongo ${n} paneles. Quite lo que no tenga sentido.`,
+    nomeDoDashboard: 'Nombre del dashboard',
+    depois: 'Después de crear, cada panel se edita, se arrastra y se elimina como cualquier otro.',
+    criar: n => n === 1 ? 'Crear dashboard con 1 panel' : `Crear dashboard con ${n} paneles`,
+    e: ' y ',
+    motivos: {
+      contagem: (_c, cat) => `Cuántos ítems de ${cat} existen en el período.`,
+      soma: c => `Usted dijo que "${c}" se suma.`,
+      media: c => `Usted dijo que "${c}" es nota, plazo o tasa.`,
+      tempo: c => `"${c}" es fecha: la línea muestra la evolución mes a mes.`,
+      distribuicao: c => `"${c}" es selección: cada columna es una opción.`,
+      etapas: c => `Usted dijo que "${c}" sigue etapas en orden.`,
+      relacao: c => `"${c}" vincula a otra categoría: el ranking muestra los que más aparecen.`,
+      multiplo: c => `"${c}" acepta más de una opción: el ítem cuenta en cada una.`,
+    },
+    criado: 'Dashboard creado con BENI',
+    criadoDescricao: 'Revise los paneles: BENI puede haber entendido mal el sentido de algún campo.',
+  },
+
+  pedir: {
+    titulo: 'Pedir a BENI',
+    descricao: 'Describa lo que quiere ver. BENI sugiere hasta 3 paneles, y usted elige cuáles entran.',
+    pedido: '¿Qué quiere ver?',
+    pedidoErro: 'Describa el panel que quiere.',
+    placeholder: 'Ej.: suma del valor por unidad',
+    pensando: 'BENI está armando las sugerencias...',
+    sugestoes: 'Sugerencias de BENI',
+    sugerir: 'Sugerir paneles',
+    adicionar: n => n === 1 ? 'Agregar 1 panel' : `Agregar ${n} paneles`,
+    adicionados: n => n === 1 ? '1 panel agregado' : `${n} paneles agregados`,
   },
 
   rotulos: { vazio: 'Sin valor', outros: 'Otros', sim: 'Sí', nao: 'No' },

@@ -37,3 +37,40 @@
   - os botões só de ícone (Como calculamos, Ações do painel, Mais ações) têm `aria-label`;
   - sem correção: o rótulo do eixo do Unovis sai em cinza claro e pequeno no tema claro; é o estilo do SDK.
 - **Ver:** `https://pernalombr4.github.io/prototipos/dashboards` · `evidencias/20-dashboard-comercial.jpg` · `evidencias/21-construtor.jpg` · `evidencias/22-itens-da-barra.jpg` · `evidencias/23-escuro-espanhol.jpg`
+
+## Rodada 2 · 2026-11-27
+
+- **Pedido (resumo do retorno da redatora, 13 pontos):** filtro de campo no lugar de "Status em 2 categorias"; estado inicial em 2 pontos da jornada, com opção A (BENI) e B (sem IA); cartão clicável como no painel de tarefas; nenhum dashboard pronto; construtor em modal com prévia à direita; tipo "contador" com o nome do Power BI; ordem lógica no construtor; arrastar e redimensionar sem "Personalizar"; ajuda só com descrição; trocar "Dividir por"; filtro em cada painel; visões salvas; Dashboards dentro de Relatórios.
+- **Mudou: nenhum dashboard vem pronto.** O ENSPACE começa sem categoria e sem campo, e o nome do campo não diz o que ele significa ("Valor do contrato" é só um campo de número). O protótipo abre em "Primeiro acesso", sem dashboard; os exemplos de antes só aparecem pelo andaime ("Dashboard montado").
+- **Mudou: estado inicial, ponto 1 da jornada (nenhum dashboard).** 2 opções para o dev, trocadas no andaime:
+  - **A, a preferida:** "Construir com o BENI" ou "Começar do zero". O BENI trabalha em 4 passos num modal:
+    1. a pessoa escolhe as categorias e, se quiser, escreve o que quer acompanhar;
+    2. o BENI lê os campos e os itens (tipo de cada campo, quantos de seleção, número e data);
+    3. o BENI pergunta o que o tipo não diz, com um palpite em cada pergunta: se o número se soma ou se tira a média, qual data marca o fato, se as opções são etapas em ordem;
+    4. o BENI propõe os painéis, cada um com o motivo; a pessoa tira o que não quer e dá o nome. Nada vira painel sem ela aceitar.
+  - **B, sem IA:** "Criar dashboard" e os 3 passos do que vem depois.
+  - Workspace sem categoria tem estado próprio: sem campo não há painel.
+- **Mudou: estado inicial, ponto 2 (dashboard recém-criado, sem painéis).** Estado vazio sem proposta da IA, com "Novo painel" e "Pedir ao BENI" (só na opção A). "Pedir ao BENI" recebe a categoria e um pedido em texto e devolve até 3 painéis para adicionar.
+- **Mudou: o painel de número é o Cartão.** É o `EnStatCard` do SDK, o mesmo do painel de tarefas: o cartão inteiro abre os itens, sem botão "Ver N itens", e a descrição vira subtítulo ("Contratos · Este ano, por Data de assinatura"). O nome do tipo segue o Power BI: Cartão (Card).
+- **Mudou: o construtor é um modal.** Formulário à esquerda, prévia à direita, na ordem dos construtores de BI (Power BI, Looker Studio, GA4): 1 Fonte de dados, 2 Visualização, 3 Campos, 4 Filtros do painel, 5 Período, 6 Ordem e limite (só nos tipos que ordenam), 7 Título e descrição. O nome do eixo muda com o tipo (Eixo, Eixo de tempo, Fatias, Etapas, Linhas), e o tipo sem campo que sirva fica desabilitado com o motivo.
+- **Mudou: "Dividir por" virou "Legenda"**, como no Power BI e no Looker Studio. Na tabela, "Colunas".
+- **Mudou: descrição do painel.** Campo novo no construtor. O ícone de ajuda só aparece quando há descrição.
+- **Mudou: arrastar e redimensionar sem modo de edição.** A alça aparece no topo do painel ao passar o mouse; o canto inferior direito redimensiona. Uma dica, que se fecha, explica os 2 gestos. No celular a grade vira 1 coluna, sem arrastar.
+  - Grade própria com o `gridstack` 14.1.0, a mesma versão que o SDK usa. O `EnDashboardCanvas` não serve: no modo editável ele deixa o painel `inert` e cobre o corpo com a alça, então não dá para clicar no gráfico e arrastar ao mesmo tempo. Proposta para o SDK: modo de edição que deixa o corpo ativo e arrasta pela alça do cabeçalho.
+- **Mudou: filtro de campo.** "+ Filtro" lista os campos agrupados por categoria; cada campo é de 1 categoria, e o filtro vale só nos painéis dessa categoria. Chip com operador (é, não é, maior que, menor que, está preenchido, está vazio); vários valores no mesmo chip somam (ou), chips diferentes se juntam (e). Com mais de 1 categoria no dashboard, o chip leva a categoria na frente ("Contratos · Status").
+- **Mudou: filtro em cada painel.** O ícone de funil mostra o número de filtros e abre 3 grupos: os salvos no painel (só leitura, com "Editar painel"), os do dashboard que valem ali e os só desta visão, que se põem sem editar o painel.
+- **Mudou: visões salvas.** Guardam período, filtros do dashboard e filtros por painel. "Só para mim" é o padrão; owner e full também salvam para todo o workspace, com uma confirmação. Visão alterada mostra "(alterada)" e "Salvar alterações". Membro não muda nem exclui visão do workspace.
+- **Mudou: menu.** Relatórios vira grupo com 3 filhos: Relatórios exportados (a tela de hoje), Painel de tarefas (saiu de Tarefas) e Dashboards (selo Novo). A trilha fica Relatórios > Dashboards > nome. "Relatórios exportados" é nome proposto: a tela de hoje lista exportações.
+- **Fronteira:** muda a página de Dashboards e o grupo Relatórios do menu; não muda o resto da casca.
+- **Descartado:** o modo "Personalizar" da rodada 1, a barra "Filtros comuns entre categorias" e os botões "Ver N itens".
+- **Não deu:** a prévia do construtor usa o período e os filtros do dashboard de agora; o painel novo nasce já filtrado na prévia se a barra tiver filtro. Fica assim para mostrar o número que a pessoa vai ver.
+- **Maquete:**
+  - o BENI do protótipo é uma regra fixa em `beni.ts`, sem IA: palpite de soma para moeda e de média para o resto, etapas quando o nome do campo tem status, etapa ou fase;
+  - "Criar categoria" só mostra o aviso;
+  - os papéis (Owner ou full, Membro, Só lê) e as opções A e B são andaime.
+- **CSS próprio:** nenhum bloco `<style>`. A grade importa o CSS do `gridstack`; o resto são classes do Tailwind.
+- **Crítica e acessibilidade:**
+  - a alça de arraste é botão com `aria-label` e aparece também com o foco no painel;
+  - o cartão inteiro é botão (`interactive` do `EnStatCard`); os ícones por cima dele ficam numa camada acima, para o clique no filtro não abrir os itens;
+  - corrigido na conferência: o gráfico empilhado guardava a série que saía do filtro; agora remonta quando as partes mudam.
+- **Ver:** `https://pernalombr4.github.io/prototipos/dashboards` · `evidencias/25-estado-inicial-opcao-a.jpg` · `evidencias/26-estado-inicial-opcao-b.jpg` · `evidencias/27-beni-lendo.jpg` · `evidencias/28-beni-perguntas.jpg` · `evidencias/29-beni-paineis-sugeridos.jpg` · `evidencias/30-dashboard-criado-pelo-beni.jpg` · `evidencias/31-dashboard-montado.jpg` · `evidencias/32-filtro-do-painel.jpg` · `evidencias/33-construtor-tipos.jpg` · `evidencias/34-construtor-colunas.jpg` · `evidencias/35-dashboard-sem-paineis.jpg` · `evidencias/36-salvar-visao-workspace-escuro-espanhol.jpg`

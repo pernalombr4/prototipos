@@ -1,6 +1,8 @@
 /**
- * Os dashboards que o protótipo abre. Cada painel é uma configuração do construtor:
- * nada aqui é lâmina pronta, tudo poderia ter sido montado pela tela.
+ * Exemplos de dashboards que uma pessoa montou. Rodada 2: o ENSPACE não traz dashboard
+ * pronto, porque começa sem categoria e sem campo, e o nome de um campo não diz o que
+ * ele significa. Estes exemplos só abrem pelo andaime ("Dashboard montado"): são o
+ * resultado de alguém ter usado o construtor, painel por painel.
  *
  * Os painéis cobrem de propósito os casos que a pesquisa apontou:
  * - múltipla seleção como agrupamento (Áreas envolvidas, Temas): aviso de soma maior que o total;
@@ -10,8 +12,24 @@
  * - barra empilhada (quebra), que hoje não existe;
  * - funil pela ordem das opções.
  */
-import type { ConfigDoPainel } from './agregacao'
+import type { ConfigDoPainel, FiltroDeCampo, Periodo } from './agregacao'
 import { painelEmBranco } from './agregacao'
+
+/**
+ * PROPOSTA (rodada 2): a visão salva, como o segmento do Clarity. Guarda o período, os
+ * filtros do dashboard e os filtros que a pessoa pôs em cada painel, para voltar ao
+ * mesmo recorte depois. Nasce só para quem salvou; quem é owner ou full também pode
+ * salvar para o workspace inteiro.
+ */
+export interface Visao {
+  id: string
+  nome: string
+  escopo: 'eu' | 'workspace'
+  periodo: Periodo
+  filtros: FiltroDeCampo[]
+  /** Filtros só da visão, por painel. */
+  filtrosDosPaineis: Record<string, FiltroDeCampo[]>
+}
 
 export interface Dashboard {
   id: string
@@ -22,6 +40,8 @@ export interface Dashboard {
   /** Minutos entre recargas automáticas. Hoje o padrão é 5. */
   recarga: number
   paineis: ConfigDoPainel[]
+  /** Rodada 2: as visões salvas deste dashboard. */
+  visoes: Visao[]
 }
 
 /** Atalho: parte do painel em branco e troca só o que muda. */
@@ -36,33 +56,50 @@ export const DASHBOARDS: Dashboard[] = [
     descricao: 'Contratos, clientes e o atendimento dos clientes com contrato.',
     grupos: ['Diretoria', 'Comercial'],
     recarga: 5,
+    visoes: [
+      {
+        id: 'v-sp',
+        nome: 'São Paulo, este trimestre',
+        escopo: 'workspace',
+        periodo: 'quarter',
+        filtros: [
+          { categoria: 'contratos', campo: 'unidade', operador: 'em', valores: ['sao_paulo'] },
+          { categoria: 'chamados', campo: 'unidade', operador: 'em', valores: ['sao_paulo'] },
+        ],
+        filtrosDosPaineis: {},
+      },
+      {
+        id: 'v-grandes',
+        nome: 'Contratos acima de R$ 100 mil',
+        escopo: 'eu',
+        periodo: 'year',
+        filtros: [{ categoria: 'contratos', campo: 'valor', operador: 'maior', valores: ['100000'] }],
+        filtrosDosPaineis: {},
+      },
+    ],
     paineis: [
-      p('valor-assinado', { titulo: 'Valor assinado', categoria: 'contratos', funcao: 'soma', medida: 'valor', campoDeData: 'assinatura', icone: 'i-lucide-badge-dollar-sign' }),
+      p('valor-assinado', { titulo: 'Valor assinado', descricao: 'Soma do valor dos contratos com data de assinatura no período. Contrato sem data de assinatura não entra.', categoria: 'contratos', funcao: 'soma', medida: 'valor', campoDeData: 'assinatura', icone: 'i-lucide-badge-dollar-sign' }),
       p('em-negociacao', {
         titulo: 'Contratos em negociação',
         categoria: 'contratos',
-        condicoes: [{ campo: 'status', operador: 'igual', valor: 'em_negociacao' }],
+        condicoes: [{ categoria: 'contratos', campo: 'status', operador: 'em', valores: ['em_negociacao'] }],
         periodo: 'todo',
         icone: 'i-lucide-handshake',
       }),
       p('ticket-medio', {
         titulo: 'Ticket médio',
+        descricao: 'Valor médio dos contratos assinados no período. Acordos de confidencialidade ficam de fora, porque não têm valor.',
         categoria: 'contratos',
         funcao: 'media',
         medida: 'valor',
         campoDeData: 'assinatura',
-        condicoes: [{ campo: 'tipo', operador: 'diferente', valor: 'confidencialidade' }],
+        condicoes: [{ categoria: 'contratos', campo: 'tipo', operador: 'foraDe', valores: ['confidencialidade'] }],
         icone: 'i-lucide-scale',
       }),
       p('chamados-abertos', {
         titulo: 'Chamados em aberto',
         categoria: 'chamados',
-        juncao: 'ou',
-        condicoes: [
-          { campo: 'status', operador: 'igual', valor: 'aberto' },
-          { campo: 'status', operador: 'igual', valor: 'em_atendimento' },
-          { campo: 'status', operador: 'igual', valor: 'aguardando_cliente' },
-        ],
+        condicoes: [{ categoria: 'chamados', campo: 'status', operador: 'em', valores: ['aberto', 'em_atendimento', 'aguardando_cliente'] }],
         periodo: 'todo',
         icone: 'i-lucide-headset',
       }),
@@ -82,9 +119,10 @@ export const DASHBOARDS: Dashboard[] = [
       }),
       p('funil', {
         titulo: 'Funil de contratos',
+        descricao: 'Cada etapa conta os contratos que chegaram até ela. Cancelados ficam de fora.',
         categoria: 'contratos',
         agruparPor: 'status',
-        condicoes: [{ campo: 'status', operador: 'diferente', valor: 'cancelado' }],
+        condicoes: [{ categoria: 'contratos', campo: 'status', operador: 'foraDe', valores: ['cancelado'] }],
         visualizacao: 'funil',
         w: 4,
         h: 5,
@@ -119,6 +157,7 @@ export const DASHBOARDS: Dashboard[] = [
     descricao: 'Volume, tempo e satisfação dos chamados.',
     grupos: [],
     recarga: 5,
+    visoes: [],
     paineis: [
       p('chamados', { titulo: 'Chamados no período', categoria: 'chamados', icone: 'i-lucide-inbox' }),
       p('tempo-medio', { titulo: 'Tempo médio de resolução', categoria: 'chamados', funcao: 'media', medida: 'horas', icone: 'i-lucide-timer' }),
@@ -135,6 +174,7 @@ export const DASHBOARDS: Dashboard[] = [
     nome: 'Despesas',
     grupos: ['Diretoria', 'Financeiro'],
     recarga: 15,
+    visoes: [],
     paineis: [
       p('pago', {
         titulo: 'Total pago',

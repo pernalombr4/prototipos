@@ -20,30 +20,44 @@ export type Funcao = 'contagem' | 'soma' | 'media' | 'mediana' | 'minimo' | 'max
 export type Visualizacao = 'numero' | 'barras' | 'barrasHorizontais' | 'linha' | 'area' | 'rosca' | 'funil' | 'tabela'
 export type Granularidade = 'dia' | 'semana' | 'mes' | 'trimestre' | 'ano'
 export type Ordem = 'natural' | 'valorDesc' | 'valorAsc' | 'rotulo'
-export type Operador = 'igual' | 'diferente' | 'maior' | 'menor' | 'preenchido' | 'vazio'
+/**
+ * Rodada 2: o operador do filtro de campo, como no protótipo de visualizações da tela
+ * de itens. `em` e `foraDe` marcam várias opções ("é", "não é"); `maior` e `menor`
+ * comparam número; `preenchido` e `vazio` não pedem valor.
+ */
+export type Operador = 'em' | 'foraDe' | 'maior' | 'menor' | 'preenchido' | 'vazio'
 export type PresetDePeriodo = '7d' | '30d' | '90d' | 'month' | 'quarter' | 'year'
 export type Periodo = PresetDePeriodo | { from: Date, to: Date }
 
-export interface Condicao {
+/**
+ * Um filtro de campo. Todo campo pertence a 1 categoria: o filtro vale nos painéis
+ * dessa categoria e em nenhum outro. Vários filtros valem juntos ("e"); várias opções
+ * marcadas no mesmo filtro valem como "ou".
+ */
+export interface FiltroDeCampo {
+  categoria: string
   campo: string
   operador: Operador
-  /** Opção (value), id do item relacionado, número ou nome do membro. */
-  valor?: string
+  /** Opções (value), ids de item relacionado ou nomes de membro; em `maior` e `menor`, o número na posição 0. */
+  valores: string[]
 }
 
 export interface ConfigDoPainel {
   id: string
   /** Vazio: o título sai da frase da configuração. */
   titulo: string
+  /** Rodada 2: o texto do ícone de ajuda. Vazio: o painel não mostra o ícone. */
+  descricao: string
   categoria: string
   funcao: Funcao
   /** Campo de número, moeda ou virtual. Obrigatório quando a função não é contagem. */
   medida?: string
   agruparPor?: string
   granularidade: Granularidade
+  /** A legenda: separa cada barra ou linha em partes, uma cor por opção. */
   quebrarPor?: string
-  condicoes: Condicao[]
-  juncao: 'e' | 'ou'
+  /** Os filtros salvos no painel, que valem para todo mundo que vê o dashboard. */
+  condicoes: FiltroDeCampo[]
   /** `dashboard`: segue o período do topo. `todo`: ignora período (estoque, como "em negociação agora"). */
   periodo: 'dashboard' | 'todo'
   /** Campo de data que o período lê. Padrão: Criado em. */
@@ -55,16 +69,11 @@ export interface ConfigDoPainel {
   mostrarValores: boolean
   /** Ícone opcional: hoje é obrigatório. */
   icone?: string
-  /** Largura e altura na grade de 12 colunas. */
+  /** Posição, largura e altura na grade de 12 colunas. Sem posição, o painel entra no 1º espaço livre. */
+  x?: number
+  y?: number
   w: number
   h: number
-}
-
-/** Filtro do topo do dashboard, por campo comum. */
-export interface FiltroDoDashboard {
-  /** Chave do campo comum (`chaveComum`). */
-  chave: string
-  valores: string[]
 }
 
 export interface Grupo {
@@ -89,8 +98,6 @@ export interface Resultado {
   multiplo: boolean
   /** Grupos que entraram em "Outros". */
   emOutros: number
-  /** Filtros do dashboard que este painel não pôde usar (a categoria não tem o campo). */
-  filtrosIgnorados: string[]
 }
 
 export const VAZIO = '__vazio'
@@ -251,71 +258,44 @@ export function rotuloDaChave(campo: CampoDoMock, chave: string, g: Granularidad
   return campo.options?.find(o => o.value === chave)?.label ?? chave
 }
 
-/* --------------------------------- condições -------------------------------- */
+/* ------------------------------ filtro de campo ----------------------------- */
 
-function passa(item: ItemDoMock, c: Condicao, categoria: CategoriaDoMock): boolean {
-  const campo = categoria.campos.find(x => x.refId === c.campo)
-  if (!campo) return true
-  const v = bruto(item, c.campo)
-  const vazio = v === null || v === undefined || v === '' || (Array.isArray(v) && !v.length)
-  switch (c.operador) {
-    case 'preenchido': return !vazio
-    case 'vazio': return vazio
-    case 'igual': return Array.isArray(v) ? v.includes(c.valor ?? '') : String(v ?? '') === c.valor
-    case 'diferente': return Array.isArray(v) ? !v.includes(c.valor ?? '') : String(v ?? '') !== c.valor
-    case 'maior': return typeof v === 'number' && v > Number(c.valor)
-    case 'menor': return typeof v === 'number' && v < Number(c.valor)
+const vazioDe = (v: Valor | Date | undefined) => v === null || v === undefined || v === '' || (Array.isArray(v) && !v.length)
+
+/** O filtro que ainda não filtra: lista sem opção marcada ou comparação sem número. */
+export function filtroVazio(f: FiltroDeCampo): boolean {
+  if (f.operador === 'preenchido' || f.operador === 'vazio') return false
+  return !f.valores.length || f.valores.every(v => v === '')
+}
+
+export function passaNoFiltro(item: ItemDoMock, f: FiltroDeCampo): boolean {
+  if (filtroVazio(f)) return true
+  const v = bruto(item, f.campo)
+  switch (f.operador) {
+    case 'preenchido': return !vazioDe(v)
+    case 'vazio': return vazioDe(v)
+    case 'em': return (Array.isArray(v) ? v : [String(v ?? '')]).some(x => f.valores.includes(String(x)))
+    case 'foraDe': return !(Array.isArray(v) ? v : [String(v ?? '')]).some(x => f.valores.includes(String(x)))
+    case 'maior': return typeof v === 'number' && v > Number(f.valores[0])
+    case 'menor': return typeof v === 'number' && v < Number(f.valores[0])
   }
 }
 
-/* ------------------------------- campos comuns ------------------------------ */
+/** Os campos que dá para filtrar: seleção, relação, sim ou não, número e moeda. Texto e data ficam de fora. */
+export const ehFiltravel = (c: CampoDoMock) => (ehDimensao(c) && !ehData(c)) || ehMedida(c)
 
-/**
- * O campo comum que o filtro do dashboard usa: mesmo nome e mesmo tipo em mais de uma
- * categoria (a "Unidade" de Contratos, Clientes e Chamados). Relação conta também na
- * própria categoria de destino: o filtro "Cliente" vale em Clientes pelo próprio item.
- */
-export interface CampoComum {
-  chave: string
-  nome: string
-  campo: CampoDoMock
-  /** Slug da categoria e refId do campo em cada uma que tem. */
-  em: Record<string, string>
-}
-
-export function chaveComum(c: CampoDoMock) {
-  return `${c.name}|${c.type}|${c.relacao ?? ''}`
-}
-
-export function camposComuns(slugs: string[]): CampoComum[] {
-  const mapa = new Map<string, CampoComum>()
-  for (const slug of slugs) {
-    const cat = categoriaPorSlug.get(slug)
-    if (!cat) continue
-    for (const campo of cat.campos) {
-      if (!ehDimensao(campo) || ehData(campo)) continue
-      const chave = chaveComum(campo)
-      const atual = mapa.get(chave) ?? { chave, nome: campo.name, campo, em: {} }
-      atual.em[slug] = campo.refId
-      mapa.set(chave, atual)
-    }
-  }
-  for (const comum of mapa.values()) {
-    const destino = comum.campo.relacao
-    if (destino && slugs.includes(destino)) comum.em[destino] = '__proprio'
-  }
-  return [...mapa.values()].filter(c => Object.keys(c.em).length >= 2)
-}
-
-/** As opções de um campo comum para o filtro: opção, membro ou item relacionado. */
-export function opcoesDoComum(c: CampoComum): { value: string, label: string }[] {
-  if (c.campo.relacao) {
-    const cat = categoriaPorSlug.get(c.campo.relacao)!
-    return ITENS.filter(i => i.categoria === c.campo.relacao)
+/** As opções de um campo para o filtro: opção, membro, item relacionado ou sim e não. */
+export function opcoesDoCampo(slug: string, refId: string, r: Pick<RotulosDoMotor, 'sim' | 'nao'>): { value: string, label: string }[] {
+  const c = campoDe(slug, refId)
+  if (!c) return []
+  if (c.type === 'inputSwitch') return [{ value: 'true', label: r.sim }, { value: 'false', label: r.nao }]
+  if (c.relacao) {
+    const cat = categoriaPorSlug.get(c.relacao)!
+    return ITENS.filter(i => i.categoria === c.relacao)
       .map(i => ({ value: String(i.id), label: String(i.data[cat.display] ?? i.reference) }))
       .sort((a, b) => a.label.localeCompare(b.label))
   }
-  return c.campo.options ?? []
+  return c.options ?? []
 }
 
 /* ---------------------------------- funções -------------------------------- */
@@ -343,26 +323,16 @@ export function aplicarFuncao(f: Funcao, ids: number[], medida?: string): number
 
 export interface Contexto {
   periodo: Periodo
-  filtros: FiltroDoDashboard[]
-  comuns: CampoComum[]
+  /** Filtros do dashboard e da visão. Cada um só vale no painel da categoria dele. */
+  filtros: FiltroDeCampo[]
   rotulos: RotulosDoMotor
 }
 
-/** Os itens que o painel conta, antes de agrupar: categoria, condições, período e filtros do topo. */
-export function recorte(cfg: ConfigDoPainel, ctx: Contexto): { ids: number[], filtrosIgnorados: string[] } {
-  const cat = categoriaPorSlug.get(cfg.categoria)
-  if (!cat) return { ids: [], filtrosIgnorados: [] }
+/** Os itens que o painel conta, antes de agrupar: categoria, filtros do painel, período e filtros do dashboard. */
+export function recorte(cfg: ConfigDoPainel, ctx: Contexto): number[] {
+  if (!categoriaPorSlug.get(cfg.categoria)) return []
   const janela = cfg.periodo === 'dashboard' ? intervalo(ctx.periodo) : null
-  const ignorados: string[] = []
-  const aplicaveis: { refId: string, valores: string[] }[] = []
-  for (const f of ctx.filtros) {
-    if (!f.valores.length) continue
-    const comum = ctx.comuns.find(c => c.chave === f.chave)
-    const refId = comum?.em[cfg.categoria]
-    if (!comum) continue
-    if (!refId) ignorados.push(comum.nome)
-    else aplicaveis.push({ refId, valores: f.valores })
-  }
+  const filtros = [...cfg.condicoes, ...ctx.filtros].filter(f => f.categoria === cfg.categoria && !filtroVazio(f))
   const ids: number[] = []
   for (const item of ITENS) {
     if (item.categoria !== cfg.categoria) continue
@@ -370,28 +340,26 @@ export function recorte(cfg: ConfigDoPainel, ctx: Contexto): { ids: number[], fi
       const d = comoData(bruto(item, cfg.campoDeData))
       if (!d || d < janela.from || d > janela.to) continue
     }
-    if (cfg.condicoes.length) {
-      const ok = cfg.juncao === 'e'
-        ? cfg.condicoes.every(c => passa(item, c, cat))
-        : cfg.condicoes.some(c => passa(item, c, cat))
-      if (!ok) continue
-    }
-    let dentro = true
-    for (const f of aplicaveis) {
-      const v = f.refId === '__proprio' ? String(item.id) : bruto(item, f.refId)
-      const lista = Array.isArray(v) ? v : [String(v ?? '')]
-      if (!lista.some(x => f.valores.includes(x))) { dentro = false; break }
-    }
-    if (dentro) ids.push(item.id)
+    if (filtros.every(f => passaNoFiltro(item, f))) ids.push(item.id)
   }
-  return { ids, filtrosIgnorados: ignorados }
+  return ids
+}
+
+/**
+ * A tendência do cartão: o valor em cada pedaço do período, para a linha fina do
+ * `EnStatCard` (a mesma do painel de tarefas). Sem período, não há tendência.
+ */
+export function serieDoCartao(cfg: ConfigDoPainel, ctx: Contexto): number[] | undefined {
+  if (cfg.periodo !== 'dashboard') return undefined
+  const r = agregar({ ...cfg, visualizacao: 'linha', agruparPor: cfg.campoDeData, quebrarPor: undefined, granularidade: granularidadeSugerida(ctx.periodo) }, ctx)
+  return r.grupos.length > 1 ? r.grupos.map(g => g.valor) : undefined
 }
 
 export function agregar(cfg: ConfigDoPainel, ctx: Contexto): Resultado {
-  const { ids, filtrosIgnorados } = recorte(cfg, ctx)
+  const ids = recorte(cfg, ctx)
   const total = aplicarFuncao(cfg.funcao, ids, cfg.medida)
   const dim = campoDe(cfg.categoria, cfg.agruparPor)
-  const base: Resultado = { grupos: [], quebras: [], total, itens: ids.length, ids, multiplo: false, emOutros: 0, filtrosIgnorados }
+  const base: Resultado = { grupos: [], quebras: [], total, itens: ids.length, ids, multiplo: false, emOutros: 0 }
   if (!dim || cfg.visualizacao === 'numero') return base
 
   const quebra = campoDe(cfg.categoria, cfg.quebrarPor)
@@ -444,7 +412,7 @@ export function agregar(cfg: ConfigDoPainel, ctx: Contexto): Resultado {
   })
 
   /* Opção que existe e ficou sem item também aparece, com zero (só lista de opções, sem filtro de valor). */
-  if (dim.options && !ehData(dim) && dim.refId !== 'user' && !cfg.condicoes.some(c => c.campo === dim.refId)) {
+  if (dim.options && !ehData(dim) && dim.refId !== 'user' && !cfg.condicoes.some(c => c.campo === dim.refId) && !ctx.filtros.some(f => f.categoria === cfg.categoria && f.campo === dim.refId)) {
     for (const o of dim.options) {
       if (!porGrupo.has(o.value)) grupos.push({ chave: o.value, rotulo: o.label, valor: 0, ids: [], partes: {}, idsDaParte: {} })
     }
@@ -503,31 +471,47 @@ export function agregar(cfg: ConfigDoPainel, ctx: Contexto): Resultado {
   return { ...base, grupos, quebras, multiplo: ehMultiplo(dim) || (!!quebra && ehMultiplo(quebra)), emOutros }
 }
 
-/* ------------------------------ sugestão de gráfico ------------------------- */
+/* --------------------------- campos de cada visualização --------------------- */
 
-/** As visualizações que fazem sentido com o dado escolhido, a sugerida primeiro. */
-export function visualizacoesPossiveis(cfg: Pick<ConfigDoPainel, 'categoria' | 'agruparPor' | 'quebrarPor' | 'funcao'>): { possiveis: Visualizacao[], sugerida: Visualizacao } {
-  const dim = campoDe(cfg.categoria, cfg.agruparPor)
-  if (!dim) return { possiveis: ['numero'], sugerida: 'numero' }
-  const comQuebra = !!cfg.quebrarPor
-  if (ehData(dim)) return { possiveis: ['linha', 'area', 'barras', 'tabela'], sugerida: comQuebra ? 'area' : 'linha' }
-  const muitos = dim.type === 'EnRel' || dim.type === 'EnRelMulti' || dim.refId === 'user' || (dim.options?.length ?? 0) > 8
-  const possiveis: Visualizacao[] = ['barras', 'barrasHorizontais', 'tabela']
-  if (!comQuebra && !muitos && (dim.options?.length ?? 2) <= 6) possiveis.push('rosca')
-  if (!comQuebra && dim.options && !ehMultiplo(dim) && (cfg.funcao === 'contagem' || cfg.funcao === 'soma')) possiveis.push('funil')
-  return { possiveis, sugerida: muitos ? 'barrasHorizontais' : 'barras' }
+/*
+ * Rodada 2: o tipo de visualização vem primeiro, como no Power BI e no Looker Studio,
+ * e define que campos cabem em cada lugar. As regras abaixo decidem o que cada
+ * seletor do construtor lista.
+ */
+
+/** O campo que cabe no eixo (ou nas fatias, etapas, linhas) de cada visualização. */
+export function cabeNoEixo(v: Visualizacao, c: CampoDoMock): boolean {
+  if (!ehDimensao(c)) return false
+  switch (v) {
+    case 'numero': return false
+    case 'linha': case 'area': return ehData(c)
+    case 'barrasHorizontais': return !ehData(c)
+    case 'rosca': return !ehData(c) && !c.relacao && c.refId !== 'user' && (c.type === 'inputSwitch' || (c.options?.length ?? 99) <= 8)
+    case 'funil': return !!c.options && !ehMultiplo(c) && !ehData(c) && c.refId !== 'user'
+    default: return true
+  }
 }
 
-/** Painel novo: contagem da categoria, sem agrupamento, seguindo o período do topo. */
+/** A visualização que separa cada barra ou linha em cores (a legenda). */
+export const aceitaLegenda = (v: Visualizacao) => v === 'barras' || v === 'barrasHorizontais' || v === 'linha' || v === 'area' || v === 'tabela'
+export const cabeNaLegenda = (c: CampoDoMock) => ehDimensao(c) && !ehData(c)
+/** O funil só soma ou conta: a etapa acumula as seguintes. */
+export const funcoesDa = (v: Visualizacao): Funcao[] => v === 'funil' ? ['contagem', 'soma'] : ['contagem', 'soma', 'media', 'mediana', 'minimo', 'maximo', 'distintos']
+/** Tamanho inicial na grade de 12 colunas. */
+export const TAMANHOS: Record<Visualizacao, [number, number]> = {
+  numero: [3, 2], barras: [6, 5], barrasHorizontais: [6, 5], linha: [6, 5], area: [6, 5], rosca: [4, 5], funil: [4, 5], tabela: [6, 4],
+}
+
+/** Painel novo: cartão com a contagem da categoria, seguindo o período do topo. */
 export function painelEmBranco(id: string, categoria = CATEGORIAS[0]!.slug): ConfigDoPainel {
   return {
     id,
     titulo: '',
+    descricao: '',
     categoria,
     funcao: 'contagem',
     granularidade: 'mes',
     condicoes: [],
-    juncao: 'e',
     periodo: 'dashboard',
     campoDeData: 'created_at',
     visualizacao: 'numero',

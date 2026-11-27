@@ -2,8 +2,8 @@
 /**
  * A casca do ENSPACE, copiada da tela de develop.
  *
- * ⚠️ NADA AQUI É PROPOSTA, com UMA exceção marcada abaixo: a entrada
- * "Dashboards" no grupo Membro. Menu lateral, barra do topo, trilha e atalhos
+ * ⚠️ NADA AQUI É PROPOSTA, com UMA exceção marcada abaixo: o grupo
+ * "Relatórios" no menu Membro (rodada 2). Menu lateral, barra do topo, trilha e atalhos
  * são a reprodução do que o produto já tem, para o dashboard ser avaliado no
  * lugar onde ele vive. Se alguma outra coisa estiver diferente do develop, é
  * defeito de cópia, não sugestão de mudança.
@@ -12,8 +12,9 @@
  * visitada em 11/11/2026 (print `evidencias/01-tela-de-painel-hoje.jpg`). A
  * estrutura do template veio do protótipo `painel-de-tarefas`; a lista do menu
  * foi refeita pela print: neste workspace não há "Credenciais", "Integrações"
- * expande e o grupo Membro tem a chave crua "menu.member.reports.label", que
- * fica como está (achado de texto no BRIEFING.md).
+ * expande. Rodada 2 (develop, 27/11/2026, print `evidencias/24-develop-painel-de-tarefas.jpg`):
+ * a chave crua "menu.member.reports.label" virou "Relatórios", e Tarefas tem os filhos
+ * Painel (com selo Novo), Agendadas e Rápidas.
  *
  * Na implementação isto é o `EnLayout` com os slots `sidebar-header`,
  * `sidebar-default`, `navbar-leading`, `navbar-title` e `navbar-trailing`
@@ -48,13 +49,30 @@ const membro: ItemDeMenu[] = [
   { chave: 'inicio', icone: 'i-lucide-house' },
   { chave: 'spaceflows', icone: 'i-lucide-workflow' },
   { chave: 'categorias', icone: 'i-lucide-layout-grid', expansivel: true },
-  { chave: 'tarefas', icone: 'i-lucide-file-check', expansivel: true },
+  // Rodada 2: o Painel de tarefas sai daqui e vai para Relatórios. Ficam Agendadas e Rápidas.
+  {
+    chave: 'tarefas',
+    icone: 'i-lucide-file-check',
+    expansivel: true,
+    filhos: [
+      { chave: 'agendadas', icone: 'i-lucide-calendar-clock' },
+      { chave: 'rapidas', icone: 'i-lucide-clipboard-check' },
+    ],
+  },
   { chave: 'agenda', icone: 'i-lucide-calendar-days' },
-  // PROPOSTA: a única mudança na casca. O dashboard vira entrada nativa do
-  // menu, sem passar por Interface > Telas e Interface > Menus (recomendação 2
-  // do relatório). Hoje a tela de Painéis só aparece num menu criado à mão.
-  { chave: 'dashboards', icone: 'i-lucide-chart-column', ativo: true, novo: true },
-  { chave: 'relatorios', icone: 'i-lucide-file-down' },
+  // PROPOSTA (rodada 2): a única mudança na casca. Relatórios vira grupo, com os
+  // relatórios exportados de hoje, o painel de tarefas (que sai de Tarefas) e os
+  // dashboards. O dashboard é entrada nativa, sem passar por Interface > Telas.
+  {
+    chave: 'relatorios',
+    icone: 'i-lucide-file-down',
+    expansivel: true,
+    filhos: [
+      { chave: 'relatoriosExportados', icone: 'i-lucide-file-down' },
+      { chave: 'painelDeTarefas', icone: 'i-lucide-calendar-check-2' },
+      { chave: 'dashboards', icone: 'i-lucide-chart-column', ativo: true, novo: true },
+    ],
+  },
   { chave: 'knowledge', icone: 'i-lucide-table-2', expansivel: true },
 ]
 
@@ -75,7 +93,8 @@ const ajuda: ItemDeMenu[] = [
   { chave: 'documentacao', icone: 'i-lucide-file-text', externo: true },
 ]
 
-const abertos = ref<string[]>([])
+/* Relatórios abre com a tela: o item ativo fica à vista. */
+const abertos = ref<string[]>(['relatorios'])
 
 function alternar(chave: string) {
   abertos.value = abertos.value.includes(chave)
@@ -159,7 +178,7 @@ const menuRecolhido = ref(false)
               </template>
             </button>
 
-            <!-- Filhos: nesta tela nenhuma seção abre sozinha. -->
+            <!-- Filhos: Relatórios abre sozinho, porque Dashboards está dentro dele. -->
             <template v-if="!menuRecolhido && item.filhos && abertos.includes(item.chave)">
               <button
                 v-for="filho in item.filhos"

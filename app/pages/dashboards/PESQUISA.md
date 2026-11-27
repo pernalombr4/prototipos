@@ -45,3 +45,24 @@ Seção 5 do relatório. Em resumo:
 - aviso na tela de que o número depende de quem vê;
 - drill-down até a listagem real e editável da categoria, com o recorte aplicado;
 - cartão com subtítulo que diz o que conta, nascido da configuração.
+
+## Rodada 2 · 2026-11-27: o que mudou na leitura das referências
+
+Sem pesquisa nova nesta rodada. O retorno da redatora pediu 3 alinhamentos com as ferramentas de BI do relatório:
+
+- **O nome do painel de número:** o Power BI chama de **Card** (em português, **Cartão**); o Looker Studio chama de
+  Scorecard. O protótipo usa "Cartão", que também é o nome do `EnStatCard` do SDK.
+- **A ordem do construtor**, como Power BI, Looker Studio e as explorações do GA4 a seguem:
+  1. a fonte (a tabela, a categoria);
+  2. o tipo de visualização;
+  3. os campos nos "poços" que o tipo pede: eixo, valor e legenda;
+  4. os filtros do visual;
+  5. o período;
+  6. a ordem;
+  7. o título e a formatação, por último.
+  A rodada 1 pedia o cálculo antes do tipo, o que deixava a pessoa sem saber onde cada campo ia aparecer.
+- **"Legenda" no lugar de "Dividir por":** é o nome do poço de quebra no Power BI e no Looker Studio ("Breakdown
+  dimension"), e não lembra conta de divisão.
+- **Modal no lugar do painel lateral:** o relatório apontava painel lateral com prévia. A redatora preferiu o modal largo,
+  com o formulário à esquerda e a prévia à direita, como o editor de visual do Metabase e do Looker Studio; o modal não abre
+  outro modal por cima.

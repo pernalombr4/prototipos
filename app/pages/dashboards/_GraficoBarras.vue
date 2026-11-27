@@ -89,7 +89,9 @@ const gatilhos = { [StackedBar.selectors.bar]: dica }
 
 <template>
   <div class="flex flex-col">
+    <!-- A chave remonta o gráfico quando as partes mudam: o unovis não tira a série que saiu da pilha. -->
     <EnChart
+      :key="series.map(s => s.chave).join('|')"
       :data="dados"
       :height="altura"
       :aria-label="rotuloAcessivel"
