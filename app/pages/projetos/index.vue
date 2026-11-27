@@ -40,6 +40,7 @@ import Telas from './_Telas.vue'
 import FormularioDoProjeto from './_FormularioDoProjeto.vue'
 import MoverCategoria from './_MoverCategoria.vue'
 import JanelasDoProjeto from './_JanelasDoProjeto.vue'
+import ConfirmarMenuParaTodos from './_ConfirmarMenuParaTodos.vue'
 
 import briefingMd from './BRIEFING.md?raw'
 import pesquisaMd from './PESQUISA.md?raw'
@@ -255,6 +256,7 @@ const pessoaEscolhida = computed({
     <FormularioDoProjeto :t="t" />
     <MoverCategoria :t="t" />
     <JanelasDoProjeto />
+    <ConfirmarMenuParaTodos />
     <TodasAsCategorias v-model:open="vendoTodasCategorias" :t="t" />
 
     <!-- ANDAIME DE PROTÓTIPO, não faz parte da proposta -->

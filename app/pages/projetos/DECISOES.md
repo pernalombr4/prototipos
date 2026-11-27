@@ -755,3 +755,39 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - `evidencias/entrega-r12-configurar-acesso.png`: Acesso e segurança, com participantes e visibilidade juntos.
   - O detector de seta passou nas 10. Em 4, a barra de rolagem dava falso positivo; os prints foram refeitos com a
     barra escondida por CSS temporário na página.
+
+## Rodada 13 · 2026-11-27
+
+- **Pedido da redatora:** "\"mostrar no meu menu\" deve ser opçao \"adicionar ao menu\" e na hora que editar o menu
+  aparece salvar pra mim ou salvar pra todos se for o owner. se for user comum é só salvar pra ele." e "deve haver uma
+  coluna na tabela do projeto de oculto ou visivel no menu. coluna de visibilidade".
+- **De onde vem a regra:** lida no código do front do ENSPACE (develop, 2026-11-27), na barra de informações do item e
+  na barra de pastas:
+  - a mudança pessoal salva na hora; o aviso diz "Só para você." e traz Desfazer;
+  - "Para todos" aparece só para quem administra (Proprietário, quem cria e edita na categoria ou o Full, quando o
+    workspace permite) e pede confirmação, com os botões Cancelar e "Salvar para todos";
+  - o "Para todos" muda o padrão para quem não personalizou o seu; quem personalizou fica com o dele;
+  - os rótulos do produto: "Só para mim", "Para todos", "Salvar para todos", "Aplicar minha ordem para todos".
+- **No protótipo:**
+  - "Mostrar no meu menu" virou "Adicionar ao menu", e "Ocultar do meu menu" virou "Ocultar do menu";
+  - usuário comum: a opção salva direto, só para ele, com o aviso "Só para você." e Desfazer;
+  - Proprietário e Full: a mesma opção abre "Salvar para mim" e "Salvar para todos". No topo da página do projeto, o
+    botão abre as 2 escolhas;
+  - "Salvar para todos" pede confirmação ("Adicionar ao menu de todos?" ou "Ocultar do menu de todos?") e muda a
+    opção "Mostrar no menu de todos os participantes" do projeto;
+  - projeto que está no menu de quem administra, mas não no de todos, ganha o atalho "Adicionar ao menu de todos";
+  - Todos os projetos ganhou a coluna "Visibilidade no menu": Visível ou Oculto no menu de quem vê, e "No menu de
+    todos" embaixo quando o projeto vai para o menu de todos. Projeto sem acesso ou arquivado fica sem valor;
+  - o nome da coluna leva "no menu" porque a coluna Visibilidade (Aberto, Fechado, Privado) já existe e diz quem vê o
+    projeto.
+- **Fora desta rodada:** a ordem do menu continua só pessoal. O "Aplicar minha ordem para todos" das pastas fica para
+  quando a redatora pedir.
+- **Fronteira:** mudam as opções de menu do projeto (menu lateral, Todos os projetos e página do projeto) e a tabela
+  de Todos os projetos. A casca fica como estava.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r13-pagina-salvar-para-mim-ou-todos.png`: Proprietária no topo da página, com as 2 escolhas;
+  - `evidencias/entrega-r13-confirmar-para-todos.png`: a confirmação do "Salvar para todos";
+  - `evidencias/entrega-r13-coluna-visibilidade-no-menu.png`: a coluna Visibilidade no menu;
+  - `evidencias/entrega-r13-usuario-comum-so-para-voce.png`: usuário comum adiciona ao menu, com "Só para você." e
+    Desfazer.
+  - O detector de seta passou nas 4. A da página foi refeita com a barra de rolagem escondida por CSS temporário.

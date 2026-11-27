@@ -37,6 +37,7 @@ import { textosDaTarefa } from './textosDaTarefa'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { useMetasEDiscussoes } from './metasEDiscussoes'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
+import { useMenuDoProjeto } from './menuDoProjeto'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -77,14 +78,10 @@ function nomeDe(x: Participante) {
 }
 const iconeDoTipo = { pessoa: 'i-lucide-user-round', grupo: 'i-lucide-users-round', cargo: 'i-lucide-shield-check' } as const
 
-function mostrar() {
-  prj.mostrarNoMenu(p.value.id)
-  toast.add({ title: props.t.diretorio.mostrado(p.value.nome), icon: 'i-lucide-check', color: 'success' })
-}
-function ocultar() {
-  prj.ocultarDoMenu(p.value.id)
-  toast.add({ title: props.t.painel.ocultado(p.value.nome), icon: 'i-lucide-eye-off', color: 'neutral' })
-}
+/** Rodada 13: Adicionar ao menu e Ocultar do menu. Quem administra escolhe Salvar para mim ou Salvar para todos. */
+const menuDoProjeto = useMenuDoProjeto()
+const tmenu = menuDoProjeto.tm
+const noMeuMenu = computed(() => prj.estaNoMenu(p.value.id))
 function configurar(aba = 'geral') {
   prj.janelas.configurar.value = { id: p.value.id, aba }
 }
@@ -159,8 +156,12 @@ const abas = computed<TabsItem[]>(() => [
         </p>
       </div>
       <div class="flex shrink-0 items-center gap-2">
-        <UButton v-if="!prj.estaNoMenu(p.id) && p.status === 'ativo'" :label="t.pagina.mostrarNoMenu" icon="i-lucide-panel-left" color="neutral" variant="outline" size="sm" @click="mostrar" />
-        <UButton v-else-if="p.status === 'ativo'" :label="t.pagina.ocultarDoMenu" icon="i-lucide-eye-off" color="neutral" variant="ghost" size="sm" @click="ocultar" />
+        <template v-if="p.status === 'ativo'">
+          <UDropdownMenu v-if="prj.souDono.value" :items="[menuDoProjeto.escolhas(p, !noMeuMenu)]" :content="{ align: 'end' }">
+            <UButton :label="noMeuMenu ? tmenu.ocultar : tmenu.adicionar" :icon="noMeuMenu ? 'i-lucide-eye-off' : 'i-lucide-panel-left'" trailing-icon="i-lucide-chevron-down" color="neutral" :variant="noMeuMenu ? 'ghost' : 'outline'" size="sm" />
+          </UDropdownMenu>
+          <UButton v-else :label="noMeuMenu ? tmenu.ocultar : tmenu.adicionar" :icon="noMeuMenu ? 'i-lucide-eye-off' : 'i-lucide-panel-left'" color="neutral" :variant="noMeuMenu ? 'ghost' : 'outline'" size="sm" @click="menuDoProjeto.salvarParaMim(p, !noMeuMenu)" />
+        </template>
         <UButton v-if="admin" :label="t.pagina.configurar" icon="i-lucide-settings" color="neutral" variant="outline" size="sm" @click="configurar()" />
       </div>
     </div>

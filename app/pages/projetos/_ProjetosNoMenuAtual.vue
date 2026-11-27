@@ -17,6 +17,7 @@ import type { Projeto } from './mocks'
 import ConteudoDoProjeto from './_ConteudoDoProjeto.vue'
 import AdicionarAoProjeto from './_AdicionarAoProjeto.vue'
 import { useAdicionarAoProjeto } from './adicionarAoProjeto'
+import { useMenuDoProjeto } from './menuDoProjeto'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, PONTO_DA_SITUACAO, useMarcaDeProposta, useProjetos } from './estado'
 
@@ -38,6 +39,8 @@ const projetoAtivo = computed(() => tela.value.tipo === 'projeto' ? tela.value.i
 const categoriaAtiva = computed(() => tela.value.tipo === 'categoria' ? tela.value.id : null)
 
 const adicionar = useAdicionarAoProjeto()
+/** Rodada 13: Ocultar do menu, com Salvar para mim ou Salvar para todos para quem administra. */
+const menuDoProjeto = useMenuDoProjeto()
 
 function acoesDoProjeto(p: Projeto): DropdownMenuItem[][] {
   return [
@@ -50,14 +53,7 @@ function acoesDoProjeto(p: Projeto): DropdownMenuItem[][] {
     ],
     [
       { label: props.t.painel.copiarLink, icon: 'i-lucide-link', onSelect: () => toast.add({ title: props.t.painel.linkCopiado, icon: 'i-lucide-check', color: 'success' }) },
-      {
-        label: props.t.painel.ocultar,
-        icon: 'i-lucide-eye-off',
-        onSelect: () => {
-          prj.ocultarDoMenu(p.id)
-          toast.add({ title: props.t.painel.ocultado(p.nome), icon: 'i-lucide-eye-off', color: 'neutral' })
-        },
-      },
+      ...menuDoProjeto.itens(p),
     ],
   ]
 }

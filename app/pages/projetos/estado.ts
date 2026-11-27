@@ -106,6 +106,8 @@ export function useProjetos() {
   const categorias = useState<Categoria[]>('prj-categorias', () => categoriasBase.map(c => ({ ...c })))
   /** O menu de cada pessoa: os projetos que ela mostra no painel, na ordem dela. */
   const meuMenu = useState<Record<number, number[]>>('prj-menu', () => ({}))
+  /** Rodada 13: quem mexeu no próprio menu. O "Para todos" não muda o menu dessas pessoas, como no ENSPACE. */
+  const personalizados = useState<number[]>('prj-menu-pessoal', () => [])
   const area = useState<Area>('prj-area', () => 'inicio')
   const tela = useState<Tela>('prj-tela', () => ({ tipo: 'inicio' }))
   /** Projetos abertos no painel (expandidos). Por pessoa, no produto. */
@@ -214,15 +216,35 @@ export function useProjetos() {
   })
   const estaNoMenu = (id: number) => noMenu.value.some(p => p.id === id)
 
+  function personalizar() {
+    if (!personalizados.value.includes(eu.value)) personalizados.value = [...personalizados.value, eu.value]
+  }
   function mostrarNoMenu(id: number) {
     const atual = meuMenu.value[eu.value] ?? []
     if (!atual.includes(id)) meuMenu.value = { ...meuMenu.value, [eu.value]: [...atual, id] }
+    personalizar()
   }
   function ocultarDoMenu(id: number) {
     meuMenu.value = { ...meuMenu.value, [eu.value]: (meuMenu.value[eu.value] ?? []).filter(x => x !== id) }
+    personalizar()
   }
   function reordenar(ids: number[]) {
     meuMenu.value = { ...meuMenu.value, [eu.value]: ids }
+    personalizar()
+  }
+  /**
+   * Rodada 13: "Salvar para todos". Muda o padrão do projeto (noMenuDeTodos) e o menu de quem não personalizou o
+   * próprio menu, mais o de quem salvou, como o "Aplicar para todos" da barra de informações do item.
+   */
+  function salvarParaTodos(id: number, mostrar: boolean) {
+    atualizarProjeto(id, { noMenuDeTodos: mostrar })
+    const novo: Record<number, number[]> = {}
+    for (const [k, ids] of Object.entries(meuMenu.value)) {
+      const quem = Number(k)
+      if (quem !== eu.value && personalizados.value.includes(quem)) { novo[quem] = ids; continue }
+      novo[quem] = mostrar ? (ids.includes(id) ? ids : [...ids, id]) : ids.filter(x => x !== id)
+    }
+    meuMenu.value = novo
   }
 
   /** Categorias que a pessoa vê: as do workspace (pelo cargo) e as dos projetos em que entra. */
@@ -327,7 +349,8 @@ export function useProjetos() {
       ]
       avisos.value = [...avisos.value, ...avisosBase.filter(a => deOrigem(a.categoria)).map(a => ({ ...a, categoria: deOrigem(a.categoria)!.id }))]
     }
-    mostrarNoMenu(id)
+    // criar o projeto põe no menu de quem criou sem contar como menu personalizado
+    meuMenu.value = { ...meuMenu.value, [eu.value]: [...(meuMenu.value[eu.value] ?? []), id] }
     expandidos.value = [...expandidos.value, id]
     area.value = 'projetos'
     tela.value = { tipo: 'projeto', id }
@@ -579,7 +602,7 @@ export function useProjetos() {
     cenario, estadoDaTela, menu, eu, euPessoa, souDono, souConvidado,
     projetos, categorias, area, tela, expandidos, pedidos, janelas,
     participa, papel, enxerga, entra, podeAdministrar,
-    ativos, visiveis, queEntro, noMenu, estaNoMenu, mostrarNoMenu, ocultarDoMenu, reordenar,
+    ativos, visiveis, queEntro, noMenu, estaNoMenu, mostrarNoMenu, ocultarDoMenu, reordenar, salvarParaTodos,
     categoriasDe, categoriasDoWorkspace, veCategoria, projetoDa,
     aplicarCenario, trocarPessoa, abrirProjeto, abrirCategoria,
     criarProjeto, referenciaLivre, moverCategoria, atualizarProjeto, arquivar, restaurar, excluir, pedirAcesso, alcance, quantosVeem,

@@ -22,6 +22,7 @@ import type { Textos } from './textos'
 import { iniciais, pessoa, type Projeto, type Situacao, type Visibilidade } from './mocks'
 import { COR_DA_SITUACAO, COR_DO_PROJETO, ICONE_DA_SITUACAO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
 import Paginador from './_Paginador.vue'
+import { useMenuDoProjeto } from './menuDoProjeto'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -114,6 +115,7 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'acao', label: td.value.colunaAcao },
   { key: 'nome', label: td.value.colunaNome, sortable: true },
   { key: 'visibilidade', label: td.value.colunaVisibilidade },
+  { key: 'noMenu', label: tmenu.value.colunaNoMenu },
   { key: 'situacao', label: props.t.situacao.coluna },
   { key: 'admins', label: td.value.colunaAdmins },
   { key: 'participantes', label: td.value.colunaParticipantes, sortable: true },
@@ -145,10 +147,6 @@ const opcoesDeAdmin = computed(() => {
 })
 const rotuloDoFiltro = (nome: string, n: number) => n ? `${nome} (${n})` : nome
 
-function mostrar(p: Projeto) {
-  prj.mostrarNoMenu(p.id)
-  toast.add({ title: td.value.mostrado(p.nome), icon: 'i-lucide-check', color: 'success' })
-}
 function pedir(p: Projeto) {
   prj.pedirAcesso(p.id)
   toast.add({ title: td.value.pedidoEnviado(p.nome), icon: 'i-lucide-send', color: 'success' })
@@ -158,10 +156,9 @@ function restaurar(p: Projeto) {
   toast.add({ title: td.value.restaurado(p.nome), icon: 'i-lucide-archive-restore', color: 'success' })
 }
 
-function ocultar(p: Projeto) {
-  prj.ocultarDoMenu(p.id)
-  toast.add({ title: props.t.painel.ocultado(p.nome), icon: 'i-lucide-eye-off', color: 'neutral' })
-}
+/** Rodada 13: Adicionar ao menu e Ocultar do menu, com Salvar para mim ou Salvar para todos para quem administra. */
+const menuDoProjeto = useMenuDoProjeto()
+const tmenu = menuDoProjeto.tm
 const copiarLink = () => toast.add({ title: props.t.painel.linkCopiado, icon: 'i-lucide-check', color: 'success' })
 function acoesDaLinha(p: Projeto): DropdownMenuItem[][] {
   const tp = props.t.painel
@@ -174,9 +171,7 @@ function acoesDaLinha(p: Projeto): DropdownMenuItem[][] {
   const grupos: DropdownMenuItem[][] = [
     [
       { label: tp.abrirPagina, icon: 'i-lucide-panel-top', onSelect: () => prj.abrirProjeto(p.id) },
-      prj.estaNoMenu(p.id)
-        ? { label: tp.ocultar, icon: 'i-lucide-eye-off', onSelect: () => ocultar(p) }
-        : { label: td.value.mostrar, icon: 'i-lucide-panel-left', onSelect: () => mostrar(p) },
+      ...menuDoProjeto.itens(p),
       link,
     ],
   ]
@@ -381,6 +376,18 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
               size="sm"
             />
             <span v-else class="text-sm text-dimmed">{{ t.situacao.semStatus }}</span>
+          </template>
+          <template #cell-noMenu="{ row }">
+            <span v-if="(row as Linha).projeto.status === 'ativo' && prj.entra((row as Linha).projeto)" class="flex flex-col items-start gap-0.5">
+              <UBadge
+                :label="prj.estaNoMenu((row as Linha).projeto.id) ? tmenu.visivel : tmenu.oculto"
+                :icon="prj.estaNoMenu((row as Linha).projeto.id) ? 'i-lucide-eye' : 'i-lucide-eye-off'"
+                :color="prj.estaNoMenu((row as Linha).projeto.id) ? 'success' : 'neutral'"
+                variant="subtle"
+                size="sm"
+              />
+              <span v-if="(row as Linha).projeto.noMenuDeTodos" class="text-xs text-muted">{{ tmenu.padraoParaTodos }}</span>
+            </span>
           </template>
           <template #cell-visibilidade="{ row }">
             <UBadge
