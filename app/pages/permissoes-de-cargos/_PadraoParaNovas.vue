@@ -104,7 +104,7 @@ const colunas = computed<TableColumn<Linha>[]>(() => [
             v-if="(acoesDeAlcance as Acao[]).includes(a)"
             :valor="regraMarcada(a as AcaoDeAlcance, row.original.tipo)"
             :rotulo="`${row.original.tipo === 'criador' ? t.subAlcance : t.subResponsavel}: ${t.acoes[a]} (${t.padraoLinha})`"
-            :dica="estado.padrao[a] ? '' : t.acaoBloqueada(t.acoes[a])"
+            :dica="estado.padrao[a] ? '' : t.acaoDesligada(t.acoes[a])"
             :desabilitada="somenteLeitura || !estado.padrao[a]"
             @alterar="v => definirRegra(estado, null, a as AcaoDeAlcance, row.original.tipo as keyof RegraDeItens, v)"
           />

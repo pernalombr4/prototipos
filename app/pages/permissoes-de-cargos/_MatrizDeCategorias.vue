@@ -312,8 +312,12 @@ function travadaNaOrigem(c: CategoriaMock, a: Acao, o: number) {
 function restricoes(c: CategoriaMock) {
   const saida: { rotulo: string, icone: string, dica: string }[] = []
   const o = resumoDeOrigens(props.estado, c)
-  if (o)
-    saida.push({ rotulo: o.n < o.total ? props.t.formulariosDe(o.n, o.total) : props.t.formulariosEmParte, icone: 'i-lucide-split', dica: dicaDeOrigens(c) })
+  if (o) {
+    // Conta só os formulários: "Itens sem formulário" aparece na dica, não no número.
+    const forms = o.alcancadas.filter(x => x !== SEM_FORMULARIO).length
+    const total = c.formularios.length
+    saida.push({ rotulo: forms < total ? props.t.formulariosDe(forms, total) : props.t.formulariosEmParte, icone: 'i-lucide-split', dica: dicaDeOrigens(c) })
+  }
   const k = resumoDeCampos(props.estado, c)
   if (k)
     saida.push({ rotulo: props.t.camposDeTotal(k.liberados, k.total), icone: 'i-lucide-eye-off', dica: props.t.restricaoDica })
@@ -520,7 +524,7 @@ const meta = {
             v-if="(acoesDeAlcance as Acao[]).includes(a)"
             :valor="regraMarcada(row.original.c, a as AcaoDeAlcance, row.original.tipo)"
             :rotulo="`${row.original.tipo === 'criador' ? t.subAlcance : t.subResponsavel}: ${t.acoes[a]} (${row.original.c.name})`"
-            :dica="acoesDaCategoria(estado, row.original.c.id)[a] ? '' : t.acaoBloqueada(t.acoes[a])"
+            :dica="acoesDaCategoria(estado, row.original.c.id)[a] ? '' : t.acaoDesligada(t.acoes[a])"
             :desabilitada="somenteLeitura || !acoesDaCategoria(estado, row.original.c.id)[a] || (row.original.tipo === 'responsavel' && !camposPessoa(row.original.c).length)"
             @alterar="v => definirRegra(estado, row.original.c, a as AcaoDeAlcance, row.original.tipo as keyof RegraDeItens, v)"
           />
