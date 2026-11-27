@@ -144,9 +144,9 @@ function aoTeclar(e: KeyboardEvent) {
   -->
   <UContextMenu :items="props.acoes" :disabled="!props.acoes?.length">
   <div
-    class="group relative animate-[entrada_0.22s_ease-out_both]"
+    class="group relative"
     :class="[
-      props.saindo ? 'opacity-40' : '',
+      props.saindo ? 'opacity-40' : 'animate-[entrada_0.22s_ease-out_both]',
       props.marca === 'dentro' ? (props.recusando ? 'rounded-md bg-error/10 ring-1 ring-error' : 'rounded-md bg-primary/10 ring-1 ring-primary') : '',
       props.marca === 'antes' ? 'before:absolute before:inset-x-1 before:-top-px before:z-20 before:h-0.5 before:rounded-full' : '',
       props.marca === 'depois' ? 'after:absolute after:inset-x-1 after:-bottom-px after:z-20 after:h-0.5 after:rounded-full' : '',

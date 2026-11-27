@@ -73,6 +73,7 @@ const itens = computed(() => [[
       v-model:open="aberto"
       :items="itens"
       :portal="false"
+      :ui="{ content: 'z-50' }"
       :content="props.formato === 'linha' ? { side: 'top', align: 'end', sideOffset: 6 } : { side: 'right', align: 'end', sideOffset: 10 }"
     >
       <UButton

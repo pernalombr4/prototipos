@@ -427,9 +427,9 @@ function classeDaArea(a: Area) {
 </script>
 
 <template>
-  <div class="flex h-full">
+  <div class="flex h-full min-w-0 flex-1">
     <!-- ==================== A TRILHA ==================== -->
-    <div class="flex w-[4.5rem] shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-default bg-accented/40 py-2">
+    <div class="z-10 flex w-[4.5rem] shrink-0 flex-col items-center gap-1 overflow-y-auto border-r border-default bg-accented/40 py-2">
       <!--
         RECOLHIDO: "»" é o primeiro ícone, como no ClickUp, e reabre o painel.
         Os popovers continuam valendo em todos os ícones.

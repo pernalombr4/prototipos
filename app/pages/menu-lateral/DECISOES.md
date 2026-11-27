@@ -389,6 +389,18 @@ Precisam de resposta antes da rodada 2.
 
 ## Rodadas
 
+### Rodada 36 · 2026-11-27
+- **Pedido (literal):** "pode corrigir, ja ajustar os prints e criar os cards em seguida"
+- **Por quê:** os prints dos requisitos dos 5 épicos mostraram 5 defeitos do protótipo, que obrigavam a alargar a barra à mão ou deixavam o print sem prova.
+- **Mudou:**
+  - o painel da trilha cabe na largura padrão: o "+" do Início deixou de ser cortado;
+  - o menu da Ajuda, aberto na trilha, fica por cima do painel, sem transparência;
+  - a trilha do topo acompanha a tela aberta: abrir um destino ou uma categoria sai de Configurações, e com um dashboard aberto a trilha termina em categoria > dashboard;
+  - a explicação de "Adicionar ao workspace", no "…" do caso de uso, aparece inteira, em 2 linhas;
+  - a linha arrastada fica esmaecida enquanto a pessoa arrasta.
+- **Prints:** o ajuste de largura da barra saiu dos roteiros de print; os prints dos 5 épicos foram refeitos na largura padrão.
+- **Fronteira:** muda só o que corrige os 5 defeitos. A casca e as regras do menu ficam como na rodada 35.
+
 ### Requisitos em épicos · 2026-11-27
 - **Pedido (literal):** "o menu de 2 níveis já tem cards escritos no enspace. contudo, eles nao foram escritos na logica nova de divisao de epicos. revise a divisao que ta la. [...] reveja e sugira a alteraçao. se eu validar vc aplica"
 - **Pedido (literal):** "pode deletar os cards antigos e fazer do zero com esses."

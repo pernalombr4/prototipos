@@ -4,10 +4,6 @@
   "cenas": {
     "mais": [
       {
-        "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-        "esperar": 900
-      },
-      {
         "clicar": {
           "css": "button[aria-label='Criar'][class*='ml-0.5']"
         },
@@ -447,12 +443,6 @@
       }
     },
     "RF136": {
-      "antes": [
-        {
-          "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-          "esperar": 900
-        }
-      ],
       "cena": "usar",
       "passos": [
         {
@@ -704,12 +694,6 @@
       }
     },
     "RF306": {
-      "antes": [
-        {
-          "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-          "esperar": 900
-        }
-      ],
       "cena": "importarLido",
       "passos": [
         {

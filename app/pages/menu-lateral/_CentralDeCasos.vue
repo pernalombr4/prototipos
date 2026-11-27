@@ -362,7 +362,7 @@ function data(iso: string) {
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-1">
                     <h3 class="truncate text-xl font-semibold text-highlighted">{{ aberto.nome }}</h3>
-                    <UDropdownMenu :items="acoesDoCaso" :content="{ align: 'start' }" :ui="{ content: 'w-72' }">
+                    <UDropdownMenu :items="acoesDoCaso" :content="{ align: 'start' }" :ui="{ content: 'w-72', itemDescription: 'whitespace-normal' }">
                       <UButton icon="i-lucide-ellipsis" size="sm" color="neutral" variant="ghost" :aria-label="props.t.maisDoCaso" />
                     </UDropdownMenu>
                   </div>

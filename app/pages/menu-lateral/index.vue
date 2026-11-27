@@ -291,6 +291,10 @@ const breadcrumb = computed(() => {
 })
 
 function irParaDestino(id: string) {
+  // Rodada 36: abrir um destino sai de Configurações. Sem isto, abrir um
+  // dashboard pela lista de Configurações deixava a trilha do topo em
+  // Configurações e o miolo na tela de configuração.
+  painel.value = 'trabalho'
   destinoAtivo.value = id
   categoriaAtiva.value = null
 }
@@ -306,6 +310,7 @@ function irParaInicio() {
 }
 
 function abrirCategoria(c: Categoria) {
+  painel.value = 'trabalho'
   categoriaAtiva.value = c
   destinoAtivo.value = ''
 }

@@ -2,12 +2,7 @@
   "url": "https://pernalombr4.github.io/prototipos/menu-lateral/",
   "andaime": "Estado",
   "cenas": {
-    "inicio": [
-      {
-        "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-        "esperar": 900
-      }
-    ],
+    "inicio": [],
     "dash": [
       {
         "clicar": {
@@ -26,10 +21,6 @@
     ],
     "botaoDireitoCategoria": [
       {
-        "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-        "esperar": 900
-      },
-      {
         "js": "(() => { const el = [...document.querySelectorAll('span')].filter(e => e.children.length === 0 && e.textContent.trim() === 'Contratos')[1]; el.scrollIntoView({ block: 'center' }) })()",
         "esperar": 500
       },
@@ -43,10 +34,6 @@
       }
     ],
     "dashAberto": [
-      {
-        "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-        "esperar": 900
-      },
       {
         "clicar": {
           "texto": "Contratos por status",
@@ -131,10 +118,6 @@
             "n": 1
           },
           "esperar": 900
-        },
-        {
-          "js": "(s => { s['$smenu-larguras'] = { barra: 280, trilha: 420 } })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-          "esperar": 600
         },
         {
           "js": "[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'Início' && b.getBoundingClientRect().x < 72).click()",

@@ -4,7 +4,7 @@
   "cenas": {
     "comercial": [
       {
-        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
         "esperar": 500
       },
       {
@@ -14,7 +14,7 @@
     ],
     "rascunho": [
       {
-        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
         "esperar": 500
       },
       {
@@ -32,7 +32,7 @@
     ],
     "personalizar": [
       {
-        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
         "esperar": 500
       },
       {
@@ -46,7 +46,7 @@
     ],
     "mais": [
       {
-        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
         "esperar": 500
       },
       {
@@ -59,7 +59,7 @@
     ],
     "criarMenu": [
       {
-        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
         "esperar": 500
       },
       {
@@ -76,7 +76,7 @@
     ],
     "editor": [
       {
-        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+        "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
         "esperar": 500
       },
       {
@@ -392,7 +392,7 @@
     "RF105": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -433,7 +433,7 @@
     "RF108": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -450,7 +450,7 @@
     "RF111": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -476,7 +476,7 @@
     "RF112": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -502,7 +502,7 @@
     "RF113": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -542,7 +542,7 @@
     "RF203": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -570,7 +570,7 @@
     "RF204": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -650,7 +650,7 @@
     "RF211": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -671,7 +671,7 @@
     "RF212": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -706,7 +706,7 @@
     "RF213": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -732,7 +732,7 @@
     "RF302": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -786,7 +786,7 @@
       ],
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
@@ -1066,7 +1066,7 @@
     "RF423": {
       "passos": [
         {
-          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state['$smenu-larguras'].trilha = 408 })()",
+          "js": "(async () => { for (let i = 0; i < 50 && !document.querySelector('#__nuxt')?.__vue_app__; i++) await new Promise(r => setTimeout(r, 100)); })()",
           "esperar": 500
         },
         {
