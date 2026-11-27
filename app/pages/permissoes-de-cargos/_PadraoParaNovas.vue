@@ -11,7 +11,7 @@
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import CaixaDePermissao from './_CaixaDePermissao.vue'
-import { type Acao, type AcaoDeAlcance, type RegraDeItens, acoes, acoesDeAlcance } from './mocks'
+import { type Acao, type AcaoDeAlcance, type OutraDeItem, type RegraDeItens, acoes, acoesDeAlcance, exigeDaOutra, outrasDeItem } from './mocks'
 import { type EstadoDoCargo, comDependencia, definirRegra, verExigidoPor } from './estado'
 
 const props = defineProps<{
@@ -21,13 +21,14 @@ const props = defineProps<{
   somenteLeitura: boolean
 }>()
 
-type Linha = { tipo: 'acoes' } | { tipo: 'criador' } | { tipo: 'responsavel' }
+type Linha = { tipo: 'acoes' } | { tipo: 'criador' } | { tipo: 'responsavel' } | { tipo: 'outras' }
 
-const linhas: Linha[] = [{ tipo: 'acoes' }, { tipo: 'criador' }, { tipo: 'responsavel' }]
+const linhas: Linha[] = [{ tipo: 'acoes' }, { tipo: 'criador' }, { tipo: 'responsavel' }, { tipo: 'outras' }]
 
 const alterado = computed(() =>
   JSON.stringify(props.estado.padrao) !== JSON.stringify(props.salvo.padrao)
-  || JSON.stringify(props.estado.padraoItens) !== JSON.stringify(props.salvo.padraoItens))
+  || JSON.stringify(props.estado.padraoItens) !== JSON.stringify(props.salvo.padraoItens)
+  || JSON.stringify(props.estado.padraoOutras) !== JSON.stringify(props.salvo.padraoOutras))
 
 function definirAcao(acao: Acao, valor: boolean) {
   props.estado.padrao = comDependencia({ ...props.estado.padrao, [acao]: valor })
@@ -36,6 +37,14 @@ function definirAcao(acao: Acao, valor: boolean) {
 function travadaPor(acao: Acao) {
   const quem = acao === 'ver' ? verExigidoPor(props.estado.padrao) : null
   return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
+}
+
+/** Rodada 7: as outras ações de item que a categoria nova recebe. */
+const outraLiberada = (o: OutraDeItem) => props.estado.padrao[exigeDaOutra[o]]
+
+function definirOutra(o: OutraDeItem, valor: boolean) {
+  const atual = props.estado.padraoOutras
+  props.estado.padraoOutras = valor ? [...new Set([...atual, o])] : atual.filter(x => x !== o)
 }
 
 const regraMarcada = (a: AcaoDeAlcance, tipo: keyof RegraDeItens) => !!props.estado.padraoItens[a]?.[tipo]
@@ -80,6 +89,13 @@ const colunas = computed<TableColumn<Linha>[]>(() => [
           <UIcon name="i-lucide-layout-grid" class="size-4 shrink-0 text-muted" />
           <span class="truncate text-sm font-medium text-default">{{ t.padraoAcoes }}</span>
         </span>
+        <span v-else-if="row.original.tipo === 'outras'" class="flex min-w-0 items-center gap-2 pl-6">
+          <UIcon name="i-lucide-ellipsis" class="size-4 shrink-0 text-muted" />
+          <span class="min-w-0">
+            <span class="block truncate text-sm text-default">{{ t.subOutras }}</span>
+            <span class="block truncate text-xs text-muted">{{ t.subOutrasDesc }}</span>
+          </span>
+        </span>
         <span v-else class="flex min-w-0 items-center gap-2 pl-6">
           <UIcon :name="row.original.tipo === 'criador' ? 'i-lucide-user-round' : 'i-lucide-user-check'" class="size-4 shrink-0 text-info" />
           <span class="min-w-0">
@@ -98,6 +114,7 @@ const colunas = computed<TableColumn<Linha>[]>(() => [
           :desabilitada="somenteLeitura"
           @alterar="v => definirAcao(a, v)"
         />
+        <span v-else-if="row.original.tipo === 'outras'" class="text-dimmed" aria-hidden="true">·</span>
         <template v-else>
           <!-- Criar não tem regra de itens: quem cria é sempre o criador. -->
           <CaixaDePermissao
@@ -110,6 +127,20 @@ const colunas = computed<TableColumn<Linha>[]>(() => [
           />
           <span v-else class="text-dimmed" aria-hidden="true">·</span>
         </template>
+      </template>
+
+      <template #resto-cell="{ row }">
+        <span v-if="row.original.tipo === 'outras'" class="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <UTooltip v-for="o in outrasDeItem" :key="o" :text="t.outraExige(t.acoes[exigeDaOutra[o]])" :disabled="outraLiberada(o)">
+            <UCheckbox
+              :model-value="outraLiberada(o) && estado.padraoOutras.includes(o)"
+              :label="t.outras[o]"
+              :disabled="somenteLeitura || !outraLiberada(o)"
+              size="sm"
+              @update:model-value="v => definirOutra(o, v === true)"
+            />
+          </UTooltip>
+        </span>
       </template>
     </UTable>
   </section>

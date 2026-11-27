@@ -25,7 +25,7 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Permissões de cargos',
-  descricao: 'A tela do cargo que cresce com o workspace: uma linha por categoria, que abre os formulários, os campos e quais itens, e o padrão só para as categorias novas.',
+  descricao: 'A tela do cargo que cresce com o workspace: abas Categorias e Funcionalidades, uma linha por categoria que abre formulários, campos, quais itens e outras ações, e o padrão só para as categorias novas.',
   status: 'em-revisao',
   atualizado: '2026-10-08',
   tela: 'Gestão de Membros › Cargo › Permissões',
@@ -81,10 +81,14 @@ const contagemConfig = computed(() => {
   const chaves = chavesDe(configuracoes)
   return { n: chaves.filter(c => estado.value.fixas.includes(c)).length, total: chaves.length }
 })
-/** Dados = tudo menos Configurações (Padrão + categorias + formulários). */
-const contagemDados = computed(() => ({
-  n: ativas.value - contagemConfig.value.n,
-  total: total.value - contagemConfig.value.total,
+/** Rodada 7: Funcionalidades = o grupo `default` do código; Categorias = o resto da antiga aba Dados. */
+const contagemFuncionalidades = computed(() => {
+  const chaves = chavesDe(gruposDoPadrao.value)
+  return { n: chaves.filter(c => estado.value.fixas.includes(c)).length, total: chaves.length }
+})
+const contagemCategorias = computed(() => ({
+  n: ativas.value - contagemConfig.value.n - contagemFuncionalidades.value.n,
+  total: total.value - contagemConfig.value.total - contagemFuncionalidades.value.total,
 }))
 
 const listaDeMudancas = computed(() =>
@@ -96,18 +100,17 @@ const pendentes = computed(() => listaDeMudancas.value.length)
  * Abas, camada da categoria e confirmação.
  * ------------------------------------------------------------------ */
 
-const aba = ref<'dados' | 'configuracoes' | 'invalidas'>('dados')
+/*
+ * Rodada 7: a aba Dados vira 2 abas no topo, como o código separa a árvore: Categorias
+ * (`types::<slug>`) e Funcionalidades (o grupo `default`: tarefas, agenda, assinaturas,
+ * Spaceflows, IA). Configurações e Inválidas continuam como estão.
+ */
+const aba = ref<'categorias' | 'funcionalidades' | 'configuracoes' | 'invalidas'>('categorias')
 const itensDeAba = computed(() => [
-  { label: t.value.abas.dados, value: 'dados', icon: 'i-lucide-database', badge: { label: `${contagemDados.value.n}/${contagemDados.value.total}`, color: 'neutral' as const, variant: 'subtle' as const } },
+  { label: t.value.abas.categorias, value: 'categorias', icon: 'i-lucide-layout-grid', badge: { label: `${contagemCategorias.value.n}/${contagemCategorias.value.total}`, color: 'neutral' as const, variant: 'subtle' as const } },
+  { label: t.value.abas.funcionalidades, value: 'funcionalidades', icon: 'i-lucide-boxes', badge: { label: `${contagemFuncionalidades.value.n}/${contagemFuncionalidades.value.total}`, color: 'neutral' as const, variant: 'subtle' as const } },
   { label: t.value.abas.configuracoes, value: 'configuracoes', icon: 'i-lucide-settings', badge: { label: `${contagemConfig.value.n}/${contagemConfig.value.total}`, color: 'neutral' as const, variant: 'subtle' as const } },
   { label: t.value.abas.invalidas, value: 'invalidas', icon: 'i-lucide-shield' },
-])
-
-/** Rodada 6: dentro de Dados, as categorias primeiro e o que fica fora delas na outra aba. */
-const subAba = ref<'categorias' | 'fora'>('categorias')
-const itensDeSubAba = computed(() => [
-  { label: t.value.categorias, value: 'categorias', icon: 'i-lucide-layout-grid' },
-  { label: t.value.padrao, value: 'fora', icon: 'i-lucide-boxes' },
 ])
 
 /** Rodada 6: a barra lateral só abre para o campo a campo. */
@@ -138,6 +141,7 @@ function frase(p: { chave: string, valor?: string | number }) {
     case 'ganhouRegra': return ps.ganhouRegra
     case 'voltouAoPadrao': return ps.voltouAoPadrao
     case 'segueOPadrao': return ps.segueOPadrao(Number(p.valor))
+    case 'outrasDoPadrao': return ps.outrasDoPadrao
     case 'camposEscolhidos': return ps.camposEscolhidos(Number(p.valor))
     case 'todosOsCampos': return ps.todosOsCampos
     case 'origensEmParte': return ps.origensEmParte(Number(p.valor))
@@ -172,7 +176,7 @@ function descartar() {
 
 const caixasHoje = computed(() => caixasNaArvoreDeHoje(lista.value))
 const pxHoje = computed(() => caixasHoje.value * pixelsPorLinhaHoje)
-const linhasProposta = computed(() => padrao[0]!.linhas.length + 1 + lista.value.length)
+const linhasProposta = computed(() => padrao.flatMap(g => g.linhas).length + 1 + lista.value.length)
 const fmt = (n: number) => n.toLocaleString('pt-BR')
 </script>
 
@@ -247,25 +251,22 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
       <UTabs v-model="aba" :items="itensDeAba" :content="false" variant="link" class="mt-6" />
 
       <div class="pt-5">
-        <!-- DADOS -->
-        <div v-if="aba === 'dados'" class="space-y-5">
-          <UTabs v-model="subAba" :items="itensDeSubAba" :content="false" variant="pill" size="sm" color="neutral" class="w-fit" />
+        <!-- CATEGORIAS -->
+        <MatrizDeCategorias
+          v-if="aba === 'categorias'"
+          :t="t"
+          :lista="lista"
+          :estado="estado"
+          :salvo="salvo"
+          :somente-leitura="somenteLeitura"
+          :carregando="carregando"
+          @campos="abrirCampos"
+        />
 
-          <MatrizDeCategorias
-            v-if="subAba === 'categorias'"
-            :t="t"
-            :lista="lista"
-            :estado="estado"
-            :salvo="salvo"
-            :somente-leitura="somenteLeitura"
-            :carregando="carregando"
-            @campos="abrirCampos"
-          />
-
-          <section v-else class="space-y-3">
-            <p class="text-sm text-muted">{{ t.padraoDesc }}</p>
-            <MatrizFixa :t="t" :grupos="gruposDoPadrao" :estado="estado" :salvo="salvo" :somente-leitura="somenteLeitura" />
-          </section>
+        <!-- FUNCIONALIDADES: o grupo `default` do código, em 2 grupos com título. -->
+        <div v-else-if="aba === 'funcionalidades'" class="space-y-4">
+          <p class="text-sm text-muted">{{ t.padraoDesc }}</p>
+          <MatrizFixa :t="t" :grupos="gruposDoPadrao" :estado="estado" :salvo="salvo" :somente-leitura="somenteLeitura" com-titulo />
         </div>
 
         <!-- CONFIGURAÇÕES -->

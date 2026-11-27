@@ -354,3 +354,41 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
 - **O que muda e o que não muda:** muda a aba Dados (2 abas, o bloco do padrão, a coluna Restrições, as sublinhas e a
   barra lateral só de campos). Não muda a casca, o cabeçalho do cargo, o Salvar no topo, a aba Configurações (fora a
   caixa de Outras ações) e a aba Inválidas.
+
+## Rodada 7 · 2026-11-27
+
+- **Pedido (literal):** "eu acredito que "dados" dá pra ser dividido, nao? o padrão em uma aba que seja "ações
+  gerais" ou algo assim, e outra aba só com as categorias." **Mudou:** as abas do topo passam a ser Categorias,
+  Funcionalidades, Configurações e Inválidas. As sub-abas da rodada 6 saem. O código já separa a árvore assim: o que
+  começa com `types::<slug>` é categoria; o grupo `default` (tarefas, agenda, assinaturas, Spaceflows, IA) vira
+  Funcionalidades; `settings::` e os prefixos de administração ficam em Configurações.
+- **Pedido (literal):** "chame "trabalho" de "geral" / e dentro dele vem o que voce colocou em trabalho e em
+  documentos também / automação e IA pode deixar tb, mas cuidado pq tem isso dentro da aba de configuraçoes tambem."
+  **Mudou:** Funcionalidades tem 2 grupos com título, Geral (Agenda, Tarefas rápidas, Tarefas programadas, Painel de
+  tarefas, Assinaturas, Relatórios) e Automação e IA (Spaceflows, IA). Os grupos são só de leitura: a referência de
+  cada linha continua no grupo `default` do código. Para não repetir o que está em Configurações: Spaceflows em
+  Funcionalidades é iniciar e acompanhar (`workflows::`); montar e excluir fluxo continua em Configurações › Dados ›
+  Spaceflows (`setupWorkflows::`). A sugestão de Excluir em Spaceflows saiu por isso.
+- **Pedido (literal):** "açoes em itens nao deveriam estar abaixo de categorias? ou no codigo é separado mesmo?"
+  **Decisão:** ficam na categoria, como no código (`types::<slug>::<ação>`). A categoria aberta ganha a sublinha
+  "Outras ações", com Exportar, Ver histórico, Comentar e Excluir definitivamente. Cada uma exige uma ação da
+  categoria (as 3 primeiras exigem Ver; Excluir definitivamente exige Excluir). A coluna Restrições mostra "{n} de
+  {total} outras ações" quando a categoria tira alguma, e o bloco do padrão ganha a mesma linha. Ao abrir, quem vê
+  a categoria tem Exportar, Ver histórico e Comentar, porque é o que vale hoje.
+- **Pedido (literal):** "NAO se preocupe com estes gaps: base de conhecimento, arquivos, tarefas programadas,
+  formulario publico, link de tarefa externa, Saved views for everyone, feature flags / o resto pode aplicar".
+  **Mudou:**
+  - Funcionalidades: Assinaturas (Criar, Ver, Cancelar) e "Gerenciar agentes" na IA, que já estão no develop;
+    Painel de tarefas (Ver); Relatórios (CRUD); em Spaceflows, "Ver execuções" e "Cancelar execução"; na IA, "Usar
+    IA em campos e anexos".
+  - Configurações: Faturamento em Sistemas (Ver, "Comprar créditos"); em Membros, "Importar membros", "Gerenciar
+    ausências" e "Mesclar duplicados"; em Interface, Início (Atualizar, os widgets para todos), Migrações (Ver,
+    "Executar migração") e Casos de uso com o CRUD.
+- **Pedido (literal):** "use /investigar-codigo pra ter certeza de que está fazendo no front alinhamentos que seguem a
+  logica do back". **Como ficou:** o back só aceita referência cuja 1ª parte e cuja ação estão na lista dele
+  (`validatePermissionReference`). Cada linha nova tem uma referência que o back já aceita ou que pede uma mudança
+  declarada no requisito (épico 8). "Personalizar o Início para todos" saiu de Funcionalidades e foi para
+  Configurações › Interface (`screens::`), porque é ação de administração.
+- **O que muda e o que não muda:** mudam as abas do topo, os grupos de Funcionalidades, as linhas novas e a
+  sublinha Outras ações. Não muda a tabela de categorias da rodada 6, a casca, o cabeçalho do cargo e o Salvar.
+

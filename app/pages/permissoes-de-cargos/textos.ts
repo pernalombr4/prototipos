@@ -39,7 +39,7 @@ export interface Textos {
   alertaTexto: (n: number) => string
   salvar: string
   descartar: string
-  abas: { dados: string, configuracoes: string, invalidas: string }
+  abas: { categorias: string, funcionalidades: string, dados: string, configuracoes: string, invalidas: string }
 
   // seções
   padrao: string
@@ -103,6 +103,10 @@ export interface Textos {
   subCamposTodos: (n: number) => string
   subCamposEscolhidos: (n: number, total: number) => string
   escolherCampos: string
+  subOutras: string
+  subOutrasDesc: string
+  outrasDeTotal: (n: number, total: number) => string
+  outraExige: (acao: string) => string
   subAlcance: string
   subAlcanceDesc: string
   alcanceTodos: string
@@ -210,6 +214,7 @@ export interface Textos {
     ganhouRegra: string
     voltouAoPadrao: string
     segueOPadrao: (n: number) => string
+    outrasDoPadrao: string
     camposEscolhidos: (n: number) => string
     todosOsCampos: string
     origensEmParte: (n: number) => string
@@ -248,20 +253,23 @@ const pt: Textos = {
   alertaTexto: n => n === 1 ? '1 alteração não salva.' : `${n} alterações não salvas.`,
   salvar: 'Salvar Alterações',
   descartar: 'Descartar',
-  abas: { dados: 'Dados', configuracoes: 'Configurações', invalidas: 'Inválidas' },
+  abas: { categorias: 'Categorias', funcionalidades: 'Funcionalidades', dados: 'Dados', configuracoes: 'Configurações', invalidas: 'Inválidas' },
 
   padrao: 'Fora das categorias',
-  padraoDesc: 'O que o cargo faz fora das categorias.',
+  padraoDesc: 'O que o cargo faz nas áreas do workspace que não são categorias.',
   categorias: 'Categorias',
   categoriasDesc: 'O que o cargo faz nos itens de cada categoria. Clique na categoria para ver os formulários, os campos e quais itens.',
   configuracoesDesc: 'Atribua permissões de configuração a este cargo',
   invalidasDesc: 'Permissões obsoletas ou que você não tem permissão para acessar',
   invalidasVazio: 'Nenhuma permissão obsoleta encontrada',
   grupos: {
+    geral: 'Geral', automacaoIa: 'Automação e IA',
     padrao: 'Fora das categorias', sistemas: 'Sistemas', dados: 'Dados', acesso: 'Acesso', interface: 'Interface',
     emails: 'Emails', integracoes: 'Integrações', logs: 'Logs', credenciais: 'Credenciais',
   },
   linhas: {
+    painelDeTarefas: 'Painel de tarefas', assinaturas: 'Assinaturas', relatorios: 'Relatórios', inicio: 'Início',
+    faturamento: 'Faturamento', migracoes: 'Migrações',
     agenda: 'Agenda', ia: 'IA', spaceflows: 'Spaceflows', tarefasRapidas: 'Tarefas rápidas',
     tarefasProgramadas: 'Tarefas programadas', calendario: 'Calendário', configuracao: 'Configuração',
     dicionario: 'Dicionário', espacoDeTrabalho: 'Espaço de Trabalho', modulos: 'Módulos', listas: 'Listas',
@@ -269,7 +277,7 @@ const pt: Textos = {
     casosDeUso: 'Casos de Uso', menu: 'Menu', telas: 'Telas', caixas: 'Caixas', enviados: 'Enviados',
     modelos: 'Modelos', integracoes: 'Integrações', logs: 'Logs', credenciais: 'Credenciais',
   },
-  outras: { usarChat: 'Usar Chat da IA', iniciarSpaceflow: 'Iniciar Spaceflow', reenviar: 'Reenviar', exportar: 'Exportar', importar: 'Importar', arquivar: 'Arquivar', comentar: 'Comentar', duplicar: 'Duplicar' },
+  outras: { cancelarAssinatura: 'Cancelar', verExecucoes: 'Ver execuções', cancelarExecucao: 'Cancelar execução', gerenciarAgentes: 'Gerenciar agentes', usarIaEmCampos: 'Usar IA em campos e anexos', personalizarParaTodos: 'Personalizar para todos', comprarCreditos: 'Comprar créditos', importarMembros: 'Importar membros', gerenciarAusencias: 'Gerenciar ausências', mesclarDuplicados: 'Mesclar duplicados', executarMigracao: 'Executar migração', verHistorico: 'Ver histórico', excluirDeVez: 'Excluir definitivamente', usarChat: 'Usar Chat da IA', iniciarSpaceflow: 'Iniciar Spaceflow', reenviar: 'Reenviar', exportar: 'Exportar', importar: 'Importar', arquivar: 'Arquivar', comentar: 'Comentar', duplicar: 'Duplicar' },
   maisAcoes: (n, m) => `+${n} ${n === 1 ? 'ação' : 'ações'}${m ? ` (${m} ${m === 1 ? 'marcada' : 'marcadas'})` : ''}`,
   acoes: { criar: 'Criar', ver: 'Ver', atualizar: 'Atualizar', excluir: 'Excluir' },
   colunaArea: 'Área',
@@ -303,8 +311,14 @@ const pt: Textos = {
     excluir: 'Excluir: apagar itens. Exige Ver.',
   },
   descLinhas: {
+    painelDeTarefas: 'O painel com as tarefas do membro.',
+    assinaturas: 'Documentos enviados para assinatura digital.',
+    relatorios: 'Relatórios dos itens do workspace.',
+    inicio: 'Os widgets da tela inicial, para todos os membros.',
+    faturamento: 'Créditos e consumo do workspace.',
+    migracoes: 'Pedidos de migração de dados, geral ou por tabela.',
     agenda: 'Eventos da Agenda do workspace.',
-    ia: 'Conversar com a IA dentro do workspace.',
+    ia: 'O chat da IA, os agentes de IA e a IA nos campos.',
     spaceflows: 'Iniciar e acompanhar fluxos de trabalho.',
     tarefasRapidas: 'Tarefas avulsas, fora de um fluxo.',
     tarefasProgramadas: 'Tarefas que os fluxos das categorias criam.',
@@ -350,6 +364,10 @@ const pt: Textos = {
   subCamposTodos: n => `Todos os ${n} campos`,
   subCamposEscolhidos: (n, t) => `${n} de ${t} campos escolhidos`,
   escolherCampos: 'Escolher campos',
+  subOutras: 'Outras ações',
+  subOutrasDesc: 'O que o cargo faz com os itens além das 4 ações.',
+  outrasDeTotal: (n, t) => `${n} de ${t} outras ações`,
+  outraExige: a => `Libere ${a} na categoria para usar esta ação.`,
   subAlcance: 'Só se for o criador',
   subAlcanceDesc: 'Marque para a ação valer só nos itens que a pessoa criou.',
   alcanceTodos: 'Todos',
@@ -479,6 +497,7 @@ const pt: Textos = {
     ganhouRegra: 'passou a ter regra própria',
     voltouAoPadrao: 'voltou a seguir o padrão',
     segueOPadrao: () => 'vale só para as categorias criadas a partir de agora',
+    outrasDoPadrao: 'mudou as outras ações',
     camposEscolhidos: n => `${n} campos escolhidos`,
     todosOsCampos: 'todos os campos',
     origensEmParte: n => n === 1 ? 'só em 1 formulário' : `só em ${n} formulários`,
@@ -516,20 +535,23 @@ const en: Textos = {
   alertaTexto: n => n === 1 ? '1 unsaved change.' : `${n} unsaved changes.`,
   salvar: 'Save Changes',
   descartar: 'Discard',
-  abas: { dados: 'Data', configuracoes: 'Settings', invalidas: 'Invalid' },
+  abas: { categorias: 'Categories', funcionalidades: 'Features', dados: 'Data', configuracoes: 'Settings', invalidas: 'Invalid' },
 
   padrao: 'Outside categories',
-  padraoDesc: 'What the role does outside categories.',
+  padraoDesc: 'What the role does in workspace areas that are not categories.',
   categorias: 'Categories',
   categoriasDesc: 'What the role does with the items of each category. Click a category to see its forms, fields and which items.',
   configuracoesDesc: 'Assign settings permissions to this role',
   invalidasDesc: 'Obsolete permissions or permissions you are not allowed to access',
   invalidasVazio: 'No obsolete permissions found',
   grupos: {
+    geral: 'General', automacaoIa: 'Automation and AI',
     padrao: 'Outside categories', sistemas: 'Systems', dados: 'Data', acesso: 'Access', interface: 'Interface',
     emails: 'Emails', integracoes: 'Integrations', logs: 'Logs', credenciais: 'Credentials',
   },
   linhas: {
+    painelDeTarefas: 'Task dashboard', assinaturas: 'Signatures', relatorios: 'Reports', inicio: 'Home',
+    faturamento: 'Billing', migracoes: 'Migrations',
     agenda: 'Calendar', ia: 'AI', spaceflows: 'Spaceflows', tarefasRapidas: 'Quick tasks',
     tarefasProgramadas: 'Scheduled tasks', calendario: 'Calendar', configuracao: 'Settings',
     dicionario: 'Dictionary', espacoDeTrabalho: 'Workspace', modulos: 'Modules', listas: 'Lists',
@@ -537,7 +559,7 @@ const en: Textos = {
     casosDeUso: 'Use Cases', menu: 'Menu', telas: 'Screens', caixas: 'Inboxes', enviados: 'Sent',
     modelos: 'Templates', integracoes: 'Integrations', logs: 'Logs', credenciais: 'Credentials',
   },
-  outras: { usarChat: 'Use AI Chat', iniciarSpaceflow: 'Start Spaceflow', reenviar: 'Resend', exportar: 'Export', importar: 'Import', arquivar: 'Archive', comentar: 'Comment', duplicar: 'Duplicate' },
+  outras: { cancelarAssinatura: 'Cancel', verExecucoes: 'View executions', cancelarExecucao: 'Cancel execution', gerenciarAgentes: 'Manage agents', usarIaEmCampos: 'Use AI in fields and attachments', personalizarParaTodos: 'Customize for everyone', comprarCreditos: 'Buy credits', importarMembros: 'Import members', gerenciarAusencias: 'Manage absences', mesclarDuplicados: 'Merge duplicates', executarMigracao: 'Run migration', verHistorico: 'View history', excluirDeVez: 'Delete permanently', usarChat: 'Use AI Chat', iniciarSpaceflow: 'Start Spaceflow', reenviar: 'Resend', exportar: 'Export', importar: 'Import', arquivar: 'Archive', comentar: 'Comment', duplicar: 'Duplicate' },
   maisAcoes: (n, m) => `+${n} ${n === 1 ? 'action' : 'actions'}${m ? ` (${m} checked)` : ''}`,
   acoes: { criar: 'Create', ver: 'View', atualizar: 'Update', excluir: 'Delete' },
   colunaArea: 'Area',
@@ -571,8 +593,14 @@ const en: Textos = {
     excluir: 'Delete: remove items. Requires View.',
   },
   descLinhas: {
+    painelDeTarefas: 'The member task dashboard.',
+    assinaturas: 'Documents sent for digital signature.',
+    relatorios: 'Reports on workspace items.',
+    inicio: 'Home screen widgets, for every member.',
+    faturamento: 'Workspace credits and usage.',
+    migracoes: 'Data migration requests, general or per table.',
     agenda: 'Workspace calendar events.',
-    ia: 'Chat with AI inside the workspace.',
+    ia: 'AI chat, AI agents and AI in fields.',
     spaceflows: 'Start and follow workflows.',
     tarefasRapidas: 'Standalone tasks, outside a flow.',
     tarefasProgramadas: 'Tasks created by category flows.',
@@ -618,6 +646,10 @@ const en: Textos = {
   subCamposTodos: n => `All ${n} fields`,
   subCamposEscolhidos: (n, t) => `${n} of ${t} fields chosen`,
   escolherCampos: 'Choose fields',
+  subOutras: 'Other actions',
+  subOutrasDesc: 'What the role does with items beyond the 4 actions.',
+  outrasDeTotal: (n, t) => `${n} of ${t} other actions`,
+  outraExige: a => `Allow ${a} in the category to use this action.`,
   subAlcance: 'Only if creator',
   subAlcanceDesc: 'Check to apply the action only to items the person created.',
   alcanceTodos: 'All',
@@ -747,6 +779,7 @@ const en: Textos = {
     ganhouRegra: 'now has its own rule',
     voltouAoPadrao: 'follows the default again',
     segueOPadrao: () => 'applies only to categories created from now on',
+    outrasDoPadrao: 'changed the other actions',
     camposEscolhidos: n => `${n} fields chosen`,
     todosOsCampos: 'all fields',
     origensEmParte: n => n === 1 ? 'only on 1 form' : `only on ${n} forms`,
@@ -784,20 +817,23 @@ const es: Textos = {
   alertaTexto: n => n === 1 ? '1 cambio sin guardar.' : `${n} cambios sin guardar.`,
   salvar: 'Guardar Cambios',
   descartar: 'Descartar',
-  abas: { dados: 'Datos', configuracoes: 'Configuración', invalidas: 'Inválidos' },
+  abas: { categorias: 'Categorías', funcionalidades: 'Funcionalidades', dados: 'Datos', configuracoes: 'Configuración', invalidas: 'Inválidos' },
 
   padrao: 'Fuera de las categorías',
-  padraoDesc: 'Lo que el cargo hace fuera de las categorías.',
+  padraoDesc: 'Lo que el cargo hace en las áreas del workspace que no son categorías.',
   categorias: 'Categorías',
   categoriasDesc: 'Lo que el cargo hace con los ítems de cada categoría. Haga clic en la categoría para ver los formularios, los campos y qué ítems.',
   configuracoesDesc: 'Asigne permisos de configuración a este cargo',
   invalidasDesc: 'Permisos obsoletos o a los que usted no tiene acceso',
   invalidasVazio: 'Ningún permiso obsoleto encontrado',
   grupos: {
+    geral: 'General', automacaoIa: 'Automatización e IA',
     padrao: 'Fuera de las categorías', sistemas: 'Sistemas', dados: 'Datos', acesso: 'Acceso', interface: 'Interfaz',
     emails: 'Emails', integracoes: 'Integraciones', logs: 'Logs', credenciais: 'Credenciales',
   },
   linhas: {
+    painelDeTarefas: 'Panel de tareas', assinaturas: 'Firmas', relatorios: 'Informes', inicio: 'Inicio',
+    faturamento: 'Facturación', migracoes: 'Migraciones',
     agenda: 'Agenda', ia: 'IA', spaceflows: 'Spaceflows', tarefasRapidas: 'Tareas rápidas',
     tarefasProgramadas: 'Tareas programadas', calendario: 'Calendario', configuracao: 'Configuración',
     dicionario: 'Diccionario', espacoDeTrabalho: 'Espacio de Trabajo', modulos: 'Módulos', listas: 'Listas',
@@ -805,7 +841,7 @@ const es: Textos = {
     casosDeUso: 'Casos de Uso', menu: 'Menú', telas: 'Pantallas', caixas: 'Bandejas', enviados: 'Enviados',
     modelos: 'Plantillas', integracoes: 'Integraciones', logs: 'Logs', credenciais: 'Credenciales',
   },
-  outras: { usarChat: 'Usar Chat de IA', iniciarSpaceflow: 'Iniciar Spaceflow', reenviar: 'Reenviar', exportar: 'Exportar', importar: 'Importar', arquivar: 'Archivar', comentar: 'Comentar', duplicar: 'Duplicar' },
+  outras: { cancelarAssinatura: 'Cancelar', verExecucoes: 'Ver ejecuciones', cancelarExecucao: 'Cancelar ejecución', gerenciarAgentes: 'Gestionar agentes', usarIaEmCampos: 'Usar IA en campos y adjuntos', personalizarParaTodos: 'Personalizar para todos', comprarCreditos: 'Comprar créditos', importarMembros: 'Importar miembros', gerenciarAusencias: 'Gestionar ausencias', mesclarDuplicados: 'Combinar duplicados', executarMigracao: 'Ejecutar migración', verHistorico: 'Ver historial', excluirDeVez: 'Eliminar definitivamente', usarChat: 'Usar Chat de IA', iniciarSpaceflow: 'Iniciar Spaceflow', reenviar: 'Reenviar', exportar: 'Exportar', importar: 'Importar', arquivar: 'Archivar', comentar: 'Comentar', duplicar: 'Duplicar' },
   maisAcoes: (n, m) => `+${n} ${n === 1 ? 'acción' : 'acciones'}${m ? ` (${m} ${m === 1 ? 'marcada' : 'marcadas'})` : ''}`,
   acoes: { criar: 'Crear', ver: 'Ver', atualizar: 'Actualizar', excluir: 'Eliminar' },
   colunaArea: 'Área',
@@ -839,8 +875,14 @@ const es: Textos = {
     excluir: 'Eliminar: borrar ítems. Exige Ver.',
   },
   descLinhas: {
+    painelDeTarefas: 'El panel con las tareas del miembro.',
+    assinaturas: 'Documentos enviados para firma digital.',
+    relatorios: 'Informes de los ítems del workspace.',
+    inicio: 'Los widgets de la pantalla de inicio, para todos los miembros.',
+    faturamento: 'Créditos y consumo del workspace.',
+    migracoes: 'Solicitudes de migración de datos, general o por tabla.',
     agenda: 'Eventos de la Agenda del workspace.',
-    ia: 'Conversar con la IA dentro del workspace.',
+    ia: 'El chat de IA, los agentes de IA y la IA en los campos.',
     spaceflows: 'Iniciar y seguir flujos de trabajo.',
     tarefasRapidas: 'Tareas sueltas, fuera de un flujo.',
     tarefasProgramadas: 'Tareas que crean los flujos de las categorías.',
@@ -886,6 +928,10 @@ const es: Textos = {
   subCamposTodos: n => `Todos los ${n} campos`,
   subCamposEscolhidos: (n, t) => `${n} de ${t} campos elegidos`,
   escolherCampos: 'Elegir campos',
+  subOutras: 'Otras acciones',
+  subOutrasDesc: 'Lo que el cargo hace con los ítems además de las 4 acciones.',
+  outrasDeTotal: (n, t) => `${n} de ${t} otras acciones`,
+  outraExige: a => `Permita ${a} en la categoría para usar esta acción.`,
   subAlcance: 'Solo si es el creador',
   subAlcanceDesc: 'Marque para que la acción valga solo en los ítems que la persona creó.',
   alcanceTodos: 'Todos',
@@ -1015,6 +1061,7 @@ const es: Textos = {
     ganhouRegra: 'ahora tiene regla propia',
     voltouAoPadrao: 'volvió a seguir el predeterminado',
     segueOPadrao: () => 'vale solo para las categorías creadas a partir de ahora',
+    outrasDoPadrao: 'cambió las otras acciones',
     camposEscolhidos: n => `${n} campos elegidos`,
     todosOsCampos: 'todos los campos',
     origensEmParte: n => n === 1 ? 'solo en 1 formulario' : `solo en ${n} formularios`,

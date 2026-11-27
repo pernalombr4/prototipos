@@ -352,17 +352,45 @@ export interface GrupoFixo {
 
 const CRUD: Acao[] = ['criar', 'ver', 'atualizar', 'excluir']
 
-/** Aba Dados, seção "Padrão": 15 permissões. */
+/*
+ * Aba Funcionalidades (rodada 7): era a seção "Padrão" da aba Dados, com 15 permissões.
+ * No código, é o grupo `default` da árvore: tudo o que não é `types::<slug>` nem
+ * configuração (`settings::` e os prefixos de administração). Os 2 grupos abaixo são só
+ * de leitura na tela; a referência continua no grupo `default`.
+ *
+ * Já no develop e fora da tela copiada em 08/10: Assinaturas (`signature::read|create|cancel`,
+ * 22/11) e "Gerenciar agentes" (`ai::agents`, 17/11). Proposta da rodada 7: Painel de tarefas,
+ * Relatórios, "Ver execuções" e "Cancelar execução" em Spaceflows e "Usar IA em campos e anexos"
+ * (o `ai::inference` que o back confere e nenhum cargo consegue dar). Excluir fluxo fica em
+ * Configurações › Dados › Spaceflows, onde o código põe a montagem dos fluxos.
+ */
 export const padrao: GrupoFixo[] = [{
-  chave: 'padrao',
+  chave: 'geral',
   linhas: [
     { chave: 'agenda', icone: 'i-lucide-calendar-days', acoes: CRUD },
-    { chave: 'ia', icone: 'i-lucide-bot', acoes: [], outras: ['usarChat'] },
-    { chave: 'spaceflows', icone: 'i-lucide-workflow', acoes: ['ver', 'atualizar'], outras: ['iniciarSpaceflow'] },
     { chave: 'tarefasRapidas', icone: 'i-lucide-zap', acoes: CRUD },
     { chave: 'tarefasProgramadas', icone: 'i-lucide-calendar-clock', acoes: ['ver', 'atualizar', 'excluir'] },
+    { chave: 'painelDeTarefas', icone: 'i-lucide-layout-dashboard', acoes: ['ver'] },
+    { chave: 'assinaturas', icone: 'i-lucide-signature', acoes: ['criar', 'ver'], outras: ['cancelarAssinatura'] },
+    { chave: 'relatorios', icone: 'i-lucide-chart-column', acoes: CRUD },
+  ],
+}, {
+  chave: 'automacaoIa',
+  linhas: [
+    { chave: 'spaceflows', icone: 'i-lucide-workflow', acoes: ['ver', 'atualizar'], outras: ['iniciarSpaceflow', 'verExecucoes', 'cancelarExecucao'] },
+    { chave: 'ia', icone: 'i-lucide-bot', acoes: [], outras: ['usarChat', 'gerenciarAgentes', 'usarIaEmCampos'] },
   ],
 }]
+
+/*
+ * Rodada 7: as outras ações de item são da categoria, como no código: `types::<slug>::<ação>`
+ * cai no grupo das categorias. Hoje nenhuma delas tem permissão: exportar segue Ver, a
+ * lixeira segue Atualizar, o histórico e os comentários ficam abertos ao membro.
+ */
+export const outrasDeItem = ['exportar', 'verHistorico', 'comentar', 'excluirDeVez'] as const
+export type OutraDeItem = typeof outrasDeItem[number]
+/** A ação da categoria que cada outra ação exige. */
+export const exigeDaOutra: Record<OutraDeItem, Acao> = { exportar: 'ver', verHistorico: 'ver', comentar: 'ver', excluirDeVez: 'excluir' }
 
 /** Aba Configurações: 67 permissões em 8 seções. */
 export const configuracoes: GrupoFixo[] = [
@@ -373,6 +401,8 @@ export const configuracoes: GrupoFixo[] = [
       { chave: 'configuracao', icone: 'i-lucide-settings', acoes: ['ver', 'atualizar'] },
       { chave: 'dicionario', icone: 'i-lucide-book-a', acoes: CRUD },
       { chave: 'espacoDeTrabalho', icone: 'i-lucide-house', acoes: ['ver', 'atualizar'] },
+      // Rodada 7: créditos e consumo (`settings::billing`), hoje só pelo tipo de membro.
+      { chave: 'faturamento', icone: 'i-lucide-wallet', acoes: ['ver'], outras: ['comprarCreditos'] },
       { chave: 'modulos', icone: 'i-lucide-boxes', acoes: ['ver', 'atualizar'] },
     ],
   },
@@ -389,14 +419,20 @@ export const configuracoes: GrupoFixo[] = [
     linhas: [
       { chave: 'cargos', icone: 'i-lucide-id-card', acoes: CRUD },
       { chave: 'grupos', icone: 'i-lucide-users', acoes: CRUD },
-      { chave: 'membros', icone: 'i-lucide-contact', acoes: CRUD },
+      // Rodada 7: importar, ausências e duplicados hoje não têm permissão própria.
+      { chave: 'membros', icone: 'i-lucide-contact', acoes: CRUD, outras: ['importarMembros', 'gerenciarAusencias', 'mesclarDuplicados'] },
     ],
   },
   {
     chave: 'interface',
     linhas: [
-      { chave: 'casosDeUso', icone: 'i-lucide-database', acoes: ['criar', 'ver'] },
+      // Rodada 7: a tela oferece Criar e Ver; o back calcula Ver, Atualizar e Excluir. Alinhado no CRUD.
+      { chave: 'casosDeUso', icone: 'i-lucide-database', acoes: CRUD },
+      // Rodada 7: os widgets do Início para todos (`screens::home::update`); hoje basta ser membro full.
+      { chave: 'inicio', icone: 'i-lucide-house', acoes: ['atualizar'] },
       { chave: 'menu', icone: 'i-lucide-menu', acoes: CRUD },
+      // Rodada 7: a tela pede uma permissão que o back nunca calcula.
+      { chave: 'migracoes', icone: 'i-lucide-database-backup', acoes: ['ver'], outras: ['executarMigracao'] },
       { chave: 'telas', icone: 'i-lucide-monitor', acoes: CRUD },
     ],
   },
@@ -439,7 +475,8 @@ export function padraoComOutrasSimuladas(): GrupoFixo[] {
 
 /** O que o cargo já tem nas permissões fixas, ao abrir a tela. Chave `linha:acao`. */
 export const fixasIniciais: string[] = [
-  'agenda:ver', 'agenda:criar', 'ia:usarChat', 'spaceflows:ver', 'spaceflows:iniciarSpaceflow',
+  'agenda:ver', 'agenda:criar', 'ia:usarChat', 'spaceflows:ver', 'spaceflows:iniciarSpaceflow', 'spaceflows:verExecucoes',
+  'painelDeTarefas:ver', 'assinaturas:ver', 'relatorios:ver',
   'tarefasRapidas:criar', 'tarefasRapidas:ver', 'tarefasRapidas:atualizar',
   'tarefasProgramadas:ver', 'tarefasProgramadas:atualizar',
   'calendario:ver', 'dicionario:ver', 'listas:ver', 'membros:ver', 'enviados:ver',

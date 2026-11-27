@@ -45,6 +45,9 @@ import {
   fixasIniciais,
   padrao,
   SEM_FORMULARIO,
+  type OutraDeItem,
+  exigeDaOutra,
+  outrasDeItem,
 } from './mocks'
 
 export type MapaDeAcoes = Record<Acao, boolean>
@@ -54,6 +57,8 @@ export interface EstadoDaCategoria {
   campos: Record<AcaoDeCampo, string[]> | null
   origens: Partial<Record<Acao, Origem[]>>
   itens: ItensDaCategoria | null
+  /** Rodada 7: Exportar, Ver histórico, Comentar e Excluir definitivamente (`types::<slug>::<ação>`). */
+  outras: OutraDeItem[]
 }
 
 export type RegrasDeItens = Partial<Record<AcaoDeAlcance, RegraDeItens>>
@@ -66,8 +71,10 @@ export interface ItensDaCategoria {
 
 export interface EstadoDoCargo {
   padrao: MapaDeAcoes
-  /** "Quais itens" do padrão: vale para toda categoria que não tem a sua. */
+  /** "Quais itens" do padrão: a regra que a categoria nova recebe. */
   padraoItens: RegrasDeItens
+  /** Rodada 7: as outras ações de item que a categoria nova recebe. */
+  padraoOutras: OutraDeItem[]
   categorias: Record<number, EstadoDaCategoria>
   /** Permissões fixas marcadas, chave `linha:acao`. */
   fixas: string[]
@@ -95,7 +102,7 @@ const padraoInicial: MapaDeAcoes = { criar: false, ver: true, atualizar: false, 
 export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
   const categorias: Record<number, EstadoDaCategoria> = {}
   lista.forEach((c, i) => {
-    const e: EstadoDaCategoria = { proprio: null, campos: null, origens: {}, itens: null }
+    const e: EstadoDaCategoria = { proprio: null, campos: null, origens: {}, itens: null, outras: [] }
     const responsavel = camposPessoa(c).find(f => f.label === 'Responsável') ?? camposPessoa(c)[0]
 
     // Analista de Contratos: cria e atualiza onde o assunto é contrato.
@@ -135,11 +142,14 @@ export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
     }
     // Rodada 6: quem seguia o padrão grava o valor que tinha (Ver).
     e.proprio ??= { ...padraoInicial }
+    // Rodada 7: a migração grava o que vale hoje: quem vê exporta, vê o histórico e comenta.
+    e.outras = e.proprio.ver ? [...outrasIniciais] : []
     categorias[c.id] = e
   })
   return {
     padrao: { ...padraoInicial },
     padraoItens: {},
+    padraoOutras: [...outrasIniciais],
     categorias,
     fixas: [...fixasIniciais],
   }
@@ -369,13 +379,14 @@ export function temAcesso(e: EstadoDoCargo, id: number): boolean {
 
 export function totalDePermissoes(lista: CategoriaMock[]): number {
   const fixas = [...padrao, ...configuracoes].flatMap(g => g.linhas).reduce((s, l) => s + l.acoes.length + (l.outras?.length ?? 0), 0)
-  return fixas + lista.reduce((s, c) => s + 4 + c.formularios.length * 4, 0)
+  return fixas + lista.reduce((s, c) => s + 4 + outrasDeItem.length + c.formularios.length * 4, 0)
 }
 
 export function permissoesAtivas(e: EstadoDoCargo, lista: CategoriaMock[]): number {
   let n = e.fixas.length
   for (const c of lista) {
     n += acoes.filter(a => acoesDaCategoria(e, c.id)[a]).length
+    n += outrasValendo(e, c).length
     for (const f of c.formularios)
       n += acoes.filter(a => liberadoNaOrigem(e, c, a, f.id)).length
   }
@@ -431,6 +442,14 @@ export function mudancas(
     partes.push({ chave: 'segueOPadrao', valor: lista.filter(c => !atual.categorias[c.id]?.proprio).length })
     saida.push({ onde: '__padrao__', partes })
   }
+  if (JSON.stringify(salvo.padraoOutras) !== JSON.stringify(atual.padraoOutras)) {
+    const ja = saida.find(m => m.onde === '__padrao__')
+    const parte = { chave: 'outrasDoPadrao' }
+    if (ja)
+      ja.partes.push(parte)
+    else
+      saida.push({ onde: '__padrao__', partes: [parte] })
+  }
   if (JSON.stringify(salvo.padraoItens) !== JSON.stringify(atual.padraoItens)) {
     const ja = saida.find(m => m.onde === '__padrao__')
     if (ja)
@@ -458,6 +477,12 @@ export function mudancas(
       partes.push(b.campos ? { chave: 'camposEscolhidos', valor: resumoDeCampos(atual, c)?.liberados ?? 0 } : { chave: 'todosOsCampos' })
     if (JSON.stringify(a.itens) !== JSON.stringify(b.itens))
       partes.push({ chave: 'alcance' })
+    const ol = b.outras.filter(x => !a.outras.includes(x))
+    const ot = a.outras.filter(x => !b.outras.includes(x))
+    if (ol.length)
+      partes.push({ chave: 'liberou', valor: ol.join(',') })
+    if (ot.length)
+      partes.push({ chave: 'tirou', valor: ot.join(',') })
     if (JSON.stringify(a.origens) !== JSON.stringify(b.origens)) {
       const r = resumoDeOrigens(atual, c)
       partes.push(r ? { chave: 'origensEmParte', valor: r.n } : { chave: 'origensTodas' })
@@ -490,6 +515,28 @@ export function mudancas(
     saida.push({ onde: rotuloFixo(l), partes })
   }
   return saida
+}
+
+/* ------------------------------------------------------------------ *
+ * Rodada 7: outras ações de item, por categoria.
+ * ------------------------------------------------------------------ */
+
+const outrasIniciais: OutraDeItem[] = ['exportar', 'verHistorico', 'comentar']
+
+/** A outra ação só vale com a ação da categoria que ela exige (Exportar exige Ver). */
+export function outraLiberada(e: EstadoDoCargo, c: CategoriaMock, o: OutraDeItem) {
+  return acoesDaCategoria(e, c.id)[exigeDaOutra[o]]
+}
+
+export function outrasValendo(e: EstadoDoCargo, c: CategoriaMock) {
+  return (e.categorias[c.id]?.outras ?? []).filter(o => outraLiberada(e, c, o))
+}
+
+/** Quantas das outras ações possíveis a categoria tira; nulo quando não tira nenhuma. */
+export function resumoDeOutras(e: EstadoDoCargo, c: CategoriaMock) {
+  const possiveis = outrasDeItem.filter(o => outraLiberada(e, c, o))
+  const n = outrasValendo(e, c).length
+  return possiveis.length && n < possiveis.length ? { n, total: possiveis.length } : null
 }
 
 export { categoriasDoCenario }

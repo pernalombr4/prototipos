@@ -31,6 +31,9 @@ import {
   acoesDeCampo,
   camposPessoa,
   SEM_FORMULARIO,
+  type OutraDeItem,
+  exigeDaOutra,
+  outrasDeItem,
 } from './mocks'
 import {
   type EstadoDoCargo,
@@ -44,6 +47,8 @@ import {
   itensDaCategoria,
   liberadoNaOrigem,
   liberarEmTodas,
+  outraLiberada,
+  resumoDeOutras,
   parcialPorOrigem,
   resumoDeOrigens,
   temOrigens,
@@ -110,6 +115,7 @@ type Linha =
   | { tipo: 'responsavel', id: string, c: CategoriaMock }
   | { tipo: 'formulario', id: string, c: CategoriaMock, f: FormularioMock }
   | { tipo: 'semForm', id: string, c: CategoriaMock }
+  | { tipo: 'outras', id: string, c: CategoriaMock }
 
 const linhas = computed<Linha[]>(() => {
   const saida: Linha[] = []
@@ -122,6 +128,7 @@ const linhas = computed<Linha[]>(() => {
       }
       saida.push({ tipo: 'criador', id: `o${c.id}`, c })
       saida.push({ tipo: 'responsavel', id: `r${c.id}`, c })
+      saida.push({ tipo: 'outras', id: `x${c.id}`, c })
       saida.push({ tipo: 'campos', id: `k${c.id}`, c })
     }
   }
@@ -321,11 +328,22 @@ function restricoes(c: CategoriaMock) {
   const k = resumoDeCampos(props.estado, c)
   if (k)
     saida.push({ rotulo: props.t.camposDeTotal(k.liberados, k.total), icone: 'i-lucide-eye-off', dica: props.t.restricaoDica })
+  const x = resumoDeOutras(props.estado, c)
+  if (x)
+    saida.push({ rotulo: props.t.outrasDeTotal(x.n, x.total), icone: 'i-lucide-ellipsis', dica: props.t.restricaoDica })
   if (temRegraDeItens(props.estado, c)) {
     const dica = acoesDeAlcance.map(a => regraDaCelula(c, a)?.dica).filter(Boolean).join(' ')
     saida.push({ rotulo: props.t.filtros.comItens, icone: 'i-lucide-user-round-check', dica })
   }
   return saida
+}
+
+/** Rodada 7: Exportar, Ver histórico, Comentar e Excluir definitivamente, por categoria. */
+const outraMarcada = (c: CategoriaMock, o: OutraDeItem) => outraLiberada(props.estado, c, o) && props.estado.categorias[c.id]!.outras.includes(o)
+
+function definirOutra(c: CategoriaMock, o: OutraDeItem, valor: boolean) {
+  const e = props.estado.categorias[c.id]!
+  e.outras = valor ? [...new Set([...e.outras, o])] : e.outras.filter(x => x !== o)
 }
 
 const valorNaOrigem = (c: CategoriaMock, a: Acao, o: number) =>
@@ -472,6 +490,15 @@ const meta = {
           </span>
         </span>
 
+        <!-- Sublinha: outras ações de item (rodada 7) -->
+        <span v-else-if="row.original.tipo === 'outras'" class="flex min-w-0 items-center gap-2 pl-16">
+          <UIcon name="i-lucide-ellipsis" class="size-4 shrink-0 text-muted" />
+          <span class="min-w-0">
+            <span class="block text-sm text-default">{{ t.subOutras }}</span>
+            <span class="block truncate text-xs text-muted">{{ t.subOutrasDesc }}</span>
+          </span>
+        </span>
+
         <!-- Sublinha: formulário -->
         <span v-else-if="row.original.tipo === 'formulario'" class="flex min-w-0 items-center gap-2 pl-16">
           <UIcon name="i-lucide-file-text" class="size-4 shrink-0 text-muted" />
@@ -543,6 +570,7 @@ const meta = {
           :desabilitada="somenteLeitura"
           @alterar="v => definirNaOrigem(estado, row.original.c, a, row.original.tipo === 'formulario' ? row.original.f.id : SEM_FORMULARIO, v)"
         />
+        <span v-else-if="row.original.tipo === 'outras'" class="text-dimmed" aria-hidden="true">·</span>
       </template>
 
       <!-- ───────── Restrições: só o resumo; o clique abre a categoria. ───────── -->
@@ -581,6 +609,23 @@ const meta = {
             @update:model-value="(v: string[]) => definirCamposDoResponsavel(row.original.c, v)"
           />
         </template>
+        <!-- Outras ações: cada uma exige uma ação da categoria (Exportar exige Ver). -->
+        <span v-else-if="row.original.tipo === 'outras'" class="flex flex-wrap items-center gap-x-4 gap-y-1">
+          <UTooltip
+            v-for="o in outrasDeItem"
+            :key="o"
+            :text="outraLiberada(estado, row.original.c, o) ? '' : t.outraExige(t.acoes[exigeDaOutra[o]])"
+            :disabled="outraLiberada(estado, row.original.c, o)"
+          >
+            <UCheckbox
+              :model-value="outraMarcada(row.original.c, o)"
+              :label="t.outras[o]"
+              :disabled="somenteLeitura || !outraLiberada(estado, row.original.c, o)"
+              size="sm"
+              @update:model-value="v => definirOutra(row.original.c, o, v === true)"
+            />
+          </UTooltip>
+        </span>
         <!-- O que vale para o formulário criado depois, ao lado da última origem. -->
         <p v-else-if="row.original.tipo === 'semForm'" class="flex items-start gap-1.5 whitespace-normal text-xs text-muted">
           <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />
