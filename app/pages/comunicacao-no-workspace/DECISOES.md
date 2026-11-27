@@ -576,6 +576,24 @@ clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
   épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
   estão em `evidencias/requisitos/`.
 
+## Rodada 18 · 2026-11-26 (requisitos e cards das rodadas 12 a 17)
+
+- **Pedido (literal):** "sim, atualiza os requisitos e os cards e me traga no final a planilha atualizada com os cards (novos titulos e novos links)".
+- **Requisitos:** os épicos 1 a 6 e o documento do botão no cartão passam a dizer "Comunicações" e Configurações › Comunicações; o épico 1 ganha a parte 8 (central e configurações) e o filtro em cada coluna da lista. Épico novo: `requisitos/8-sms-e-whatsapp-pelo-enspace/`, com 7 partes.
+- **Prints:** refeitos em todos os épicos na tela atual, e os do épico 8, novos. O detector de seta acusou só o RF102 do épico 8, com o destaque cortado na borda; o print foi refeito numa tela mais larga.
+- **Cards no ENSPACE** (desenvolvimento-enlighten2, 2026-11-26): os 7 cards ganharam a descrição nova e as tarefas reescritas; os cards 1, 3, 4 e 6 também ganharam o critério de aceite novo. O card do épico 8 é novo. A planilha está em `cards-no-enspace.xlsx`.
+
+  | Card (título no ENSPACE) | Tipo | Tarefas |
+  |---|---|---|
+  | [\[COMUNICAÇÃO NO WORKSPACE\] Escrever e-mail de qualquer tela e central Comunicações no menu](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE43B719A7958E477E896536B49D307) | Melhoria | 10 |
+  | [\[COMUNICAÇÃO NO WORKSPACE\] Escolher na categoria de onde vêm o nome e o e-mail do contato](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE9ECFA785A7DF40F0B715D3384C6D8) | Inovação | 2 |
+  | [\[COMUNICAÇÃO NO WORKSPACE\] Gravar e-mail enviado sem item e filtrar a lista de mensagens por permissão](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEA192C88EF210435D86E3D0D759DD7) | Inovação | 5 |
+  | [\[COMUNICAÇÃO NO WORKSPACE\] Enviar e-mail pelas Caixas de E-mail do workspace](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEEA43CA2899994226AA8A6002D5799) | Inovação | 2 |
+  | [\[COMUNICAÇÃO NO WORKSPACE\] Responder na mesma conversa e encaminhar e-mail](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEE7549AB3B7AC401A8D2B5791E7D2C) | Inovação | 2 |
+  | [\[COMUNICAÇÃO NO WORKSPACE\] Vincular e-mail a uma tarefa](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE0D4EAB388F5E4E238D7E3BDF138B1) | Inovação | 4 |
+  | [\[COMUNICAÇÃO NO WORKSPACE\] Botão de e-mail no cartão do quadro de itens e de tarefas](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE38811F4778A94A3983977CD6F8F9A) | Melhoria | 0 |
+  | [\[COMUNICAÇÃO NO WORKSPACE\] Comunicações com SMS e WhatsApp pelo ENSPACE](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEC77EE1D507394E6699D00886FC2A7) | Inovação | 7 |
+
 ## Rodada 17 · 2026-11-26 ("Comunicações" desde o MVP; WhatsApp e SMS com 2 caminhos)
 
 - **Pedido (literal):** "desde o mvp, o nome do menu ja deve ser o mesmo, senao depois os devs serao obrigados a alterar a rota no backend. o nome do menu sempre acompanha o breadcrumb [...] se um dia o menu será comunicaçoes, é assim que deve ser feito edsde o inicio, mesmo que por enquanto so tenha emails no mvp" e "mesmo com twilio, ele deve ter essas 2 opçoes: mandar algo abrindo o whatsapp web dele ou usar a integraçao. [...] SMS cai no mesmo caso. se nao tiver integraçao, ele pode fazer sem integraçao, dos modos como previmos: qr code e outros. e se tiver integraçao tem MAIS uma opçao de como fazer."
