@@ -307,3 +307,11 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
   caixas, "Sem print" com o motivo), conferidas pela API.
 - **Sem card:** os épicos 2 a 7, até a redatora pedir.
 - **Falta:** conferir o card na tela. O Chrome parou na aprovação da Microsoft (Authenticator), que é da redatora.
+
+## Rodada 6 · 2026-11-27
+- **Pedido (literal):** "nessa tabela do print, vale o cabeçalho ter alguma indicativo visual, tipo cor ou opacidade
+  diferente. só pra dar pra entender que é cabeçalho. hoje ta parecendo uma linha \"quebrada\"" e "o mesmo vale pro
+  cabeçalho da parte de categorias, ok?"
+- **Mudou:** o cabeçalho das tabelas de permissão (fora das categorias, Categorias e a aba Configurações) tem fundo
+  `bg-elevated` e texto `text-highlighted`. Antes, o fundo era o mesmo das linhas.
+- **Em conversa:** separar o padrão (fora das categorias) e as categorias em abas. Sem decisão.
