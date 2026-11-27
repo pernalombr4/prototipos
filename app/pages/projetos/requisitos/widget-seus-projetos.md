@@ -23,13 +23,14 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
 | RN801 | "Seus projetos" é 1 bloco da tela Início. O conteúdo que a Início já mostra continua nela. | Início em widgets: "Seus projetos" ao lado de "Minhas tarefas" e "Categorias". | Obrigatório |
-| RN802 | Os projetos de "Seus projetos" são os projetos ativos que estão no menu lateral da pessoa, na ordem do menu. | Rita com Financeiro, Jurídico e Obra Aurora no menu vê os 3, nessa ordem. | Obrigatório |
+| RN802 | Os projetos de "Seus projetos" são os projetos ativos que estão no menu lateral da pessoa, na ordem do menu, sem limite de quantidade. | Rita com Financeiro, Jurídico e Obra Aurora no menu vê os 3, nessa ordem. Com 12 projetos no menu, vê os 12. | Obrigatório |
 
 ## Onde o bloco entra (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF801 | Se a tela Início usa widgets, "Seus projetos" deve ser 1 widget do catálogo da Início (RN801). | O widget aparece no Personalizar e se adiciona, se move e se tira como os outros. | Essencial | Obrigatório |
+| RF808 | Se a tela Início usa widgets, o widget "Seus projetos" deve estar na Início padrão, a que a pessoa vê antes de personalizar. | Pessoa que nunca usou o Personalizar vê o widget na Início. | Essencial | Obrigatório |
 | RF802 | Se a tela Início não usa widgets, "Seus projetos" deve ser 1 seção da tela, abaixo da saudação (RN801). | A saudação e o resto do conteúdo da Início continuam na tela. | Essencial | Obrigatório |
 
 ## O conteúdo do bloco (RF)
@@ -47,8 +48,6 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | S1 | O bloco segue a ordem do menu lateral da pessoa (RN802). | redatora | RN802 |
-| P1 | O bloco tem um número máximo de projetos, com "Ver todos os projetos" para o resto? Hoje o protótipo mostra todos os do menu. | redatora | RF803, RF805 |
-| P2 | Quando a Início estiver em widgets, "Seus projetos" entra na Início padrão de quem ainda não personalizou? | redatora e o épico "Home em widgets" | RF801 |
 
 ## Padrão de qualidade
 

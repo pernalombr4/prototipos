@@ -872,8 +872,12 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - a tela Início mostra "Seus projetos" como 1 widget entre os outros da Home. "Minhas tarefas" e "Categorias"
     aparecem como casca, com borda tracejada: nada neles é proposta.
 - **A fronteira:** o MVP muda só o que aparece. Nada do que fica no MVP muda de comportamento.
-- **Requisitos:** `requisitos/widget-seus-projetos.md` (RN801, RN802, RF801 a RF807). O de relações ganhou, no
+- **Requisitos:** `requisitos/widget-seus-projetos.md` (RN801, RN802, RF801 a RF808). O de relações ganhou, no
   cabeçalho, as linhas que valem no MVP.
+- **Respostas da redatora, depois da entrega:**
+  - o widget mostra os projetos do menu sem limite de quantidade (RN802);
+  - na Início em widgets, "Seus projetos" entra na Início padrão (RF808). O protótipo home não muda: a regra fica só
+    nos requisitos daqui.
 - **Evidências:** `evidencias/entrega-r16-01` a `entrega-r16-07`, sem ponteiro.
 
 ### O que entra no MVP e o que fica para depois
