@@ -10,12 +10,13 @@
  * - o Status do projeto continua separado (Visão geral).
  * Por ora só dentro do projeto: o workspace não tem discussões (pedido da redatora).
  */
-import type { SelectItem } from '@nuxt/ui'
+import type { DropdownMenuItem, SelectItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { iniciais, pessoa } from './mocks'
 import { useMarcaDeProposta, useProjetos } from './estado'
 import { useMetasEDiscussoes, type Discussao, type FormatoDaDiscussao, type Mensagem } from './metasEDiscussoes'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
+import { textosDeAcoes } from './textosDeAcoes'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -90,9 +91,10 @@ const painelAberto = computed({
 })
 const moderar = computed(() => !!aberta.value && md.podeModerar(aberta.value))
 const podeMarcar = computed(() => !!aberta.value && aberta.value.formato === 'pergunta' && moderar.value)
-const acoes = computed(() => {
-  const d = aberta.value
-  if (!d || !moderar.value) return []
+/** Rodada 12: as ações da discussão servem ao painel e ao menu ⋯ de cada linha da lista. */
+const tac = useTextos(textosDeAcoes)
+function acoesDe(d: Discussao): DropdownMenuItem[][] {
+  if (!md.podeModerar(d)) return []
   const p = prj.projetos.value.find(x => x.id === d.projeto)!
   return [[
     ...(prj.podeAdministrar(p) ? [{ label: d.fixada ? td.value.desafixar : td.value.fixar, icon: d.fixada ? 'i-lucide-pin-off' : 'i-lucide-pin', onSelect: () => { d.fixada = !d.fixada } }] : []),
@@ -105,7 +107,15 @@ const acoes = computed(() => {
       },
     },
   ]]
-})
+}
+const acoes = computed(() => aberta.value ? acoesDe(aberta.value) : [])
+const acoesDaLinha = (d: Discussao): DropdownMenuItem[][] => [
+  [
+    { label: tac.value.abrir, icon: 'i-lucide-panel-right-open', onSelect: () => { md.discussaoAberta.value = d.id } },
+    { label: tac.value.copiarLink, icon: 'i-lucide-link', onSelect: () => toast.add({ title: tac.value.linkCopiado, icon: 'i-lucide-check', color: 'success' }) },
+  ],
+  ...acoesDe(d),
+]
 const resposta = ref('')
 const enviando = ref(false)
 async function enviar() {
@@ -210,10 +220,10 @@ function abrirTarefas() {
 
     <!-- a lista -->
     <ul v-else class="divide-y divide-default">
-      <li v-for="(d, i) in lista" :key="d.id" class="animate-[entrada_0.2s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
+      <li v-for="(d, i) in lista" :key="d.id" class="flex items-center pr-2 animate-[entrada_0.2s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
         <button
           type="button"
-          class="group flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-elevated/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
+          class="group flex min-w-0 flex-1 items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-elevated/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
           @click="md.discussaoAberta.value = d.id"
         >
           <span class="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-md" :class="COR[d.formato]">
@@ -234,6 +244,9 @@ function abrirTarefas() {
             <span class="flex items-center gap-1 tabular-nums"><UIcon name="i-lucide-message-circle" class="size-3.5" />{{ d.mensagens.length - 1 }}</span>
           </span>
         </button>
+        <UDropdownMenu :items="acoesDaLinha(d)" :content="{ align: 'end' }">
+          <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de(d.titulo)" />
+        </UDropdownMenu>
       </li>
     </ul>
   </div>

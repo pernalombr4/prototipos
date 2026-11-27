@@ -196,10 +196,18 @@ export interface AtualizacaoDeStatus {
   em: string
 }
 
+/**
+ * Rodada 12: a referência do projeto copia o nome, como a das categorias e dos campos do ENSPACE: minúsculas, sem
+ * acento, palavras ligadas por hífen. Na criação ela pode ser alterada; depois fica fixa.
+ */
+export function referenciaDoNome(nome: string) {
+  return nome.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+}
+
 export const projetosBase: Projeto[] = [
   {
     id: 1,
-    referencia: 'PRJ1A2B',
+    referencia: 'financeiro',
     nome: 'Financeiro',
     descricao: 'Contas a pagar, notas fiscais e reembolsos da matriz e das filiais.',
     icone: 'i-lucide-landmark',
@@ -227,7 +235,7 @@ export const projetosBase: Projeto[] = [
   },
   {
     id: 2,
-    referencia: 'PRJ3C4D',
+    referencia: 'juridico',
     nome: 'Jurídico',
     descricao: 'Processos, prazos e pareceres. Conteúdo sob sigilo.',
     icone: 'i-lucide-scale',
@@ -252,7 +260,7 @@ export const projetosBase: Projeto[] = [
   },
   {
     id: 3,
-    referencia: 'PRJ5E6F',
+    referencia: 'comercial-sul',
     nome: 'Comercial Sul',
     descricao: 'Funil e propostas da regional Sul.',
     icone: 'i-lucide-trending-up',
@@ -274,7 +282,7 @@ export const projetosBase: Projeto[] = [
   },
   {
     id: 4,
-    referencia: 'PRJ7G8H',
+    referencia: 'obra-aurora-engenharia',
     nome: 'Obra Aurora Engenharia',
     descricao: 'Acompanhamento da obra com o cliente: medições e ocorrências.',
     icone: 'i-lucide-hard-hat',
@@ -315,10 +323,11 @@ export const projetosVolume: Projeto[] = [
     const tipo = tipos[i % tipos.length]!
     const cidade = cidades[i % cidades.length]!
     const visibilidade: Visibilidade = i % 5 === 0 ? 'privado' : i % 3 === 0 ? 'aberto' : 'fechado'
+    const nome = `${tipo.prefixo} ${cidade}${i >= cidades.length ? ` ${Math.floor(i / cidades.length) + 1}` : ''}`
     return {
       id: 100 + i,
-      referencia: `PRJ${(9100 + i * 37).toString(16).toUpperCase()}`,
-      nome: `${tipo.prefixo} ${cidade}${i >= cidades.length ? ` ${Math.floor(i / cidades.length) + 1}` : ''}`,
+      referencia: referenciaDoNome(nome),
+      nome,
       descricao: '',
       icone: tipo.icone,
       cor: tipo.cor,
@@ -424,6 +433,9 @@ export interface CamposDaCategoria {
 }
 
 export const camposDaCategoria: Record<number, CamposDaCategoria> = {
+  1: { pessoa: ['Gerente da conta'], data: ['Próximo contato', 'Data de cadastro'], status: 'Situação do cliente', prefixo: 'CL', titulos: ['Rede Vale Supermercados', 'Clínica Horizonte', 'Colégio Araucária'], valores: [{ valor: 'Em cadastro', grupo: 'aberto' }, { valor: 'Ativo', grupo: 'andamento' }, { valor: 'Inativo', grupo: 'concluido' }] },
+  2: { pessoa: ['Comprador'], data: ['Validade da homologação'], status: 'Homologação', prefixo: 'FO', titulos: ['Aço Forte Distribuidora', 'Andaimes Litoral', 'Papelaria Central'], valores: [{ valor: 'Em análise', grupo: 'aberto' }, { valor: 'Homologado', grupo: 'concluido' }, { valor: 'Suspenso', grupo: 'aberto' }] },
+  3: { pessoa: ['Atendente', 'Solicitante'], data: ['Prazo de atendimento', 'Data de abertura'], status: 'Situação do chamado', prefixo: 'CH', titulos: ['Troca de notebook', 'Acesso ao sistema fiscal', 'Reserva de sala'], valores: [{ valor: 'Novo', grupo: 'aberto' }, { valor: 'Em atendimento', grupo: 'andamento' }, { valor: 'Aguardando solicitante', grupo: 'andamento' }, { valor: 'Resolvido', grupo: 'concluido' }] },
   4: { pessoa: ['Aprovador', 'Solicitante'], data: ['Vencimento', 'Data de emissão'], status: 'Etapa do fluxo', prefixo: 'CP', titulos: ['Honorários periciais', 'Locação de andaimes', 'Licenças de software', 'Custas processuais', 'Energia elétrica'], valores: [{ valor: 'A lançar', grupo: 'aberto' }, { valor: 'Em aprovação', grupo: 'andamento' }, { valor: 'Aprovada', grupo: 'andamento' }, { valor: 'Paga', grupo: 'concluido' }] },
   5: { pessoa: ['Conferente'], data: ['Data de entrada', 'Data de emissão'], status: 'Situação', prefixo: 'NF', titulos: ['Nota de entrada 88120', 'Nota de serviço 4471', 'Nota de entrada 88133'], valores: [{ valor: 'Recebida', grupo: 'aberto' }, { valor: 'Em conferência', grupo: 'andamento' }, { valor: 'Lançada', grupo: 'concluido' }] },
   6: { pessoa: ['Aprovador', 'Solicitante'], data: [], status: 'Etapa do fluxo', prefixo: 'RE', titulos: ['Viagem a Joinville', 'Almoço com cliente', 'Combustível de outubro'], valores: [{ valor: 'Enviado', grupo: 'aberto' }, { valor: 'Em análise', grupo: 'andamento' }, { valor: 'Reembolsado', grupo: 'concluido' }] },

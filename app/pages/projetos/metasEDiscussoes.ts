@@ -341,6 +341,26 @@ export function useMetasEDiscussoes() {
     if (!ms.length) return null
     return Math.round(ms.reduce((a, m) => a + progressoDoMarco(m), 0) / ms.length)
   }
+  /**
+   * Rodada 12: a regra do andamento, numa frase. A meta automática é medida só por marcos: a média da lista
+   * "Marcos" dela. Essa lista junta os marcos ligados um a um e todos os marcos de cada projeto ligado,
+   * inclusive os criados depois. O projeto aparece na meta quando está ligado ou quando tem marco ligado, e o
+   * andamento dele ali é a média dos marcos dele que estão na lista (não a de todos os marcos do projeto).
+   */
+  function projetosDaMeta(meta: Meta) {
+    const ids = [...meta.projetos]
+    for (const id of meta.marcos) {
+      const p = marcos.value.find(m => m.id === id)?.projeto
+      if (p !== undefined && !ids.includes(p)) ids.push(p)
+    }
+    return ids
+  }
+  function progressoDoProjetoNaMeta(meta: Meta, projeto: number) {
+    const ms = marcosQueContam(meta).filter(m => m.projeto === projeto)
+    if (!ms.length) return null
+    return Math.round(ms.reduce((a, m) => a + progressoDoMarco(m), 0) / ms.length)
+  }
+  const marcosDoProjetoNaMeta = (meta: Meta, projeto: number) => marcosQueContam(meta).filter(m => m.projeto === projeto)
   const valorAtual = (meta: Meta) => meta.atualizacoes.find(a => a.valor !== undefined)?.valor ?? meta.valor?.inicial ?? 0
   function progressoDaMeta(meta: Meta) {
     if (meta.medicao === 'valor' && meta.valor) {
@@ -390,7 +410,7 @@ export function useMetasEDiscussoes() {
     discussoes, discussaoAberta, discussoesDo, podeAbrir, podeModerar, criarDiscussao, responder, criarTarefaDaMensagem,
     marcos, marcoAberto, marcosDo, progressoDoMarco, tarefasDoMarco, marcoDaTarefa, podeEditarMarcos, ligarTarefas, tirarTarefa,
     definirMarcoDaTarefa, salvarMarco, criarMarcoRapido, concluirMarco, reabrirMarco, excluirMarco, abrirMarco,
-    metas, metaAberta, marcosQueContam, progressoDoProjeto, valorAtual, progressoDaMeta, situacaoDaMeta, metasDoProjeto, metasDoMarco,
+    metas, metaAberta, marcosQueContam, progressoDoProjeto, projetosDaMeta, progressoDoProjetoNaMeta, marcosDoProjetoNaMeta, valorAtual, progressoDaMeta, situacaoDaMeta, metasDoProjeto, metasDoMarco,
     veProjeto, podeEditarMeta, salvarMeta, excluirMeta, publicarAtualizacao, abrirMeta,
   }
 }

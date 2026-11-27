@@ -18,11 +18,12 @@ import type { Textos } from './textos'
 import type { Situacao } from './mocks'
 import { iniciais, pessoa, pessoas } from './mocks'
 import { COR_DA_SITUACAO, ICONE_DA_SITUACAO, COR_DO_PROJETO, useMarcaDeProposta, useProjetos } from './estado'
-import { useMetasEDiscussoes, type Marco, type Medicao, type Meta, type Unidade } from './metasEDiscussoes'
+import { useMetasEDiscussoes, type Medicao, type Meta, type Unidade } from './metasEDiscussoes'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { textosDeAtalhos } from './textosDeAtalhos'
 import AtalhoDeCriar from './_AtalhoDeCriar.vue'
+import { textosDeAcoes } from './textosDeAcoes'
 
 const props = defineProps<{ t: Textos }>()
 const prj = useProjetos()
@@ -32,6 +33,7 @@ const tg = computed(() => tx.value.metas)
 const tmm = useTextos(textosDeMarcosEMedicao)
 const ta = useTextos(textosDeAtalhos)
 const tv = computed(() => tmm.value.medicao)
+const tac = useTextos(textosDeAcoes)
 const idioma = useIdioma()
 const toast = useToast()
 const { marca } = useMarcaDeProposta()
@@ -56,8 +58,20 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'medicao', label: tv.value.rotulo, sortable: true },
   { key: 'dataAlvo', label: tg.value.colunas.dataAlvo!, sortable: true },
   { key: 'dono', label: tg.value.colunas.dono!, sortable: true },
-  { key: 'ligacoes', label: tg.value.colunas.ligacoes! },
+  { key: 'projetos', label: tg.value.colunas.projetos! },
+  { key: 'marcos', label: tg.value.colunas.marcos!, align: 'right' },
+  { key: 'acoes', label: tac.value.coluna, align: 'right' },
 ])
+/** Rodada 12: a coluna Ações, como em toda tabela do ENSPACE. */
+function acoesDaLinha(m: Meta): DropdownMenuItem[][] {
+  const grupos: DropdownMenuItem[][] = [[{ label: tv.value.abrir, icon: 'i-lucide-panel-right-open', onSelect: () => { md.metaAberta.value = m.id } }]]
+  if (md.podeEditarMeta(m)) {
+    grupos[0]!.push({ label: tv.value.editar, icon: 'i-lucide-pencil', onSelect: () => abrirForm(m) })
+    grupos.push([{ label: tv.value.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => { aExcluir.value = m } }])
+  }
+  return grupos
+}
+const nomesDosProjetos = (m: Meta) => md.projetosDaMeta(m).map(id => md.veProjeto(id) ? projetoDe(id)?.nome ?? '' : tg.value.semAcesso)
 const linhas = computed(() => {
   const q = normalizar(busca.value.trim())
   const rs = md.metas.value
@@ -126,10 +140,28 @@ function ligar(tipo: 'projetos' | 'marcos', ids: number[]) {
 }
 const projetosVisiveisDa = (m: Meta) => m.projetos.filter(id => md.veProjeto(id))
 const marcosVisiveisDa = (m: Meta) => m.marcos.filter(id => md.veProjeto(marcoDe(id)?.projeto ?? 0))
-/** O caminho pelo qual o marco conta: pelo projeto ligado ou ligado direto à meta. */
-function caminho(meta: Meta, m: Marco) {
-  if (meta.projetos.includes(m.projeto)) return md.veProjeto(m.projeto) ? tv.value.viaProjeto(projetoDe(m.projeto)?.nome ?? '') : tv.value.viaProjetoSemAcesso
-  return tv.value.ligadoDireto
+/**
+ * Rodada 12: o painel tem 2 listas, Projetos e Marcos. O projeto aparece quando está ligado (todos os marcos
+ * dele entram na lista Marcos) ou quando tem marco ligado um a um. O marco que veio pelo projeto ligado sai só
+ * desligando o projeto: no seletor ele aparece marcado e travado, e o X dele explica por quê.
+ */
+function subtextoDoProjeto(meta: Meta, id: number) {
+  const n = md.marcosDoProjetoNaMeta(meta, id).length
+  if (meta.projetos.includes(id)) return n ? tv.value.projetoLigado(n) : tv.value.projetoSemMarcos
+  return tv.value.pelosMarcos(n)
+}
+const marcosVisiveisNaLista = (meta: Meta) => md.marcosQueContam(meta).filter(m => md.veProjeto(m.projeto)).map(m => m.id)
+const opMarcosDoPainel = computed(() => opMarcos.value.map(o => ({ ...o, disabled: !!aberta.value?.projetos.includes(marcoDe(o.value)?.projeto ?? 0) })))
+function ligarMarcosDoPainel(ids: number[]) {
+  const m = aberta.value
+  if (!m) return
+  ligar('marcos', ids.filter(id => !m.projetos.includes(marcoDe(id)?.projeto ?? 0)))
+}
+function desligarProjeto(id: number) {
+  if (aberta.value) ligar('projetos', projetosVisiveisDa(aberta.value).filter(x => x !== id))
+}
+function tirarMarco(id: number) {
+  if (aberta.value) ligar('marcos', marcosVisiveisDa(aberta.value).filter(x => x !== id))
 }
 const formula = (m: Meta) => {
   if (m.medicao === 'valor' && m.valor) return tv.value.formulaValor(formatar(m.valor.inicial, m.valor.unidade))
@@ -277,8 +309,19 @@ function excluir() {
               <span class="truncate text-sm text-toned">{{ (row as any).donoNome }}</span>
             </span>
           </template>
-          <template #cell-ligacoes="{ row }">
-            <span class="text-xs text-muted">{{ tg.ligacoes((row as any).projetos.length, (row as any).marcos.length) }}</span>
+          <template #cell-projetos="{ row }">
+            <span v-if="nomesDosProjetos(row as Meta).length" class="block truncate text-sm text-toned" :title="nomesDosProjetos(row as Meta).join(', ')">{{ nomesDosProjetos(row as Meta).join(', ') }}</span>
+            <span v-else class="text-xs text-muted">{{ tg.nenhumLigado }}</span>
+          </template>
+          <template #cell-marcos="{ row }">
+            <span class="text-sm tabular-nums text-toned">{{ md.marcosQueContam(row as Meta).length }}</span>
+          </template>
+          <template #cell-acoes="{ row }">
+            <div class="flex justify-end" @click.stop>
+              <UDropdownMenu :items="acoesDaLinha(row as Meta)" :content="{ align: 'end' }">
+                <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as Meta).nome)" />
+              </UDropdownMenu>
+            </div>
           </template>
         </EnTable>
       </div>
@@ -324,58 +367,28 @@ function excluir() {
             </div>
           </div>
 
-          <!-- automático: os marcos que contam, com o caminho de cada um -->
-          <section v-if="aberta.medicao === 'automatica'" class="flex flex-col gap-2">
-            <header class="flex items-center gap-2">
-              <h3 class="flex-1 text-sm font-semibold text-highlighted">{{ tv.marcosQueContam }}</h3>
-            </header>
-            <p v-if="!md.marcosQueContam(aberta).length" class="rounded-lg border border-dashed border-default px-3 py-4 text-center text-xs text-muted">{{ tv.formulaSemMarcos }}</p>
-            <ul v-else class="flex flex-col divide-y divide-default rounded-lg border border-default">
-              <li v-for="m in md.marcosQueContam(aberta)" :key="m.id">
-                <component
-                  :is="md.veProjeto(m.projeto) ? 'button' : 'div'"
-                  type="button"
-                  class="flex w-full items-center gap-3 px-3 py-2 text-left"
-                  :class="md.veProjeto(m.projeto) ? 'transition-colors hover:bg-elevated/60' : ''"
-                  @click="md.veProjeto(m.projeto) && (painel = false, md.abrirMarco(m))"
-                >
-                  <UIcon :name="m.status === 'concluido' ? 'i-lucide-circle-check' : 'i-lucide-flag'" class="size-4 shrink-0" :class="m.status === 'concluido' ? 'text-success' : 'text-muted'" />
-                  <span v-if="md.veProjeto(m.projeto)" class="min-w-0 flex-1">
-                    <span class="block truncate text-sm font-medium text-highlighted">{{ m.nome }}</span>
-                    <span class="block truncate text-xs text-muted">{{ caminho(aberta, m) }} · {{ data(m.dataAlvo) }}</span>
-                  </span>
-                  <UTooltip v-else :text="tg.semAcessoDica" class="min-w-0 flex-1">
-                    <span class="block truncate text-sm italic text-muted">{{ tg.marcoSemAcesso }}</span>
-                  </UTooltip>
-                  <UProgress :model-value="md.progressoDoMarco(m)" :color="corDoProgresso(md.progressoDoMarco(m))" size="sm" class="w-24" />
-                  <span class="w-9 text-right text-xs tabular-nums text-toned">{{ md.progressoDoMarco(m) }}%</span>
-                </component>
-              </li>
-            </ul>
-          </section>
-
-          <!-- os projetos ligados -->
+          <!-- rodada 12: os projetos da meta, ligados ou com marco ligado, com o andamento de cada um nesta meta -->
           <section class="flex flex-col gap-2">
-            <header class="flex items-center gap-2">
+            <header class="flex items-start gap-2">
               <div class="min-w-0 flex-1">
-                <h3 class="text-sm font-semibold text-highlighted">{{ aberta.medicao === 'automatica' ? tg.projetos : tv.acompanhamento }}</h3>
-                <p class="text-xs text-muted">{{ aberta.medicao === 'automatica' ? tv.projetoContaPelosMarcos : tv.acompanhamentoDica }}</p>
+                <h3 class="text-sm font-semibold text-highlighted">{{ tg.projetos }}</h3>
+                <p class="text-xs text-muted">{{ aberta.medicao === 'automatica' ? tv.regraDosProjetos : tv.acompanhamentoDica }}</p>
               </div>
-              <USelectMenu v-if="podeEditar" v-model:search-term="buscas.painelProjetos" :model-value="projetosVisiveisDa(aberta)" :items="opProjetos" value-key="value" multiple size="xs" class="w-44" :ui="{ content: 'min-w-72' }" :placeholder="tg.ligarProjetos" @update:model-value="ligar('projetos', $event as number[])">
+              <USelectMenu v-if="podeEditar" v-model:search-term="buscas.painelProjetos" :model-value="projetosVisiveisDa(aberta)" :items="opProjetos" value-key="value" multiple size="xs" class="w-40 shrink-0" :ui="{ content: 'min-w-72' }" :placeholder="tg.ligarProjetos" @update:model-value="ligar('projetos', $event as number[])">
                 <template #default>{{ tg.ligarProjetos }}</template>
                 <template #content-bottom>
                   <AtalhoDeCriar :termo="buscas.painelProjetos" :rotulo="ta.projeto.rotulo" :com="ta.projeto.com" :dica="ta.projeto.dica" @criar="(t: string) => criarProjetoNaMeta('painel', t)" />
                 </template>
               </USelectMenu>
             </header>
-            <p v-if="!aberta.projetos.length" class="text-xs text-muted">{{ tg.nenhumLigado }}</p>
+            <p v-if="!md.projetosDaMeta(aberta).length" class="text-xs text-muted">{{ tg.nenhumLigado }}</p>
             <ul v-else class="flex flex-col divide-y divide-default rounded-lg border border-default">
-              <li v-for="id in aberta.projetos" :key="id" class="flex items-center gap-3 px-3 py-2">
+              <li v-for="id in md.projetosDaMeta(aberta)" :key="id" class="flex items-center gap-3 py-2 pl-3 pr-2">
                 <template v-if="md.veProjeto(id)">
                   <span class="flex size-7 shrink-0 items-center justify-center rounded-md" :class="COR_DO_PROJETO[projetoDe(id)!.cor]"><UIcon :name="projetoDe(id)!.icone" class="size-4" /></span>
                   <span class="min-w-0 flex-1">
                     <button type="button" class="block max-w-full truncate text-left text-sm font-medium text-highlighted hover:underline" :title="tg.abrirProjeto" @click="painel = false; prj.abrirProjeto(id)">{{ projetoDe(id)!.nome }}</button>
-                    <span class="block truncate text-xs text-muted">{{ md.marcosDo(id).length ? tmm.marcos.contagem(md.marcosDo(id).length) : tv.projetoSemMarcos }}</span>
+                    <span class="block truncate text-xs text-muted">{{ subtextoDoProjeto(aberta, id) }}</span>
                   </span>
                 </template>
                 <UTooltip v-else :text="tg.semAcessoDica" class="min-w-0 flex-1">
@@ -384,9 +397,9 @@ function excluir() {
                     <span class="truncate text-sm italic text-muted">{{ tg.semAcesso }}</span>
                   </span>
                 </UTooltip>
-                <template v-if="md.progressoDoProjeto(id) !== null">
-                  <UProgress :model-value="md.progressoDoProjeto(id)!" :color="corDoProgresso(md.progressoDoProjeto(id))" size="sm" class="w-24" />
-                  <span class="w-9 text-right text-xs tabular-nums text-toned">{{ md.progressoDoProjeto(id) }}%</span>
+                <template v-if="md.progressoDoProjetoNaMeta(aberta, id) !== null">
+                  <UProgress :model-value="md.progressoDoProjetoNaMeta(aberta, id)!" :color="corDoProgresso(md.progressoDoProjetoNaMeta(aberta, id))" size="sm" class="w-24" />
+                  <span class="w-9 text-right text-xs tabular-nums text-toned">{{ md.progressoDoProjetoNaMeta(aberta, id) }}%</span>
                 </template>
                 <UButton
                   v-else-if="md.veProjeto(id) && md.podeEditarMarcos(id)"
@@ -397,34 +410,51 @@ function excluir() {
                   variant="outline"
                   @click="painel = false; prj.abrirAba(id, 'marcos')"
                 />
+                <UTooltip v-if="podeEditar && md.veProjeto(id)" :text="aberta.projetos.includes(id) ? tv.desligarProjeto : tv.projetoPelosMarcos">
+                  <UButton icon="i-lucide-x" size="xs" color="neutral" variant="ghost" :disabled="!aberta.projetos.includes(id)" :aria-label="tv.desligarProjeto" @click="desligarProjeto(id)" />
+                </UTooltip>
               </li>
             </ul>
           </section>
 
-          <!-- os marcos ligados direto -->
+          <!-- rodada 12: uma lista só de marcos; o andamento da meta é a média dela -->
           <section class="flex flex-col gap-2">
-            <header class="flex items-center gap-2">
-              <h3 class="flex-1 text-sm font-semibold text-highlighted">{{ tg.ligarMarcos }}</h3>
-              <USelectMenu v-if="podeEditar" v-model:search-term="buscas.painelMarcos" :model-value="marcosVisiveisDa(aberta)" :items="opMarcos" value-key="value" multiple size="xs" class="w-44" :ui="{ content: 'min-w-80' }" :placeholder="tg.ligarMarcos" @update:model-value="ligar('marcos', $event as number[])">
-                <template #default>{{ tg.ligarMarcos }}</template>
+            <header class="flex items-start gap-2">
+              <div class="min-w-0 flex-1">
+                <h3 class="text-sm font-semibold text-highlighted">{{ tv.marcos }}</h3>
+                <p class="text-xs text-muted">{{ aberta.medicao === 'automatica' ? tv.regraDosMarcos : tv.acompanhamentoDica }}</p>
+              </div>
+              <USelectMenu v-if="podeEditar" v-model:search-term="buscas.painelMarcos" :model-value="marcosVisiveisNaLista(aberta)" :items="opMarcosDoPainel" value-key="value" multiple size="xs" class="w-40 shrink-0" :ui="{ content: 'min-w-80' }" :placeholder="tv.adicionarMarcos" @update:model-value="ligarMarcosDoPainel($event as number[])">
+                <template #default>{{ tv.adicionarMarcos }}</template>
                 <template v-if="destinosDoMarco.length" #content-bottom>
                   <AtalhoDeCriar :termo="buscas.painelMarcos" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" :destinos="destinosDoMarco" @criar="(t: string, p?: number) => criarMarcoNaMeta('painel', t, p)" />
                 </template>
               </USelectMenu>
             </header>
-            <p v-if="!aberta.marcos.length" class="text-xs text-muted">{{ tg.nenhumLigado }}</p>
+            <p v-if="!md.marcosQueContam(aberta).length" class="rounded-lg border border-dashed border-default px-3 py-4 text-center text-xs text-muted">{{ tv.formulaSemMarcos }}</p>
             <ul v-else class="flex flex-col divide-y divide-default rounded-lg border border-default">
-              <li v-for="id in aberta.marcos" :key="id" class="flex items-center gap-3 px-3 py-2">
-                <UIcon name="i-lucide-flag" class="size-4 shrink-0 text-muted" />
-                <span v-if="marcoDe(id) && md.veProjeto(marcoDe(id)!.projeto)" class="min-w-0 flex-1">
-                  <span class="block truncate text-sm font-medium text-highlighted">{{ marcoDe(id)!.nome }}</span>
-                  <span class="block truncate text-xs text-muted">{{ projetoDe(marcoDe(id)!.projeto)?.nome }} · {{ data(marcoDe(id)!.dataAlvo) }}</span>
-                </span>
-                <span v-else class="min-w-0 flex-1 truncate text-sm italic text-muted">{{ tg.marcoSemAcesso }}</span>
-                <template v-if="marcoDe(id)">
-                  <UProgress :model-value="md.progressoDoMarco(marcoDe(id)!)" :color="corDoProgresso(md.progressoDoMarco(marcoDe(id)!))" size="sm" class="w-24" />
-                  <span class="w-9 text-right text-xs tabular-nums text-toned">{{ md.progressoDoMarco(marcoDe(id)!) }}%</span>
-                </template>
+              <li v-for="m in md.marcosQueContam(aberta)" :key="m.id" class="flex items-center gap-1 pr-2">
+                <component
+                  :is="md.veProjeto(m.projeto) ? 'button' : 'div'"
+                  type="button"
+                  class="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 text-left"
+                  :class="md.veProjeto(m.projeto) ? 'transition-colors hover:bg-elevated/60' : ''"
+                  @click="md.veProjeto(m.projeto) && (painel = false, md.abrirMarco(m))"
+                >
+                  <UIcon :name="m.status === 'concluido' ? 'i-lucide-circle-check' : 'i-lucide-flag'" class="size-4 shrink-0" :class="m.status === 'concluido' ? 'text-success' : 'text-muted'" />
+                  <span v-if="md.veProjeto(m.projeto)" class="min-w-0 flex-1">
+                    <span class="block truncate text-sm font-medium text-highlighted">{{ m.nome }}</span>
+                    <span class="block truncate text-xs text-muted">{{ projetoDe(m.projeto)?.nome }} · {{ data(m.dataAlvo) }}</span>
+                  </span>
+                  <UTooltip v-else :text="tg.semAcessoDica" class="min-w-0 flex-1">
+                    <span class="block truncate text-sm italic text-muted">{{ tg.marcoSemAcesso }}</span>
+                  </UTooltip>
+                  <UProgress :model-value="md.progressoDoMarco(m)" :color="corDoProgresso(md.progressoDoMarco(m))" size="sm" class="w-24" />
+                  <span class="w-9 text-right text-xs tabular-nums text-toned">{{ md.progressoDoMarco(m) }}%</span>
+                </component>
+                <UTooltip v-if="podeEditar && md.veProjeto(m.projeto)" :text="aberta.projetos.includes(m.projeto) ? tv.marcoPeloProjeto(projetoDe(m.projeto)?.nome ?? '') : tv.tirarMarco">
+                  <UButton icon="i-lucide-x" size="xs" color="neutral" variant="ghost" :disabled="aberta.projetos.includes(m.projeto)" :aria-label="tv.tirarMarco" @click="tirarMarco(m.id)" />
+                </UTooltip>
               </li>
             </ul>
           </section>
@@ -499,14 +529,14 @@ function excluir() {
               <USelect v-model="fUnidade" :items="opUnidade" class="w-full" />
             </UFormField>
           </div>
-          <UFormField :label="tg.ligarProjetos" :help="fMedicao === 'automatica' ? tv.projetoContaPelosMarcos : tv.acompanhamentoDica">
+          <UFormField :label="tg.projetos" :help="fMedicao === 'automatica' ? tv.regraDosProjetos : tv.acompanhamentoDica">
             <USelectMenu v-model="fProjetos" v-model:search-term="buscas.formProjetos" :items="opProjetos" value-key="value" multiple class="w-full">
               <template #content-bottom>
                 <AtalhoDeCriar :termo="buscas.formProjetos" :rotulo="ta.projeto.rotulo" :com="ta.projeto.com" :dica="ta.projeto.dica" @criar="(t: string) => criarProjetoNaMeta('form', t)" />
               </template>
             </USelectMenu>
           </UFormField>
-          <UFormField :label="tg.ligarMarcos">
+          <UFormField :label="tv.marcos">
             <USelectMenu v-model="fMarcos" v-model:search-term="buscas.formMarcos" :items="opMarcos" value-key="value" multiple class="w-full">
               <template v-if="destinosDoMarco.length" #content-bottom>
                 <AtalhoDeCriar :termo="buscas.formMarcos" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" :destinos="destinosDoMarco" @criar="(t: string, p?: number) => criarMarcoNaMeta('form', t, p)" />

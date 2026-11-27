@@ -1,0 +1,102 @@
+/**
+ * Rodada 12: os textos do formulário único do projeto (`_FormularioDoProjeto.vue`), que serve para criar e para
+ * configurar, em pt-BR, en e es. O que o formulário reaproveita de `textos.ts` (criar, config, modelo, mapa)
+ * continua lá; aqui ficam as abas novas, a aba de categorias reescrita, os grupos do status e a referência.
+ */
+
+const pt = {
+  abaCategorias: 'Categorias e campos',
+  abaAcesso: 'Acesso e segurança',
+  descricaoCriar: 'Tudo o que se ajusta depois, nas configurações, já se define aqui.',
+  // categorias
+  categoriasIntro: 'As categorias guardam os itens do projeto. A aba Itens do projeto junta os itens de todas elas numa lista e num quadro só. Para isso, cada categoria diz qual campo dela é o Responsável, o Prazo e o Status.',
+  adicionar: 'Adicionar categoria',
+  adicionarDica: 'Escolha uma categoria do workspace ou crie uma nova no fim da lista. Trazer uma categoria muda só quem a vê: os campos, os formulários e os fluxos continuam iguais.',
+  adicionarPlaceholder: 'Buscar categoria do workspace',
+  emOutroProjeto: (p: string) => `Em ${p}`,
+  semCategorias: 'O projeto ainda não tem categorias. Adicione a primeira acima.',
+  doModelo: (nomes: string) => `O modelo cria as categorias ${nomes}. Os campos delas se ajustam aqui depois de criar o projeto.`,
+  tirar: 'Tirar do projeto',
+  moverPara: 'Mover para outro projeto ou para o workspace',
+  acoesDa: (c: string) => `Ações de ${c}`,
+  nova: 'Nova, sem campos',
+  camposTitulo: 'Campos na aba Itens do projeto',
+  camposDica: 'Qual campo desta categoria aparece nas colunas Responsável, Prazo e Status do projeto.',
+  gruposTitulo: 'Grupos do status',
+  gruposDica: (status: string) => `Cada categoria tem os próprios valores de status. No projeto, eles se juntam em 3 grupos: A fazer, Em andamento e Concluído. O quadro de itens do projeto tem 1 coluna por grupo, e o filtro de status usa os mesmos grupos. Escolha em que grupo entra cada valor de ${status}.`,
+  valorDe: (status: string) => `Valor de ${status}`,
+  grupoNoProjeto: 'Grupo no projeto',
+  semStatus: 'Sem campo de status, os itens desta categoria entram no grupo A fazer.',
+  // referência
+  referenciaCriar: 'Preenchida a partir do nome. Pode ser alterada até criar o projeto; depois, fica fixa. O endereço da página do projeto usa a referência.',
+  referenciaFixa: 'Definida na criação do projeto. Não pode ser alterada.',
+  referenciaInvalida: 'Use letras minúsculas, números e hífen.',
+  referenciaRepetida: 'Já existe um projeto com essa referência.',
+  // acesso
+  participantesTitulo: 'Participantes',
+  arquivarTitulo: 'Arquivar e excluir',
+}
+
+export type TextosDoFormulario = typeof pt
+
+const en: TextosDoFormulario = {
+  abaCategorias: 'Categories and fields',
+  abaAcesso: 'Access and security',
+  descricaoCriar: 'Everything you adjust later, in the settings, can be defined here.',
+  categoriasIntro: 'Categories hold the project items. The project Items tab brings the items of all of them into a single list and board. For that, each category tells which of its fields is the Owner, the Due date and the Status.',
+  adicionar: 'Add category',
+  adicionarDica: 'Choose a workspace category or create a new one at the end of the list. Bringing a category in only changes who sees it: fields, forms and flows stay the same.',
+  adicionarPlaceholder: 'Search workspace categories',
+  emOutroProjeto: p => `In ${p}`,
+  semCategorias: 'The project has no categories yet. Add the first one above.',
+  doModelo: nomes => `The template creates the categories ${nomes}. Adjust their fields here after creating the project.`,
+  tirar: 'Remove from project',
+  moverPara: 'Move to another project or to the workspace',
+  acoesDa: c => `Actions for ${c}`,
+  nova: 'New, no fields',
+  camposTitulo: 'Fields in the project Items tab',
+  camposDica: 'Which field of this category shows in the project Owner, Due date and Status columns.',
+  gruposTitulo: 'Status groups',
+  gruposDica: status => `Each category has its own status values. In the project, they join 3 groups: To do, In progress and Done. The project items board has 1 column per group, and the status filter uses the same groups. Choose the group of each ${status} value.`,
+  valorDe: status => `${status} value`,
+  grupoNoProjeto: 'Group in the project',
+  semStatus: 'With no status field, the items of this category go to the To do group.',
+  referenciaCriar: 'Filled in from the name. You can change it until the project is created; then it is fixed. The project page address uses the reference.',
+  referenciaFixa: 'Set when the project was created. It cannot be changed.',
+  referenciaInvalida: 'Use lowercase letters, numbers and hyphens.',
+  referenciaRepetida: 'A project with this reference already exists.',
+  participantesTitulo: 'Participants',
+  arquivarTitulo: 'Archive and delete',
+}
+
+const es: TextosDoFormulario = {
+  abaCategorias: 'Categorías y campos',
+  abaAcesso: 'Acceso y seguridad',
+  descricaoCriar: 'Todo lo que se ajusta después, en la configuración, ya se define aquí.',
+  categoriasIntro: 'Las categorías guardan los ítems del proyecto. La pestaña Ítems del proyecto junta los ítems de todas ellas en una sola lista y un solo tablero. Para eso, cada categoría indica qué campo suyo es el Responsable, el Plazo y el Estado.',
+  adicionar: 'Agregar categoría',
+  adicionarDica: 'Elija una categoría del workspace o cree una nueva al final de la lista. Traer una categoría cambia solo quién la ve: los campos, los formularios y los flujos siguen iguales.',
+  adicionarPlaceholder: 'Buscar categoría del workspace',
+  emOutroProjeto: p => `En ${p}`,
+  semCategorias: 'El proyecto todavía no tiene categorías. Agregue la primera arriba.',
+  doModelo: nomes => `La plantilla crea las categorías ${nomes}. Sus campos se ajustan aquí después de crear el proyecto.`,
+  tirar: 'Quitar del proyecto',
+  moverPara: 'Mover a otro proyecto o al workspace',
+  acoesDa: c => `Acciones de ${c}`,
+  nova: 'Nueva, sin campos',
+  camposTitulo: 'Campos en la pestaña Ítems del proyecto',
+  camposDica: 'Qué campo de esta categoría aparece en las columnas Responsable, Plazo y Estado del proyecto.',
+  gruposTitulo: 'Grupos del estado',
+  gruposDica: status => `Cada categoría tiene sus propios valores de estado. En el proyecto, se juntan en 3 grupos: Por hacer, En curso y Concluido. El tablero de ítems del proyecto tiene 1 columna por grupo, y el filtro de estado usa los mismos grupos. Elija en qué grupo entra cada valor de ${status}.`,
+  valorDe: status => `Valor de ${status}`,
+  grupoNoProjeto: 'Grupo en el proyecto',
+  semStatus: 'Sin campo de estado, los ítems de esta categoría entran en el grupo Por hacer.',
+  referenciaCriar: 'Se completa a partir del nombre. Se puede cambiar hasta crear el proyecto; después queda fija. La dirección de la página del proyecto usa la referencia.',
+  referenciaFixa: 'Definida al crear el proyecto. No se puede cambiar.',
+  referenciaInvalida: 'Use letras minúsculas, números y guion.',
+  referenciaRepetida: 'Ya existe un proyecto con esa referencia.',
+  participantesTitulo: 'Participantes',
+  arquivarTitulo: 'Archivar y eliminar',
+}
+
+export const textosDoFormulario = { 'pt-BR': pt, en, es }

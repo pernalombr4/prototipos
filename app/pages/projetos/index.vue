@@ -37,8 +37,7 @@ import CascaDoMenuAtual from './_CascaDoMenuAtual.vue'
 import ProjetosNoMenuAtual from './_ProjetosNoMenuAtual.vue'
 import TodasAsCategorias from './_TodasAsCategorias.vue'
 import Telas from './_Telas.vue'
-import CriarProjeto from './_CriarProjeto.vue'
-import ConfiguracoesDoProjeto from './_ConfiguracoesDoProjeto.vue'
+import FormularioDoProjeto from './_FormularioDoProjeto.vue'
 import MoverCategoria from './_MoverCategoria.vue'
 import JanelasDoProjeto from './_JanelasDoProjeto.vue'
 
@@ -251,8 +250,7 @@ const pessoaEscolhida = computed({
       <Telas :t="t" />
     </CascaDoMenuAtual>
 
-    <CriarProjeto :t="t" />
-    <ConfiguracoesDoProjeto :t="t" />
+    <FormularioDoProjeto :t="t" />
     <MoverCategoria :t="t" />
     <JanelasDoProjeto />
     <TodasAsCategorias v-model:open="vendoTodasCategorias" :t="t" />

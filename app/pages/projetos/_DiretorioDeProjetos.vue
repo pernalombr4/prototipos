@@ -11,9 +11,12 @@
  *    colunas que se escondem;
  *  - paginador `EntityRendererPaginator` (_Paginador.vue).
  * Visualizações em botão, como nas categorias: Todos, De que participo, Arquivados.
- * A ação da linha depende do acesso: Mostrar no meu menu, Pedir acesso ou Restaurar.
+ * Rodada 12: a coluna Ações, como em toda tabela do ENSPACE, no lugar de "Seu acesso". O menu "⋯" muda com o
+ * acesso: quem entra abre a página, mostra ou oculta no menu e copia o link; o administrador também abre as
+ * configurações e arquiva ou exclui; quem não entra pede acesso; o arquivado se restaura.
  * "Criar projeto" fica no topo, à direita (regra 16: ação do topo continua no topo).
  */
+import type { DropdownMenuItem } from '@nuxt/ui'
 import type { EnTableColumn, EnTableColumnVisibility, EnTableSort } from '@be-enlighten/enspace-sdk-ui/base'
 import type { Textos } from './textos'
 import { iniciais, pessoa, type Projeto, type Situacao, type Visibilidade } from './mocks'
@@ -155,6 +158,35 @@ function restaurar(p: Projeto) {
   toast.add({ title: td.value.restaurado(p.nome), icon: 'i-lucide-archive-restore', color: 'success' })
 }
 
+function ocultar(p: Projeto) {
+  prj.ocultarDoMenu(p.id)
+  toast.add({ title: props.t.painel.ocultado(p.nome), icon: 'i-lucide-eye-off', color: 'neutral' })
+}
+const copiarLink = () => toast.add({ title: props.t.painel.linkCopiado, icon: 'i-lucide-check', color: 'success' })
+function acoesDaLinha(p: Projeto): DropdownMenuItem[][] {
+  const tp = props.t.painel
+  const link = { label: tp.copiarLink, icon: 'i-lucide-link', onSelect: copiarLink }
+  if (p.status === 'arquivado') return [[{ label: td.value.restaurar, icon: 'i-lucide-archive-restore', onSelect: () => restaurar(p) }]]
+  if (!prj.entra(p)) {
+    const pedido = prj.pedidos.value.includes(p.id)
+    return [[{ label: pedido ? td.value.pedido : td.value.pedir, icon: pedido ? 'i-lucide-clock' : 'i-lucide-key-round', disabled: pedido, onSelect: () => pedir(p) }], [link]]
+  }
+  const grupos: DropdownMenuItem[][] = [
+    [
+      { label: tp.abrirPagina, icon: 'i-lucide-panel-top', onSelect: () => prj.abrirProjeto(p.id) },
+      prj.estaNoMenu(p.id)
+        ? { label: tp.ocultar, icon: 'i-lucide-eye-off', onSelect: () => ocultar(p) }
+        : { label: td.value.mostrar, icon: 'i-lucide-panel-left', onSelect: () => mostrar(p) },
+      link,
+    ],
+  ]
+  if (prj.podeAdministrar(p)) {
+    grupos.push([{ label: tp.configurar, icon: 'i-lucide-settings', onSelect: () => { prj.janelas.configurar.value = { id: p.id, aba: 'geral' } } }])
+    grupos.push([{ label: td.value.arquivarOuExcluir, icon: 'i-lucide-archive', color: 'error', onSelect: () => { prj.janelas.configurar.value = { id: p.id, aba: 'arquivar' } } }])
+  }
+  return grupos
+}
+
 const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(idioma.value)
 </script>
 
@@ -227,7 +259,7 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
                 <p class="text-xs font-medium uppercase tracking-wide text-muted">{{ td.colunasVisiveis }}</p>
                 <div class="space-y-1">
                   <UCheckbox
-                    v-for="c in colunas"
+                    v-for="c in colunas.filter(k => k.key !== 'acao')"
                     :key="c.key"
                     :label="c.label"
                     :model-value="colunasVisiveis[c.key] !== false"
@@ -377,17 +409,9 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
           </template>
           <template #cell-acao="{ row }">
             <span class="flex justify-end" @click.stop>
-              <template v-if="(row as Linha).projeto.status === 'arquivado'">
-                <UButton :label="td.restaurar" icon="i-lucide-archive-restore" size="xs" color="neutral" variant="outline" @click="restaurar((row as Linha).projeto)" />
-              </template>
-              <template v-else-if="!prj.entra((row as Linha).projeto)">
-                <UBadge v-if="prj.pedidos.value.includes((row as Linha).id)" :label="td.pedido" icon="i-lucide-clock" color="neutral" variant="soft" size="sm" />
-                <UButton v-else :label="td.pedir" icon="i-lucide-key-round" size="xs" color="neutral" variant="outline" @click="pedir((row as Linha).projeto)" />
-              </template>
-              <template v-else>
-                <UBadge v-if="prj.estaNoMenu((row as Linha).id)" :label="td.noMenu" icon="i-lucide-check" color="success" variant="soft" size="sm" />
-                <UButton v-else :label="td.mostrar" icon="i-lucide-panel-left" size="xs" color="neutral" variant="outline" @click="mostrar((row as Linha).projeto)" />
-              </template>
+              <UDropdownMenu :items="acoesDaLinha((row as Linha).projeto)" :content="{ align: 'end' }" :ui="{ content: 'w-60' }">
+                <UButton icon="i-lucide-ellipsis" size="xs" color="neutral" variant="ghost" :aria-label="td.acoesDoProjeto((row as Linha).nome)" />
+              </UDropdownMenu>
             </span>
           </template>
         </EnTable>

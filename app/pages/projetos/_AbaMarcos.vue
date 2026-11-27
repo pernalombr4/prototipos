@@ -16,6 +16,7 @@ import { useMetasEDiscussoes, type Marco } from './metasEDiscussoes'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { textosDoProjeto } from './textosDoProjeto'
 import { textosDeAtalhos } from './textosDeAtalhos'
+import { textosDeAcoes } from './textosDeAcoes'
 import AtalhoDeCriar from './_AtalhoDeCriar.vue'
 
 const props = defineProps<{ t: Textos, id: number }>()
@@ -24,6 +25,7 @@ const md = useMetasEDiscussoes()
 const tx = useTextos(textosDeMarcosEMedicao)
 const tm = computed(() => tx.value.marcos)
 const rp = useTextos(textosDoProjeto)
+const tac = useTextos(textosDeAcoes)
 const ta = useTextos(textosDeAtalhos)
 const idioma = useIdioma()
 const toast = useToast()
@@ -46,9 +48,9 @@ const painel = computed({
   get: () => !!aberto.value,
   set: (v: boolean) => { if (!v) md.marcoAberto.value = null },
 })
-const acoes = computed<DropdownMenuItem[][]>(() => {
-  const m = aberto.value
-  if (!m || !podeEditar.value) return []
+/** Rodada 12: as ações do marco servem ao painel e ao menu ⋯ de cada linha da lista. */
+function acoesDe(m: Marco): DropdownMenuItem[][] {
+  if (!podeEditar.value) return []
   return [
     [
       { label: tm.value.editar, icon: 'i-lucide-pencil', onSelect: () => abrirForm(m) },
@@ -58,7 +60,15 @@ const acoes = computed<DropdownMenuItem[][]>(() => {
     ],
     [{ label: tm.value.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => { aExcluir.value = m } }],
   ]
-})
+}
+const acoes = computed(() => aberto.value ? acoesDe(aberto.value) : [])
+const acoesDaLinha = (m: Marco): DropdownMenuItem[][] => [
+  [
+    { label: tac.value.abrir, icon: 'i-lucide-panel-right-open', onSelect: () => { md.marcoAberto.value = m.id } },
+    { label: tac.value.copiarLink, icon: 'i-lucide-link', onSelect: () => toast.add({ title: tac.value.linkCopiado, icon: 'i-lucide-check', color: 'success' }) },
+  ],
+  ...acoesDe(m),
+]
 /** As tarefas do projeto que ainda não estão neste marco, para adicionar. */
 const opAdicionar = computed(() => {
   const m = aberto.value
@@ -186,10 +196,10 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
         </div>
 
         <ul v-else class="divide-y divide-default">
-          <li v-for="(m, i) in lista" :key="m.id" class="animate-[entrada_0.2s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
+          <li v-for="(m, i) in lista" :key="m.id" class="flex items-center pr-2 animate-[entrada_0.2s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
             <button
               type="button"
-              class="grid w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-left transition-colors hover:bg-elevated/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary sm:grid-cols-[auto_minmax(0,1fr)_10rem_9rem_12rem]"
+              class="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-left transition-colors hover:bg-elevated/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary sm:grid-cols-[auto_minmax(0,1fr)_10rem_9rem_12rem]"
               @click="md.marcoAberto.value = m.id"
             >
               <UIcon :name="m.status === 'concluido' ? 'i-lucide-circle-check' : 'i-lucide-flag'" class="size-4" :class="m.status === 'concluido' ? 'text-success' : 'text-muted'" />
@@ -212,6 +222,9 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
                 <span class="w-9 text-right text-xs tabular-nums text-toned">{{ md.progressoDoMarco(m) }}%</span>
               </span>
             </button>
+            <UDropdownMenu :items="acoesDaLinha(m)" :content="{ align: 'end' }">
+              <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de(m.nome)" />
+            </UDropdownMenu>
           </li>
         </ul>
       </div>

@@ -27,6 +27,8 @@ import { useMetasEDiscussoes } from './metasEDiscussoes'
 import { textosDeMarcosEMedicao } from './textosDeMarcosEMedicao'
 import { textosDeAtalhos } from './textosDeAtalhos'
 import AtalhoDeCriar from './_AtalhoDeCriar.vue'
+import { textosDeAcoes } from './textosDeAcoes'
+import type { DropdownMenuItem } from '@nuxt/ui'
 
 const props = defineProps<{ t: Textos, id: number }>()
 const prj = useProjetos()
@@ -134,9 +136,10 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'marco', label: tmm.value.marcos.colMarco },
   { key: 'prioridade', label: rt.value.colPrioridade, sortable: true },
   { key: 'criadaEm', label: rt.value.colCriada, sortable: true },
+  { key: 'acoes', label: tac.value.coluna, align: 'right' },
 ])
 const colunasVisiveis = ref<EnTableColumnVisibility>({ criadaEm: false })
-const larguras = ref<EnTableColumnSizing>({ titulo: 290, item: 150, categoria: 160, responsavel: 170, prazo: 170, status: 140, marco: 200, prioridade: 110, criadaEm: 120 })
+const larguras = ref<EnTableColumnSizing>({ titulo: 290, item: 150, categoria: 160, responsavel: 170, prazo: 170, status: 140, marco: 200, prioridade: 110, criadaEm: 120, acoes: 70 })
 function verColuna(key: string, ver: boolean | 'indeterminate') {
   colunasVisiveis.value = { ...colunasVisiveis.value, [key]: ver === true }
 }
@@ -179,6 +182,28 @@ function ofertarSubtarefas(x: TarefaDoProjeto) {
   return true
 }
 const abrir = (id: number) => { prj.tarefaAberta.value = id }
+/** Rodada 12: a coluna Ações, como em toda tabela do ENSPACE. Excluir pede confirmação, como no painel da tarefa. */
+const tac = useTextos(textosDeAcoes)
+const aExcluir = ref<TarefaDoProjeto | null>(null)
+const acoesDaLinha = (x: TarefaDoProjeto): DropdownMenuItem[][] => [
+  [
+    { label: tac.value.abrir, icon: 'i-lucide-panel-right-open', onSelect: () => abrir(x.id) },
+    x.status === 'concluida'
+      ? { label: rt.value.reabrir, icon: 'i-lucide-rotate-ccw', onSelect: () => alternar(x) }
+      : { label: rt.value.concluir, icon: 'i-lucide-circle-check', onSelect: () => alternar(x) },
+    { label: tac.value.copiarLink, icon: 'i-lucide-link', onSelect: () => toast.add({ title: tac.value.linkCopiado, icon: 'i-lucide-check', color: 'success' }) },
+  ],
+  [{ label: tt.value.detalhe.excluir, icon: 'i-lucide-trash-2', color: 'error', onSelect: () => { aExcluir.value = x } }],
+]
+function excluir() {
+  const x = aExcluir.value
+  if (!x) return
+  const m = md.marcoDaTarefa(x.id)
+  if (m) md.tirarTarefa(m, x.id)
+  prj.excluirTarefa(x.id)
+  aExcluir.value = null
+  toast.add({ title: tt.value.detalhe.excluida(x.titulo), icon: 'i-lucide-trash-2', color: 'neutral' })
+}
 
 /* ---------- quadro: o EnKanbanBoard do SDK, 1 coluna por status, arrastar troca o status ---------- */
 const colunasDoQuadro = computed<EnKanbanColumn[]>(() => STATUS.map(s => ({ value: s, label: rt.value.status[s], colorScheme: COR_DO_STATUS[s] })))
@@ -279,7 +304,7 @@ function criarRapida(status: StatusDaTarefa = 'aberta') {
               <p class="text-xs font-medium uppercase tracking-wide text-muted">{{ t.diretorio.colunasVisiveis }}</p>
               <div class="space-y-1">
                 <UCheckbox
-                  v-for="c in colunas"
+                  v-for="c in colunas.filter(k => k.key !== 'acoes')"
                   :key="c.key"
                   :label="c.label"
                   :model-value="colunasVisiveis[c.key] !== false"
@@ -422,6 +447,13 @@ function criarRapida(status: StatusDaTarefa = 'aberta') {
         <template #cell-criadaEm="{ row }">
           <span class="whitespace-nowrap text-sm text-muted">{{ formatarData((row as TarefaDoProjeto).criadaEm) }}</span>
         </template>
+        <template #cell-acoes="{ row }">
+          <span class="flex justify-end" @click.stop>
+            <UDropdownMenu :items="acoesDaLinha(row as TarefaDoProjeto)" :content="{ align: 'end' }">
+              <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as TarefaDoProjeto).titulo)" />
+            </UDropdownMenu>
+          </span>
+        </template>
       </EnTable>
       <!-- rodada 10: criação rápida no pé da tabela, como o "Add item" do GitHub Projects -->
       <div class="flex flex-wrap items-center gap-2 border-t border-default px-3 py-2 sm:px-4">
@@ -457,5 +489,13 @@ function criarRapida(status: StatusDaTarefa = 'aberta') {
         />
       </div>
     </ClientOnly>
+
+    <!-- rodada 12: excluir pela coluna Ações pede a mesma confirmação do painel da tarefa -->
+    <UModal :open="!!aExcluir" :title="tt.detalhe.excluirTitulo" :description="aExcluir ? tt.detalhe.excluirTexto(subsDe(aExcluir).length) : ''" :ui="{ content: 'max-w-md', footer: 'justify-end gap-2' }" @update:open="(v: boolean) => { if (!v) aExcluir = null }">
+      <template #footer>
+        <UButton :label="tt.detalhe.cancelar" color="neutral" variant="outline" @click="aExcluir = null" />
+        <UButton :label="tt.detalhe.excluir" icon="i-lucide-trash-2" color="error" @click="excluir" />
+      </template>
+    </UModal>
   </section>
 </template>

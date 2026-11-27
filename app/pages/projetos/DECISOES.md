@@ -661,3 +661,88 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - `evidencias/entrega-r11-criar-projeto-na-meta.png`: "Projetos ligados" na Nova meta, com "Criar o projeto";
   - `evidencias/entrega-r11-criar-etiqueta-na-tarefa.png`: Etiquetas no painel da tarefa, com "Criar a etiqueta".
   - O detector de seta passou nas 4.
+
+## Rodada 12 · 2026-11-26
+- **Pedido (literal):**
+  - "dentro do projeto deve ser possivel ver tambem as metas ligadas a ele";
+  - "na tela de metas, projetos e marcos devem ser duas colunas diferentes";
+  - "pode só colocar "marcos" e todos ali obviamente contam.";
+  - "na ordem das abas do projeto deve vir visao geral, itens e depois tarefas.";
+  - "a coluna seu acesso nao tem nada a ver. deve ter uma coluna de açoes, como toda tabela do enspce, e essa coluna
+    de açao pode ter a açao de mostrar ou ocultar no menu, dentre outras opçoes que façam sentido (editar,
+    deletar...)";
+  - "observe todas as outras tabelas e veja em quais falta coluna de açao... nao consigo finalizar um marco pela
+    tabela direto";
+  - "a sidebar de configuraçoes do projeto deve carregar o exato mesmo formulario da criaçao do projeto [...] tem
+    que ser uma sidebar, e tem que ter as mesmas abas";
+  - "veja se da pra deixar com MENOS abas. condensar mais. participantes e acesso com certeza deveriam ser a mesma
+    aba";
+  - "nao ta clara essa configuraçao dos valores dos status ok?";
+  - "o campo de referencia do projeto deve copiar o nome [...] na ediçao nao pode mais ser alterado".
+- **Como a meta sabe o andamento do projeto:**
+  - a meta automática tem 1 lista só, "Marcos", e o andamento dela é a média de todos os marcos da lista;
+  - a lista junta os marcos ligados um a um e todos os marcos dos projetos ligados, inclusive os criados depois;
+  - o projeto aparece na meta quando está ligado ou quando tem um marco ligado;
+  - o andamento do projeto na meta é a média dos marcos dele que estão na lista;
+  - na meta medida por valor, as listas só acompanham: o andamento é o valor que o dono informa.
+- **Metas:** a tabela tem as colunas Projetos e Marcos, separadas, e a coluna Ações (Abrir meta, Editar meta,
+  Excluir meta). O painel da meta tem 2 seções:
+  - Projetos: cada projeto diz como entrou ("Projeto ligado: os 2 marcos dele estão na meta" ou "1 marco ligado à
+    meta") e o andamento dele na meta. O projeto que só está ali pelos marcos não tem o X: sai quando os marcos saem;
+  - Marcos: a lista única. O marco que vem do projeto ligado não tem o X: sai quando o projeto sai.
+- **Metas dentro do projeto:** a Visão geral ganhou a seção Metas, abaixo de Marcos. Cada linha diz como o projeto
+  entra na meta, o dono, a data-alvo, a situação, "Este projeto: N%" e o andamento da meta. Clicar abre o painel da
+  meta; "Ver metas" leva à tela Metas.
+- **Abas do projeto:** Visão geral, Itens, Tarefas, Marcos, Discussões, Automações e Painéis. O menu lateral fica
+  como estava.
+- **Coluna Ações:** onde entrou e o que tem.
+
+  | Tela | Ações |
+  |---|---|
+  | Todos os projetos | Abrir a página do projeto, Mostrar ou Ocultar no meu menu, Copiar o link; quem administra: Configurações do projeto e Arquivar ou excluir. Sem acesso: Pedir acesso. Arquivado: Restaurar |
+  | Metas | Abrir meta, Editar meta, Excluir meta |
+  | Tarefas do projeto | Abrir, Concluir ou Reabrir, Copiar link, Excluir tarefa (com confirmação) |
+  | Itens do projeto | Visualizar, Abrir na categoria, Copiar link |
+  | Marcos | Abrir, Copiar link; quem administra: Editar, Concluir ou Reabrir, Excluir |
+  | Discussões | Abrir, Copiar link; quem modera: Fixar, Fechar ou Reabrir |
+
+  - A coluna "Seu acesso" do diretório saiu. A coluna Ações fica fora do seletor de colunas.
+  - **Achado (casca, regra 37):** Minhas tarefas e a lista da categoria são cópia do produto e não ganharam a coluna
+    Ações nesta rodada. Automações são cartões, com o menu ⋯ que já tinham.
+- **Criar e configurar projeto num formulário só:** `_FormularioDoProjeto.vue` substitui `_CriarProjeto.vue` e
+  `_ConfiguracoesDoProjeto.vue`. É a mesma sidebar, com as mesmas abas, para criar e para editar.
+  - As abas passaram de 6 para 3: Geral, Categorias e campos, Acesso e segurança. Participantes, visibilidade,
+    permissão padrão e pedidos de acesso ficam juntos em Acesso e segurança.
+  - Só na criação: "Começar de" (o modelo). Só na edição: Salvar como modelo, Arquivar e excluir (no fim de Geral) e
+    os pedidos de acesso.
+  - "Arquivar ou excluir", no diretório, abre a sidebar já rolada até a seção. As abas ficam fixas no topo durante a
+    rolagem.
+  - O que antes só se definia nas configurações (categorias e os campos delas, permissão padrão, participantes) já
+    se define na criação.
+- **Categorias e campos:** cada categoria é um cartão com 2 blocos.
+  - "Campos na aba Itens do projeto": qual campo da categoria é o Responsável, o Prazo e o Status do projeto.
+  - "Grupos do status": diz que cada categoria tem os próprios valores de status e que, no projeto, eles se juntam em
+    3 grupos (A fazer, Em andamento, Concluído), que são as colunas do quadro de itens e o filtro de status. A tabela
+    mostra cada valor da categoria, uma seta e o grupo escolhido. Antes, "Colunas do quadro" não dizia de onde
+    vinham os valores nem para onde iam.
+- **Referência do projeto:** na criação, preenche sozinha a partir do nome (minúsculas, sem acento, hífen no lugar do
+  espaço), como na criação de categoria e campo. A pessoa pode mudar até criar; depois de mexer, o nome não reescreve
+  mais. Valida o formato e a repetição. Na edição, fica só para consulta, com cadeado.
+- **Fronteira:** mudam Metas, Visão geral do projeto, a ordem das abas, as tabelas e listas da coluna Ações e a
+  sidebar de criar e configurar. A casca e o menu lateral ficam como na rodada 11.
+- **Inventado (pede back-end novo):** meta, marco, projeto e referência do projeto já eram propostas das rodadas
+  anteriores. Os grupos do status, a referência fixa e a exclusão da tarefa pela tabela seguem o que essas rodadas
+  inventaram.
+- **Ver:** https://pernalombr4.github.io/prototipos/projetos
+  - `evidencias/entrega-r12-metas-tabela.png`: Metas com as colunas Projetos, Marcos e Ações;
+  - `evidencias/entrega-r12-painel-da-meta.png`: painel da meta com Projetos e a lista única de Marcos;
+  - `evidencias/entrega-r12-visao-geral-metas.png`: seção Metas na Visão geral, com "Este projeto: 27%";
+  - `evidencias/entrega-r12-marcos-acoes-da-linha.png`: menu ⋯ na linha do marco, com Concluir;
+  - `evidencias/entrega-r12-diretorio-acoes.png`: coluna Ações em Todos os projetos;
+  - `evidencias/entrega-r12-criar-projeto-geral.png`: Criar projeto com a referência preenchida pelo nome;
+  - `evidencias/entrega-r12-criar-projeto-categorias.png`: Categorias e campos na criação, com os grupos do status;
+  - `evidencias/entrega-r12-configurar-geral.png`: a mesma sidebar na edição, com a referência travada;
+  - `evidencias/entrega-r12-configurar-categorias.png`: Categorias e campos na edição;
+  - `evidencias/entrega-r12-configurar-acesso.png`: Acesso e segurança, com participantes e visibilidade juntos.
+  - O detector de seta passou nas 10. Em 4, a barra de rolagem dava falso positivo; os prints foram refeitos com a
+    barra escondida por CSS temporário na página.

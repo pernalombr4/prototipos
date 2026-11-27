@@ -22,6 +22,7 @@ import {
   categoriasBase,
   fluxosBase,
   mapaPadrao,
+  referenciaDoNome,
   modelosBase,
   grupos,
   MEMBROS_DO_WORKSPACE,
@@ -286,12 +287,14 @@ export function useProjetos() {
     participantes: Participante[]
     noMenuDeTodos: boolean
     modelo?: number
+    referencia?: string
+    permissaoPadrao?: Projeto['permissaoPadrao']
   }) {
     const id = ++proximoId
     const modelo = dados.modelo ? modelos.value.find(m => m.id === dados.modelo) : undefined
     const novo: Projeto = {
       id,
-      referencia: `PRJ${id.toString(16).toUpperCase()}X`,
+      referencia: dados.referencia || `projeto-${id}`,
       nome: dados.nome,
       descricao: dados.descricao,
       icone: dados.icone,
@@ -299,7 +302,7 @@ export function useProjetos() {
       visibilidade: dados.visibilidade,
       status: 'ativo',
       participantes: [{ tipo: 'pessoa', id: eu.value, papel: 'admin' }, ...dados.participantes.filter(x => !(x.tipo === 'pessoa' && x.id === eu.value))],
-      permissaoPadrao: { ver: true, criar: true, editar: true, excluir: false },
+      permissaoPadrao: dados.permissaoPadrao ?? { ver: true, criar: true, editar: true, excluir: false },
       telas: [],
       noMenuDeTodos: dados.noMenuDeTodos,
       criadoEm: '2026-11-26',
@@ -451,9 +454,16 @@ export function useProjetos() {
     return id
   }
   /** Rodada 11: o projeto criado pelo atalho de um seletor, só com o nome; o resto fica no padrão e se ajusta nas configurações. */
+  /** Rodada 12: a referência que copia o nome, com -2, -3 quando já existe outra igual. */
+  function referenciaLivre(nome: string) {
+    const base = referenciaDoNome(nome) || 'projeto'
+    let ref = base
+    for (let n = 2; projetos.value.some(p => p.referencia === ref); n++) ref = `${base}-${n}`
+    return ref
+  }
   function criarProjetoRapido(nome: string) {
     const onde = { area: area.value, tela: tela.value }
-    const novo = criarProjeto({ nome, descricao: '', icone: 'i-lucide-folder-kanban', cor: 'primary', visibilidade: 'aberto', categorias: [], participantes: [], noMenuDeTodos: true })
+    const novo = criarProjeto({ nome, referencia: referenciaLivre(nome), descricao: '', icone: 'i-lucide-folder-kanban', cor: 'primary', visibilidade: 'aberto', categorias: [], participantes: [], noMenuDeTodos: true })
     area.value = onde.area
     tela.value = onde.tela
     return novo
@@ -572,7 +582,7 @@ export function useProjetos() {
     ativos, visiveis, queEntro, noMenu, estaNoMenu, mostrarNoMenu, ocultarDoMenu, reordenar,
     categoriasDe, categoriasDoWorkspace, veCategoria, projetoDa,
     aplicarCenario, trocarPessoa, abrirProjeto, abrirCategoria,
-    criarProjeto, moverCategoria, atualizarProjeto, arquivar, restaurar, excluir, pedirAcesso, alcance, quantosVeem,
+    criarProjeto, referenciaLivre, moverCategoria, atualizarProjeto, arquivar, restaurar, excluir, pedirAcesso, alcance, quantosVeem,
     abaDoProjeto, mapas, fluxos, avisos, modelos, statusAtual, publicarStatus, camposDe, salvarMapa,
     fluxosDoProjeto, avisosDoProjeto, alternarFluxo, salvarComoModelo,
     meusFavoritos, ehFavorito, alternarFavorito, chaveDaTela,

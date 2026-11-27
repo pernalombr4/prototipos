@@ -13,6 +13,7 @@
  *   - Painel: widgets de 1 categoria cada, como os painéis de hoje.
  *
  * Rodada 5: 5 abas (Visão geral, Tarefas, Itens, Automações, Painéis), as mesmas que o menu abre.
+ * Rodada 12: a ordem das abas é Visão geral, Itens, Tarefas, e depois o resto; a Visão geral mostra as metas.
  * A visão geral abre com os números do projeto (EnDashboardGrid do SDK), cada um levando à aba, e
  * a fila de prazos sai das tarefas dos itens das categorias do projeto.
  */
@@ -29,6 +30,7 @@ import AutomacoesDoProjeto from './_AutomacoesDoProjeto.vue'
 import PainelDoProjeto from './_PainelDoProjeto.vue'
 import DiscussoesDoProjeto from './_DiscussoesDoProjeto.vue'
 import MarcosDoProjeto from './_MarcosDoProjeto.vue'
+import MetasDoProjeto from './_MetasDoProjeto.vue'
 import AbaMarcos from './_AbaMarcos.vue'
 import TarefaAberta from './_TarefaAberta.vue'
 import { textosDaTarefa } from './textosDaTarefa'
@@ -109,8 +111,8 @@ const raiz = useTemplateRef<HTMLElement>('raiz')
 watch(aba, () => nextTick(() => raiz.value?.scrollIntoView({ block: 'start' })))
 const abas = computed<TabsItem[]>(() => [
   { value: 'geral', label: props.t.abas.geral, icon: 'i-lucide-layout-dashboard' },
-  { value: 'tarefas', label: r.value.menu.tarefas, icon: 'i-lucide-square-check', badge: abertas.value.length ? { label: String(abertas.value.length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'itens', label: props.t.abas.itens, icon: 'i-lucide-list-checks' },
+  { value: 'tarefas', label: r.value.menu.tarefas, icon: 'i-lucide-square-check', badge: abertas.value.length ? { label: String(abertas.value.length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'marcos', label: tmm.value.marcos.aba, icon: 'i-lucide-flag', badge: marcosAbertos.value ? { label: String(marcosAbertos.value), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'discussoes', label: tmd.value.discussoes.aba, icon: 'i-lucide-messages-square', badge: discussoesAbertas.value ? { label: String(discussoesAbertas.value), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'automacoes', label: props.t.abas.automacoes, icon: 'i-lucide-workflow', badge: nFluxos.value ? { label: String(nFluxos.value), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
@@ -189,6 +191,7 @@ const abas = computed<TabsItem[]>(() => [
       </section>
       <StatusDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
       <MarcosDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
+      <MetasDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
       <!-- categorias -->
       <section class="rounded-lg border border-default bg-default lg:col-span-2 animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 40ms">
         <header class="flex items-center gap-2 border-b border-default px-4 py-3">

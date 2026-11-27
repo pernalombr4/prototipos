@@ -26,6 +26,7 @@
  * permissão checada por categoria (contorno azul na chave do andaime).
  */
 import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn, EnTableColumnSizing, EnTableColumnVisibility, EnTableSort } from '@be-enlighten/enspace-sdk-ui/base'
+import { textosDeAcoes } from './textosDeAcoes'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Textos } from './textos'
 import { iniciais, itensDoProjeto, pessoa, type GrupoDeStatus, type ItemDoProjeto } from './mocks'
@@ -41,6 +42,15 @@ const toast = useToast()
 const r = useTextos(textosDoProjeto)
 const ri = computed(() => r.value.itens)
 const ti = computed(() => props.t.itensDoProjeto)
+/** Rodada 12: a coluna Ações. Visualizar abre o painel do item; editar e excluir o item acontecem na categoria. */
+const tac = useTextos(textosDeAcoes)
+const acoesDaLinha = (l: Linha): DropdownMenuItem[][] => [
+  [
+    { label: tac.value.visualizar, icon: 'i-lucide-eye', onSelect: () => { aberto.value = l } },
+    { label: tac.value.abrirNaCategoria, icon: 'i-lucide-arrow-up-right', onSelect: () => prj.abrirCategoria(l.categoria) },
+    { label: tac.value.copiarLink, icon: 'i-lucide-link', onSelect: () => toast.add({ title: tac.value.linkCopiado, icon: 'i-lucide-check', color: 'success' }) },
+  ],
+]
 
 const HOJE = '2026-11-26'
 const p = computed(() => prj.projetos.value.find(x => x.id === props.id)!)
@@ -204,6 +214,7 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'criadoEm', label: ri.value.criadoEm, sortable: true },
   { key: 'atualizadoEm', label: ri.value.atualizadoEm, sortable: true },
   { key: 'criadoPor', label: ri.value.criadoPor, sortable: true },
+  { key: 'acoes', label: tac.value.coluna, align: 'right' },
 ])
 const colunasVisiveis = ref<EnTableColumnVisibility>({ atualizadoEm: false, criadoPor: false })
 const larguras = ref<EnTableColumnSizing>({ reference: 120, titulo: 250, categoria: 170, status: 170, responsavel: 190, prazo: 160, criadoEm: 120, atualizadoEm: 130, criadoPor: 180 })
@@ -282,7 +293,7 @@ function configurarCampos() {
                 <p class="text-xs font-medium uppercase tracking-wide text-muted">{{ t.diretorio.colunasVisiveis }}</p>
                 <div class="space-y-1">
                   <UCheckbox
-                    v-for="c in colunas"
+                    v-for="c in colunas.filter(k => k.key !== 'acoes')"
                     :key="c.key"
                     :label="c.label"
                     :model-value="colunasVisiveis[c.key] !== false"
@@ -401,6 +412,13 @@ function configurarCampos() {
               <span class="flex min-w-0 items-center gap-1.5 text-sm">
                 <UAvatar size="2xs" :text="iniciais(pessoa((row as Linha).criadoPor)?.nome ?? '')" :alt="pessoa((row as Linha).criadoPor)?.nome" />
                 <span class="truncate">{{ pessoa((row as Linha).criadoPor)?.nome }}</span>
+              </span>
+            </template>
+            <template #cell-acoes="{ row }">
+              <span class="flex justify-end" @click.stop>
+                <UDropdownMenu :items="acoesDaLinha(row as Linha)" :content="{ align: 'end' }">
+                  <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as Linha).titulo)" />
+                </UDropdownMenu>
               </span>
             </template>
           </EnTable>
