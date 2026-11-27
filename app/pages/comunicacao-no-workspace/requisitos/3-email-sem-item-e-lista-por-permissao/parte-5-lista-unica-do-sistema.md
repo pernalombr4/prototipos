@@ -3,7 +3,7 @@
 **Objetivo:** a lista de mensagens junta numa lista só os e-mails dos itens e os enviados pelo sistema, com ordem e
 paginação únicas. O filtro "Do sistema" recorta essa lista, no lugar de trocar a fonte da tabela.
 
-**Depende de:** o épico "Escrever e-mail de qualquer tela e central Comunicações no menu" (os e-mails do sistema na lista de mensagens, o filtro "Do
+**Depende de:** o épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu" (os e-mails do sistema na lista de mensagens, o filtro "Do
 sistema", a coluna Status e o endereço de hoje da tela E-mails Enviados).
 
 **Onde vale:** a lista da central Comunicações, para quem tem a permissão de hoje de ver os e-mails enviados.
@@ -33,10 +33,10 @@ sistema", a coluna Status e o endereço de hoje da tela E-mails Enviados).
 
 | ID | Requisito | Como medir ou conferir | Prioridade | Relevância |
 |---|---|---|---|---|
-| RT401 | Até a lista única sair, o filtro "Do sistema" deve trocar a fonte da tabela, 1 lista por vez, como no épico "Escrever e-mail de qualquer tela e central Comunicações no menu". Critério de fim: a lista única no ar. | Antes desta parte, ligar "Do sistema" mostra só os e-mails do sistema, com paginação própria. | Importante | Obrigatório |
+| RT401 | Até a lista única sair, o filtro "Do sistema" deve trocar a fonte da tabela, 1 lista por vez, como no épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu". Critério de fim: a lista única no ar. | Antes desta parte, ligar "Do sistema" mostra só os e-mails do sistema, com paginação própria. | Importante | Obrigatório |
 
 ## Em aberto
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P401 | A aba consegue juntar as 2 listas de hoje (os e-mails dos itens e os enviados pelo sistema) com ordem e paginação únicas, sem back novo? | dev do back | Sem back novo, esta parte entra no épico "Escrever e-mail de qualquer tela e central Comunicações no menu", e a RT401 sai |
+| P401 | A aba consegue juntar as 2 listas de hoje (os e-mails dos itens e os enviados pelo sistema) com ordem e paginação únicas, sem back novo? | dev do back | Sem back novo, esta parte entra no épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu", e a RT401 sai |

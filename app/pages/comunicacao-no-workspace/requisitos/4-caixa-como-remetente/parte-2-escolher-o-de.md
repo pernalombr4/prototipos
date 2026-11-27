@@ -23,7 +23,7 @@ em "Novo e-mail" e abra o "De". O cenário "Sem Outlook integrado" mostra o "De"
 |---|---|---|---|---|
 | RF101 | Com 2 ou mais remetentes possíveis (a conta do Outlook integrada e as caixas ligadas, RN901), o "De" deve ser uma lista em 2 grupos: "Sua conta", com o endereço da conta e a marca "Sua conta do Outlook", e "Caixas do workspace", com o nome e o endereço de cada caixa ligada. | Exemplo: Ana com o Outlook integrado e 2 caixas ligadas; o "De" mostra ana.ribeiro@example.com em "Sua conta" e "Atendimento jurídico" e "Compras" em "Caixas do workspace". | Essencial | Obrigatório |
 | RF102 | Com uma caixa escolhida, o "De" deve mostrar o nome da caixa, o endereço entre parênteses e a marca "Caixa do workspace". | "Atendimento jurídico (atendimento.aurora-servicos@box.enspace.io)" com "Caixa do workspace" ao lado. | Essencial | Obrigatório |
-| RF103 | Com 1 remetente possível só, o "De" deve mostrar esse remetente sem lista, com a marca "Sua conta do Outlook" ou "Caixa do workspace". | Sem caixa ligada, o "De" mostra só a conta do Outlook, como no épico "Escrever e-mail de qualquer tela e central Comunicações no menu". | Importante | Obrigatório |
+| RF103 | Com 1 remetente possível só, o "De" deve mostrar esse remetente sem lista, com a marca "Sua conta do Outlook" ou "Caixa do workspace". | Sem caixa ligada, o "De" mostra só a conta do Outlook, como no épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu". | Importante | Obrigatório |
 | RF104 | O compositor deve abrir com a conta do Outlook no "De"; sem a conta integrada, com a 1ª caixa ligada. | Exemplo: Ana sem o Outlook integrado; o compositor abre com "Atendimento jurídico" no "De". | Importante | Obrigatório |
 
 ## Ajuda do De (RF)
@@ -57,7 +57,7 @@ em "Novo e-mail" e abra o "De". O cenário "Sem Outlook integrado" mostra o "De"
 | RF141 | Sem o Correio do Outlook integrado e com 1 ou mais caixas ligadas, o "De" deve oferecer só as caixas ligadas. | Cenário "Sem Outlook integrado": o "De" mostra só o grupo "Caixas do workspace". | Essencial | Obrigatório |
 | RF144 | No mesmo caso, o compositor deve mostrar o formulário de envio no lugar do aviso "Nenhuma conta integrada disponível.". | Cenário "Sem Outlook integrado": Ana escreve e envia por "Atendimento jurídico". | Essencial | Obrigatório |
 | RF142 | No mesmo caso, o botão E-mail dos atalhos deve escrever pelo ENSPACE: o clique no corpo abre o compositor, e a seta abre o app de e-mail. | No item CTR-00231, sem o Outlook integrado, o clique em E-mail abre o compositor com "Atendimento jurídico" no "De". | Essencial | Obrigatório |
-| RF143 | Sem o Correio do Outlook e sem caixa ligada, o compositor e os atalhos devem seguir como no épico "Escrever e-mail de qualquer tela e central Comunicações no menu". | Sem o Outlook e com cada caixa desligada, a gaveta mostra "Nenhuma conta integrada disponível.", e o botão E-mail abre o app de e-mail. | Importante | Obrigatório |
+| RF143 | Sem o Correio do Outlook e sem caixa ligada, o compositor e os atalhos devem seguir como no épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu". | Sem o Outlook e com cada caixa desligada, a gaveta mostra "Nenhuma conta integrada disponível.", e o botão E-mail abre o app de e-mail. | Importante | Obrigatório |
 
 ## Em aberto
 

@@ -2,7 +2,7 @@
 
 **O que é:** o e-mail enviado pelo ENSPACE sem item passa a ficar gravado e aparece na lista da central Comunicações. Quem escreve busca o item do e-mail entre as categorias que pode ver, no compositor ou depois do envio, na
 leitura do e-mail. A lista de mensagens mostra a cada pessoa só os e-mails dos itens que ela vê e junta numa lista só os
-e-mails dos itens e os enviados pelo sistema. Pede rotas e gravação novas no back. Depende do épico "Escrever e-mail de qualquer tela e central Comunicações no menu", que entrega o compositor, o bloco "Item vinculado" e a lista de mensagens.
+e-mails dos itens e os enviados pelo sistema. Pede rotas e gravação novas no back. Depende do épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu", que entrega o compositor, o bloco "Item vinculado" e a lista de mensagens.
 
 **Onde vale:** o compositor ("Nova Mensagem"), aberto do "Novo e-mail" da barra do topo, dos atalhos e da Mail Box; a lista da central Comunicações (tabela, filtros, menu da linha e leitura no painel lateral); a Mail Box do item.
 
@@ -36,7 +36,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | RN901 | Só os itens que a pessoa pode ver, no workspace atual, aparecem na busca de item, nas sugestões de item e na lista de mensagens. O item sem permissão fica fora também da contagem. | CTR-00214, sem permissão para a pessoa, não aparece na busca por "CTR-00214", e a contagem "<m> de <n> itens" não o soma. | Obrigatório |
 | RN902 | Cada e-mail tem 0 ou 1 item vinculado. | O e-mail "Cadastro de fornecedor" não tem item; o e-mail "CTR-00231 · Minuta revisada" tem CTR-00231. | Obrigatório |
 | RN903 | O vínculo guarda o item pela referência: renomear o item mantém o vínculo. | CTR-00231 renomeado continua com os e-mails na Mail Box. | Obrigatório |
-| RN904 | Um item é considerado sugestão para um e-mail quando um endereço do e-mail é o e-mail de um contato do item configurado no cartão "Contato da categoria" (épico "Escolher na categoria de onde vêm o nome e o e-mail do contato"). Cada e-mail tem até 3 sugestões. | Para marina.alves@example.com: CTR-00231, CTR-00219 e CTR-00207, os 3 contratos com Marina Alves no "Contato da contraparte". | Obrigatório |
+| RN904 | Um item é considerado sugestão para um e-mail quando um endereço do e-mail é o e-mail de um contato do item configurado no cartão "Contato da categoria" (épico "Escolher na categoria de onde vêm o nome, o e-mail e o telefone do contato"). Cada e-mail tem até 3 sugestões. | Para marina.alves@example.com: CTR-00231, CTR-00219 e CTR-00207, os 3 contratos com Marina Alves no "Contato da contraparte". | Obrigatório |
 
 ## Padrão de qualidade
 

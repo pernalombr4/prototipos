@@ -1,10 +1,10 @@
-# Requisitos: Botão de e-mail no cartão do quadro
+# Requisitos: Botões de e-mail, WhatsApp e SMS no cartão do quadro de itens e de tarefas
 
 **Objetivo:** o cartão do quadro de itens e o do quadro de tarefas ganham um botão de e-mail, de WhatsApp e de SMS
-que o teclado alcança. O épico "Escrever e-mail de qualquer tela e central Comunicações no menu" põe os atalhos só no menu do clique direito do
+que o teclado alcança. O épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu" põe os atalhos só no menu do clique direito do
 cartão.
 
-**Depende de:** o clique direito no cartão com os submenus "E-mail", "WhatsApp" e "SMS", do épico "Escrever e-mail de qualquer tela e central Comunicações no menu".
+**Depende de:** o clique direito no cartão com os submenus "E-mail", "WhatsApp" e "SMS", do épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu".
 
 **Onde vale:** o quadro de itens (lista de itens da categoria, visualização em quadro) e o quadro de Tarefas › Rápidas,
 os 2 com o mesmo cartão de quadro do produto.
@@ -13,7 +13,7 @@ os 2 com o mesmo cartão de quadro do produto.
 não tem o botão no cartão: mostra o mesmo menu no clique direito do cartão, no quadro de itens e no de tarefas. Os
 textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
-**Fora do escopo:** o clique direito no cartão, que fica no épico "Escrever e-mail de qualquer tela e central Comunicações no menu"; outras ações
+**Fora do escopo:** o clique direito no cartão, que fica no épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu"; outras ações
 no cartão além do e-mail, do WhatsApp e do SMS.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,

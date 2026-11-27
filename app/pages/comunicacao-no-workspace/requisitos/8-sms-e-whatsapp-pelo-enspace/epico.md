@@ -1,12 +1,12 @@
-# Épico: Comunicações com SMS e WhatsApp pelo ENSPACE
+# Épico: Enviar SMS e WhatsApp pelo número do workspace, com a integração Twilio
 
 **O que é:** com a integração Twilio do workspace, o ENSPACE passa a enviar SMS e WhatsApp pelo número do workspace,
 de uma pessoa (atalhos e "Nova mensagem") e de um fluxo (nós "Enviar SMS" e "Enviar WhatsApp" do Spaceflow). Cada
 envio fica no item e na central "Comunicações", que passa a mostrar os 3 canais e o status de entrega, também do
-e-mail. A integração soma um caminho aos atalhos e mantém os de hoje: a pessoa continua podendo enviar pelo próprio
+e-mail. A integração soma um caminho aos atalhos e mantém os sem integração: a pessoa continua podendo enviar pelo próprio
 celular e pelo próprio WhatsApp. Pede back novo: o status de entrega do e-mail pelo aviso de eventos da SendGrid, o
 envio de SMS pela Twilio do workspace e o envio de WhatsApp com modelo aprovado pela Meta. Depende do épico
-"Escrever e-mail de qualquer tela e central Comunicações no menu", que entrega a central, os atalhos, o painel
+"Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu", que entrega a central, os atalhos, o painel
 "Enviar SMS" e os 5 status do envio.
 
 **Onde vale:** a central "Comunicações" (lista, leitura e "Nova mensagem"); Configurações › Comunicações (abas Modelos
@@ -44,8 +44,8 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
-| RN901 | O ENSPACE só envia SMS e WhatsApp pelo número do workspace se o workspace tem a integração Twilio ligada, com o número de cada canal. Sem a integração, os atalhos de SMS e de WhatsApp fazem o que fazem hoje: o SMS abre o painel com os caminhos pelo celular, e o WhatsApp abre a conversa no WhatsApp da pessoa. | Com "Sem Twilio", o botão WhatsApp do item abre o WhatsApp Web direto, sem painel. | Obrigatório |
-| RN902 | A integração soma um caminho e mantém os de hoje: com a Twilio, cada atalho de SMS oferece o número do workspace e os caminhos pelo celular da pessoa, e cada atalho de WhatsApp oferece o WhatsApp do workspace e o WhatsApp da pessoa. | Com a Twilio, o painel "Enviar SMS" mostra "Enviar pelo ENSPACE" e, abaixo, "Abrir no app de SMS" e o QR code. | Obrigatório |
+| RN901 | O ENSPACE só envia SMS e WhatsApp pelo número do workspace se o workspace tem a integração Twilio ligada, com o número de cada canal. Sem a integração, os atalhos de SMS e de WhatsApp funcionam sem integração, pelo celular e pelo WhatsApp da pessoa: o SMS abre o painel com os caminhos pelo celular, e o WhatsApp abre a conversa no WhatsApp da pessoa. | Com "Sem Twilio", o botão WhatsApp do item abre o WhatsApp Web direto, sem painel. | Obrigatório |
+| RN902 | A integração soma um caminho e mantém os sem integração: com a Twilio, cada atalho de SMS oferece o número do workspace e os caminhos pelo celular da pessoa, e cada atalho de WhatsApp oferece o WhatsApp do workspace e o WhatsApp da pessoa. | Com a Twilio, o painel "Enviar SMS" mostra "Enviar pelo ENSPACE" e, abaixo, "Abrir no app de SMS" e o QR code. | Obrigatório |
 | RN903 | O WhatsApp pelo número do workspace só envia modelo com o status Aprovado na Meta. O modelo Em análise e o Recusado aparecem indisponíveis, com "<status> na Meta. Só o modelo aprovado pode ser enviado.". | "pesquisa_de_satisfacao", Em análise, aparece cinza na escolha do modelo. | Obrigatório |
 | RN904 | Cada SMS e cada WhatsApp enviado pelo número do workspace fica registrado no item e na central "Comunicações", com os 5 status do envio (Na fila, Em processamento, Enviado ao provedor, Falhou, Cancelado) e a entrega. O que a pessoa envia pelo próprio celular ou pelo próprio WhatsApp não fica registrado. | O SMS que Ana envia de CTR-00230 pelo ENSPACE aparece na central como "Ana Ribeiro, pelo ENSPACE"; o que ela abre no app do celular, não. | Obrigatório |
 | RN905 | A tabela a seguir define a entrega de cada mensagem, que o provedor informa depois do status Enviado ao provedor. Política: Única. | Linha 4: o e-mail para um endereço que não existe fica Devolvido, com o código "550 5.1.1". | Obrigatório |

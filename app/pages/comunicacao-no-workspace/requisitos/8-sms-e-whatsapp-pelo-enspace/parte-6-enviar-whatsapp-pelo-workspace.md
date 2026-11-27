@@ -17,7 +17,7 @@ CTR-00223 e clique em WhatsApp no "Contato do item"; troque entre "WhatsApp do w
 
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
-| RN501 | O link do formulário público e o WhatsApp para 2 ou mais pessoas (a fila "Avisar pelo WhatsApp") abrem o WhatsApp da pessoa mesmo com a integração Twilio: o WhatsApp do workspace envia para 1 número, com modelo, e o envio em lote pelo workspace é o nó "Enviar WhatsApp" do Spaceflow. | Com a Twilio, "WhatsApp para 3 responsáveis" abre a fila de hoje, 1 conversa por vez no WhatsApp da pessoa. | Obrigatório |
+| RN501 | O link do formulário público e o WhatsApp para 2 ou mais pessoas (a fila "Avisar pelo WhatsApp") abrem o WhatsApp da pessoa mesmo com a integração Twilio: o WhatsApp do workspace envia para 1 número, com modelo, e o envio em lote pelo workspace é o nó "Enviar WhatsApp" do Spaceflow. | Com a Twilio, "WhatsApp para 3 responsáveis" abre a fila, 1 conversa por vez no WhatsApp da pessoa. | Obrigatório |
 
 ## O painel (RF)
 

@@ -576,6 +576,25 @@ clientes usa Microsoft. A pesquisa está em `PESQUISA.md`, "SMS no computador".
   épico 2 (RN903, RN905, RN105; partes 1 e 2) e o documento do botão no cartão (RF009). Os prints
   estão em `evidencias/requisitos/`.
 
+## Rodada 19 · 2026-11-27 (WhatsApp e SMS sem integração já na 1ª versão, nos títulos dos cards)
+
+- **Pedido (literal):** "de modo rudimentar, mais simples, como no prototipo que eu te enviei de artefato do claude, sms e whatsapp ja devem fazer parte da primeira versao. entao o primeiro card já deve ter isso, ok? sem integraçao, só o botao simples pra ir pro watsapp web e pra enviar o sms".
+- **O que já estava:** o épico 1 tem os botões de WhatsApp e de SMS desde as rodadas 10 e 11 (RN917 a RN929, partes 3 a 7). O título do card e a 1ª frase falavam só de e-mail, e a abertura dizia que o épico "só tem e-mail".
+- **Mudou nos requisitos e nos cards:**
+
+  | Card | Título antigo | Título novo |
+  |---|---|---|
+  | 1 | Escrever e-mail de qualquer tela e central Comunicações no menu | Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu |
+  | 2 | Escolher na categoria de onde vêm o nome e o e-mail do contato | Escolher na categoria de onde vêm o nome, o e-mail e o telefone do contato |
+  | 7 | Botão de e-mail no cartão do quadro de itens e de tarefas | Botões de e-mail, WhatsApp e SMS no cartão do quadro de itens e de tarefas |
+  | 8 | Comunicações com SMS e WhatsApp pelo ENSPACE | Enviar SMS e WhatsApp pelo número do workspace, com a integração Twilio |
+
+  - épico 1: "O que é" abre com e-mail, WhatsApp e SMS e diz que o WhatsApp e o SMS saem do WhatsApp e do celular da pessoa, sem integração; o critério de aceite diz "sem integração" nos 2 botões;
+  - épico 8: RN901, RN902, RF408 e o critério de aceite trocam "como hoje" por "sem integração, pelo celular e pelo WhatsApp da pessoa";
+  - os outros épicos citam os nomes novos; as descrições dos cards 1, 2, 3, 5, 6, 7 e 8 e as 32 tarefas foram regravadas e conferidas pela REST.
+- **Fica como estava:** o painel "Enviar SMS" com os 4 caminhos (app, QR code, copiar, Google Messages Web), aprovado na rodada 17. O protótipo não muda: a Fase 1 já mostra os 2 botões.
+- **Fora daqui:** a Home (`app/pages/home/requisitos/2-itens-agenda-e-atalhos/`) cita o épico 1 pelo nome antigo de antes da rodada 17 ("central E-mails no menu").
+
 ## Rodada 18 · 2026-11-26 (requisitos e cards das rodadas 12 a 17)
 
 - **Pedido (literal):** "sim, atualiza os requisitos e os cards e me traga no final a planilha atualizada com os cards (novos titulos e novos links)".

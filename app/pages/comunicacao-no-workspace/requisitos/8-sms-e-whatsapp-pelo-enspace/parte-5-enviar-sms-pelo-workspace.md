@@ -22,7 +22,7 @@ CTR-00230 e clique em SMS no "Contato do item"; ligue "Sem Twilio" para ver o pa
 | RF405 | "Enviar pelo ENSPACE" deve enviar o SMS pelo número do workspace, gravar o envio com o item, o status Na fila e "Saiu por" "Número do workspace" (RN904), fechar o painel e mostrar o aviso "SMS enviado", com "O SMS saiu do número do workspace para <número>. O status de entrega aparece na central Comunicações.". | Enviar de CTR-00230 mostra o aviso, e o SMS aparece na central como Na fila, depois Enviado ao provedor e Entregue. | Essencial | Obrigatório |
 | RF406 | Aberto sem destinatário ("Nova mensagem" › SMS), o painel deve ter o campo Para para digitar o número, e a ajuda do botão diz "Informe o destinatário para enviar pelo ENSPACE." até o número ser válido. | "Nova mensagem" › SMS abre o painel com o campo Para vazio e a ajuda. | Importante | Obrigatório |
 | RF407 | Com a integração Twilio, a dica do botão SMS de cada atalho deve dizer "Envie pelo número do workspace, com registro no ENSPACE, ou pelo seu celular, sem registro.". | Pairar no SMS do item mostra a dica. | Importante | Obrigatório |
-| RF408 | Sem a integração Twilio, o painel deve ficar sem "Enviar pelo ENSPACE" e com a descrição e os caminhos de hoje (RN901). | Com "Sem Twilio", o painel mostra só os caminhos pelo celular. | Essencial | Obrigatório |
+| RF408 | Sem a integração Twilio, o painel deve ficar sem "Enviar pelo ENSPACE" e com a descrição e os caminhos pelo celular da pessoa (RN901). | Com "Sem Twilio", o painel mostra só os caminhos pelo celular. | Essencial | Obrigatório |
 
 ## Interfaces (RI)
 

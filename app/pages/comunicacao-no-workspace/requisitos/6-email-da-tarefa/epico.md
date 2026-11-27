@@ -12,7 +12,7 @@ baixo, escolha "Fase: 3 · Tarefa"; em Tarefas, abra "Enviar minuta assinada à 
 Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:** o e-mail enviado pelo sistema por uma tarefa, que já mostra "Sistema · <tarefa>" em "Enviado por"
-(épico "Escrever e-mail de qualquer tela e central Comunicações no menu"); o vínculo com mais de 1 tarefa.
+(épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu"); o vínculo com mais de 1 tarefa.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
 conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.

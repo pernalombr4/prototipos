@@ -3,7 +3,7 @@
 **Objetivo:** a lista da central Comunicações mostra a cada pessoa só os e-mails dos itens que ela pode ver, na
 tabela, na busca, nos filtros e na contagem.
 
-**Depende de:** o épico "Escrever e-mail de qualquer tela e central Comunicações no menu" (a lista de mensagens sobre a tela "Emails Recebidos").
+**Depende de:** o épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu" (a lista de mensagens sobre a tela "Emails Recebidos").
 
 **Onde vale:** a lista da central Comunicações: tabela, busca, filtros, paginador e leitura no painel lateral.
 

@@ -4,7 +4,7 @@
 vinculado. O e-mail passa a aparecer na Mail Box do item escolhido.
 
 **Depende de:** 1. Registro do e-mail enviado sem item; 2. Vincular a item no compositor (a busca de item). As
-sugestões pelo destinatário dependem também do épico "Escolher na categoria de onde vêm o nome e o e-mail do contato".
+sugestões pelo destinatário dependem também do épico "Escolher na categoria de onde vêm o nome, o e-mail e o telefone do contato".
 
 **Onde vale:** a lista da central Comunicações: menu da linha, coluna Item e leitura no painel lateral; a Mail Box do
 item.
@@ -32,7 +32,7 @@ item.
 |---|---|---|---|---|
 | RF304 | Na leitura do e-mail sem item, o bloco Item deve mostrar "Este e-mail não tem item. Ao vincular, ele passa a aparecer na aba Mail Box do item.", as "Sugestões pelo destinatário" e a busca de item. | A leitura de "Cadastro de fornecedor" mostra o texto e a busca. | Essencial | Obrigatório |
 | RF305 | As "Sugestões pelo destinatário" devem ser os itens sugeridos (RN904) pelo remetente, no e-mail recebido, ou pelos destinatários, no e-mail enviado. | E-mail enviado sem item para marina.alves@example.com: sugere CTR-00231, CTR-00219 e CTR-00207. | Importante | Obrigatório |
-| RF306 | Sem o contato configurado nas categorias (épico "Escolher na categoria de onde vêm o nome e o e-mail do contato"), o bloco deve mostrar só a busca, sem as sugestões. | Workspace sem o cartão salvo: a leitura mostra o texto e a busca. | Importante | Obrigatório |
+| RF306 | Sem o contato configurado nas categorias (épico "Escolher na categoria de onde vêm o nome, o e-mail e o telefone do contato"), o bloco deve mostrar só a busca, sem as sugestões. | Workspace sem o cartão salvo: a leitura mostra o texto e a busca. | Importante | Obrigatório |
 | RF307 | A busca de item da leitura deve seguir a busca do compositor: os 5 atualizados por último com a busca vazia, os 8 que mais combinam com o texto, agrupados por categoria, com ID e etapa, só com os itens que a pessoa pode ver (RN901). | "Papelaria" mostra FOR-00040 no grupo Fornecedores; CTR-00214, sem permissão, fica de fora. | Essencial | Obrigatório |
 | RF308 | Na leitura do e-mail com item, o bloco Item deve mostrar o item com o botão "Trocar". | A leitura de "CTR-00231 · Minuta revisada" mostra CTR-00231 e "Trocar". | Essencial | Obrigatório |
 | RF309 | "Trocar" deve abrir no bloco Item as sugestões, a busca de item e o botão "Cancelar", que volta ao item atual. | O clique em "Trocar" mostra a busca no lugar de CTR-00231; "Cancelar" volta a CTR-00231. | Importante | Obrigatório |

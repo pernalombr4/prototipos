@@ -1,7 +1,7 @@
 # Épico: Responder na mesma conversa e encaminhar e-mail
 
 **O que é:** a resposta escrita pelo ENSPACE passa a seguir na mesma conversa do e-mail original, no lugar do e-mail
-novo com "Re:" do épico "Escrever e-mail de qualquer tela e central Comunicações no menu". O e-mail ganha "Encaminhar", com o texto citado e os
+novo com "Re:" do épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu". O e-mail ganha "Encaminhar", com o texto citado e os
 anexos. Nos 2 casos, o e-mail continua no item do original.
 
 **Onde vale:** a Mail Box do item e a da tarefa (hover da linha e e-mail aberto) e a lista da central Comunicações

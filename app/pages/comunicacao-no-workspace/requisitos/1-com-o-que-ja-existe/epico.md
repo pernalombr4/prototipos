@@ -1,14 +1,16 @@
-# Épico: Escrever e-mail de qualquer tela e central Comunicações no menu
+# Épico: Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu
 
-**O que é:** a pessoa escreve o e-mail de cada tela de uso do ENSPACE: do item, da lista e do quadro de itens, das
-tarefas, da Agenda e do "Novo e-mail" da barra do topo. Nos mesmos lugares, o atalho de WhatsApp abre a conversa com
-o contato no WhatsApp Web ou no app, com o texto pronto, e o atalho de SMS abre o painel "Enviar SMS", com o texto pronto
-e os caminhos para enviar pelo celular da pessoa. O link do formulário público também sai pelo WhatsApp e pelo SMS. Com
-item na tela, o e-mail fica na Mail Box do item, que passa
+**O que é:** a pessoa envia e-mail, WhatsApp e SMS de cada tela de uso do ENSPACE: do item, da lista e do quadro de
+itens, das tarefas e da Agenda. O e-mail sai pelo compositor do ENSPACE, aberto também pelo "Novo e-mail" da barra do
+topo. O WhatsApp e o SMS saem do WhatsApp e do celular da própria pessoa, sem integração: o botão de WhatsApp abre a
+conversa com o contato no WhatsApp Web ou no app, com o texto pronto, e o botão de SMS abre o painel "Enviar SMS", com o
+texto pronto e os caminhos para enviar pelo celular. O link do formulário público também sai por e-mail, WhatsApp e
+SMS. Com item na tela, o e-mail fica na Mail Box do item, que passa
 a existir em todo item e no painel da tarefa. O link do formulário público aparece onde o formulário está em uso, e a
 central "Comunicações" no menu lista os e-mails dos itens e do sistema; a configuração do e-mail fica em
-Configurações › Comunicações. O nome "Comunicações" vale desde este épico, que só tem e-mail, para o menu, a trilha e o
-endereço da tela não mudarem quando o SMS e o WhatsApp entrarem. É só tela: o envio pela conta do Outlook, o
+Configurações › Comunicações. O nome "Comunicações" vale desde este épico, em que a central só lista e-mail, para o
+menu, a trilha e o endereço da tela não mudarem quando o envio de SMS e de WhatsApp pelo workspace entrar. É só tela:
+o envio pela conta do Outlook, o
 endereço do item, o e-mail gravado com o item, a Mail Box, os campos de e-mail e de telefone, o link público, a tela
 "Emails Recebidos" e as telas de Configurações › E-mails já existem no back de hoje. O WhatsApp abre por um link do
 próprio WhatsApp, e o SMS pelo link `sms:` do aparelho, sem back-end.
@@ -24,16 +26,16 @@ mostra o workspace novo, o primeiro uso e o workspace em uso; "Cenário" mostra 
 falha". A barra de baixo é ferramenta de revisão e não entra no produto. Os textos nos 3 idiomas estão no protótipo: o controle "Idioma" da barra de baixo troca entre PT, EN e ES.
 
 **Fora do escopo:**
-- o contato configurado por categoria, o cartão "Contato da categoria", o telefone do contato e o texto pronto do WhatsApp e do SMS por categoria (épico "Escolher na categoria de onde vêm o nome e o e-mail do contato");
+- o contato configurado por categoria, o cartão "Contato da categoria", o telefone do contato e o texto pronto do WhatsApp e do SMS por categoria (épico "Escolher na categoria de onde vêm o nome, o e-mail e o telefone do contato");
 - a busca de item para vincular no compositor, o autocompletar do Para com contatos de outros itens, o e-mail sem item gravado no ENSPACE, "Vincular a um item" depois do envio, a lista de mensagens por pessoa e permissão e a lista única dos e-mails do sistema e dos itens (épico "Gravar e-mail enviado sem item e filtrar a lista de mensagens por permissão");
 - a caixa do workspace no "De" e o bloco "Caixas como remetente" (épico "Enviar e-mail pelas Caixas de E-mail do workspace");
 - a resposta na mesma conversa e "Encaminhar" (épico "Responder na mesma conversa e encaminhar e-mail");
 - "Vincular a tarefa", a Mail Box própria da tarefa e a coluna Tarefa da lista de mensagens (épico "Vincular e-mail a uma tarefa");
-- o botão de e-mail no cartão do quadro (documento "Botão de e-mail no cartão do quadro de itens e de tarefas"); aqui o quadro usa o clique direito;
+- os botões de e-mail, WhatsApp e SMS no cartão do quadro (documento "Botões de e-mail, WhatsApp e SMS no cartão do quadro de itens e de tarefas"); aqui o quadro usa o clique direito;
 - os widgets E-mail, WhatsApp e SMS, opcionais no catálogo da Home nova (épico "Widgets de itens, agenda, atalhos e comunicação na Home"). A tela inicial de hoje continua sem atalhos de comunicação e sem o link de formulário público;
 - o envio pelo WhatsApp sem a pessoa apertar Enviar e o registro da conversa do WhatsApp no item;
 - o envio de SMS pelo próprio ENSPACE, por um serviço de SMS contratado, e o registro do SMS no item (P909);
-- o envio de SMS e de WhatsApp pelo número do workspace, a central com os 3 canais e o status de entrega, os modelos de WhatsApp e os nós "Enviar SMS" e "Enviar WhatsApp" do Spaceflow (épico "Comunicações com SMS e WhatsApp pelo ENSPACE");
+- o envio de SMS e de WhatsApp pelo número do workspace, a central com os 3 canais e o status de entrega, os modelos de WhatsApp e os nós "Enviar SMS" e "Enviar WhatsApp" do Spaceflow (épico "Enviar SMS e WhatsApp pelo número do workspace, com a integração Twilio");
 - integração com Google.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
@@ -141,7 +143,7 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | P902 | A documentação do Correio do Outlook diz que a integração exibe a caixa de entrada dentro do ENSPACE e vincula e-mails a tarefas e registros. O develop não tem essa tela. Existe em outro lugar ou é plano? | produto e dev | Se existe, a central "Comunicações" precisa conviver com ela ou substituí-la |
 | P903 | O cliente que usa Google, e não Microsoft, fica só com "Abrir no meu app de e-mail". Está aceito para este épico? | produto | Sem aceite, a integração com Google entra no roteiro |
 | S903 | O texto pronto do WhatsApp é "Olá, <primeiro nome>. Escrevo sobre <referência> · <nome do item>.", como no protótipo. | produto | Muda o texto com que o WhatsApp abre nas partes 3 e 4 |
-| S904 | Sem configuração, o e-mail e o telefone de um mesmo contato aparecem como 2 contatos ("E-mail do contato" e "Telefone do contato"), porque vêm de 2 campos. Só o Pessoa/Empresa junta os 2. Juntar campos soltos é a configuração do épico "Escolher na categoria de onde vêm o nome e o e-mail do contato". | produto | Para juntar já neste épico, falta a regra de qual telefone vai com qual e-mail |
+| S904 | Sem configuração, o e-mail e o telefone de um mesmo contato aparecem como 2 contatos ("E-mail do contato" e "Telefone do contato"), porque vêm de 2 campos. Só o Pessoa/Empresa junta os 2. Juntar campos soltos é a configuração do épico "Escolher na categoria de onde vêm o nome, o e-mail e o telefone do contato". | produto | Para juntar já neste épico, falta a regra de qual telefone vai com qual e-mail |
 | P905 | De onde vem o telefone do membro, para o WhatsApp e o SMS ao responsável da tarefa e ao participante da Agenda? O cadastro do usuário tem o campo de telefone, mas nenhuma tela do develop deixa a pessoa preenchê-lo. | produto e dev | Sem tela para o telefone, o WhatsApp e o SMS das partes 5 e 6 ficam indisponíveis até o perfil ganhar o campo |
 | P907 | No Windows, o link `sms:` abre o app definido para SMS, e o Vincular ao Celular nem sempre aparece como opção nas Configurações (relatos no Microsoft Q&A). Com o Vincular ao Celular pareado, o link abre a conversa com o número e o texto? | dev, em teste no Windows 11 com Android e com iPhone | Se não abre, "Abrir no app de SMS" fica em 2º lugar no Windows e o QR code sobe para o 1º |
 | P908 | Qual biblioteca gera o QR code do painel "Enviar SMS", no próprio navegador e sem serviço de fora? | dev | Muda só a peça que desenha o código; o link dentro dele é o de RN924 |

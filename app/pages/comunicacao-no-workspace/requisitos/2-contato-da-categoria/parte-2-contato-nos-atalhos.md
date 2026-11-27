@@ -4,7 +4,7 @@
 quadro, do compositor e da Agenda usam os contatos, o assunto e o texto pronto da categoria. O item sem contato leva
 quem usa ao campo que falta ou ao cartão da categoria.
 
-**Depende de:** 1. Cartão "Contato da categoria"; o épico "Escrever e-mail de qualquer tela e central Comunicações no menu" (o cartão "Contato do
+**Depende de:** 1. Cartão "Contato da categoria"; o épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu" (o cartão "Contato do
 item", o submenu "E-mail", a coluna "Contato", o compositor, o lembrete da Agenda e o bloco "Contato do item" da
 aba Canais e regras de Configurações › Comunicações).
 
@@ -44,7 +44,7 @@ modal "Evento" da Agenda; a aba Canais e regras de Configurações › Comunica�
 | RF120 | O contato escolhido deve mostrar o telefone embaixo do e-mail, e o botão WhatsApp deve abrir a conversa com esse telefone e o texto pronto da categoria (RN104). | CTR-00231: Marina Alves, marina.alves@example.com e +55 11 3456-7710; o WhatsApp abre com "Olá, Marina...". | Essencial | Obrigatório |
 | RF121 | Para o contato sem telefone, o cartão deve mostrar "Sem telefone: o WhatsApp e o SMS estão indisponíveis." e, para quem tem a permissão de editar o campo de origem do telefone, o botão "Cadastrar telefone", que abre a Visão Geral com o cursor nesse campo. | CTR-00228: Otávio Rezende, com o aviso e "Cadastrar telefone", que leva a "Telefone do contato". | Importante | Obrigatório |
 | RF122 | Para o contato com telefone inválido, o cartão deve mostrar "Telefone inválido: o WhatsApp e o SMS estão indisponíveis." e "Corrigir telefone", com a mesma condição e o mesmo destino de RF121. | CTR-00226: Sérgio Batista, 9210-8834, com o aviso e "Corrigir telefone". | Importante | Obrigatório |
-| RF123 | Na Visão Geral, o campo escolhido como origem do telefone deve ter os ícones do WhatsApp e do SMS, como o campo de telefone do épico "Escrever e-mail de qualquer tela e central Comunicações no menu", com o texto pronto da categoria. | Em FOR-00040, "WhatsApp comercial" e "Pessoa/Empresa › Telefone de contato" abrem com o texto de Fornecedores. | Importante | Obrigatório |
+| RF123 | Na Visão Geral, o campo escolhido como origem do telefone deve ter os ícones do WhatsApp e do SMS, como o campo de telefone do épico "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu", com o texto pronto da categoria. | Em FOR-00040, "WhatsApp comercial" e "Pessoa/Empresa › Telefone de contato" abrem com o texto de Fornecedores. | Importante | Obrigatório |
 | RF126 | O botão SMS, ao lado do WhatsApp, deve abrir o painel "Enviar SMS" com o telefone do contato escolhido e o texto pronto da categoria; com telefone fixo, fica indisponível com o motivo (RN105). | CTR-00230: o painel abre com "Enviar SMS para Rafael Monteiro" e o texto da categoria; CTR-00231 deixa o SMS cinza com "Telefone fixo não recebe SMS". | Essencial | Obrigatório |
 
 ## Assunto do atalho (RF)

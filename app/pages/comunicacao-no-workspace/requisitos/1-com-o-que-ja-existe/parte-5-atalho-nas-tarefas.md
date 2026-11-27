@@ -74,7 +74,7 @@ Lista, selecione 3 tarefas; na visão do quadro, clique com o botão direito num
 
 | ID | Requisito | Como medir ou conferir | Prioridade | Relevância |
 |---|---|---|---|---|
-| RS401 | Os atalhos do quadro de tarefas entram no menu do clique direito que o cartão já tem; o cartão não ganha botão. O botão no cartão é o documento "Botão de e-mail no cartão do quadro de itens e de tarefas". | O cartão não ganha botão; o clique direito traz as ações de hoje e o atalho. | Essencial | Obrigatório |
+| RS401 | Os atalhos do quadro de tarefas entram no menu do clique direito que o cartão já tem; o cartão não ganha botão. O botão no cartão é o documento "Botões de e-mail, WhatsApp e SMS no cartão do quadro de itens e de tarefas". | O cartão não ganha botão; o clique direito traz as ações de hoje e o atalho. | Essencial | Obrigatório |
 
 ## Em aberto
 

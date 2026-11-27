@@ -3,7 +3,7 @@
 **Objetivo:** quem administra escolhe quais Caixas de E-mail do workspace aparecem no campo De do compositor.
 
 **Onde vale:** a aba Canais e regras de Configurações › Comunicações, grupo "Regras do workspace" (o grupo de quem administra, do épico
-"Escrever e-mail de qualquer tela e central Comunicações no menu").
+"Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu").
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/. Com "Fase: 2 · Remetente" e
 "Perfil: Admin", abra Configurações › Comunicações › Canais e regras: o bloco "Caixas como remetente" fica entre "Contato do item" e
