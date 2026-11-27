@@ -119,6 +119,9 @@ export function useProjetos() {
   const estadoDaTela = useState<EstadoDaTela>('prj-estado', () => 'normal')
   /** Andaime: a proposta sobre o menu novo (protótipo menu-lateral) ou sobre o menu de hoje do develop. */
   const menu = useState<'novo' | 'atual'>('prj-casca', () => 'novo')
+  /** Rodada 16: Completo ou MVP. A chave do andaime recorta o protótipo ao MVP (DECISOES, rodada 16). */
+  const versao = useState<'completa' | 'mvp'>('prj-versao', () => 'completa')
+  const mvp = computed(() => versao.value === 'mvp')
   const eu = useState<number>('prj-eu', () => 1)
   const projetos = useState<Projeto[]>('prj-projetos', () => copiarProjetos(projetosBase))
   const categorias = useState<Categoria[]>('prj-categorias', () => categoriasBase.map(c => ({ ...c })))
@@ -435,7 +438,8 @@ export function useProjetos() {
   }
 
   /* ---------- rodada 3 ---------- */
-  const statusAtual = (p: Projeto) => p.atualizacoes[0] ?? null
+  /** Rodada 16: o Status do projeto fica fora do MVP; sem status, nenhuma tela mostra a situação. */
+  const statusAtual = (p: Projeto) => mvp.value ? null : (p.atualizacoes[0] ?? null)
   function publicarStatus(id: number, a: Omit<AtualizacaoDeStatus, 'autor' | 'em'>) {
     const p = projetos.value.find(x => x.id === id)
     if (!p) return
@@ -683,7 +687,7 @@ export function useProjetos() {
   }
 
   return {
-    cenario, estadoDaTela, menu, eu, euPessoa, souDono, souConvidado,
+    cenario, estadoDaTela, menu, versao, mvp, eu, euPessoa, souDono, souConvidado,
     projetos, categorias, area, tela, expandidos, pedidos, janelas,
     participa, papel, enxerga, entra, podeAdministrar,
     ativos, visiveis, queEntro, noMenu, estaNoMenu, mostrarNoMenu, ocultarDoMenu, reordenar, salvarParaTodos,

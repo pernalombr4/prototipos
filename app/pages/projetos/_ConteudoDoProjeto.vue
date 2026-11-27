@@ -37,13 +37,15 @@ const paineis = computed(() => prj.dashboardsDe(props.p.id))
 const abertas = computed(() => prj.tarefasDoProjeto(props.p.id).filter(x => x.status !== 'concluida').length)
 const nFluxos = computed(() => prj.fluxosDoProjeto(props.p.id).length)
 
-const fixas = computed(() => [
+const todasAsFixas = computed(() => [
   { aba: 'geral' as AbaDoProjeto, rotulo: props.t.abas.geral, icone: 'i-lucide-layout-dashboard', n: 0 },
   { aba: 'tarefas' as AbaDoProjeto, rotulo: r.value.menu.tarefas, icone: 'i-lucide-square-check', n: abertas.value },
   { aba: 'marcos' as AbaDoProjeto, rotulo: tmm.value.marcos.aba, icone: 'i-lucide-flag', n: md.marcosDo(props.p.id).filter(m => m.status === 'aberto').length },
   { aba: 'discussoes' as AbaDoProjeto, rotulo: tmd.value.discussoes.aba, icone: 'i-lucide-messages-square', n: md.discussoesDo(props.p.id).filter(d => d.status === 'aberta').length },
   { aba: 'automacoes' as AbaDoProjeto, rotulo: r.value.menu.automacoes, icone: 'i-lucide-workflow', n: nFluxos.value },
 ])
+/** Rodada 16: o MVP tem só Visão geral e Tarefas. */
+const fixas = computed(() => prj.mvp.value ? todasAsFixas.value.filter(f => f.aba === 'geral' || f.aba === 'tarefas') : todasAsFixas.value)
 
 const naPagina = computed(() => prj.tela.value.tipo === 'projeto' && prj.tela.value.id === props.p.id)
 const abaAtiva = (aba: AbaDoProjeto) => naPagina.value && prj.abaDoProjeto.value === aba
@@ -289,7 +291,8 @@ function linhaDeMira(tipo: 'c' | 'd', id: number) {
       <p v-else class="text-xs text-dimmed" :class="v.linha">{{ r.menu.semCategoria }}</p>
     </li>
 
-    <!-- Painéis -->
+    <!-- Painéis (fora do MVP, rodada 16) -->
+    <template v-if="!prj.mvp.value">
     <li class="group/sec flex items-center" :class="v.secao">
       <span class="min-w-0 flex-1 truncate text-xs font-medium text-muted">{{ r.menu.paineis }}</span>
       <UTooltip v-if="admin" :text="r.menu.adicionarPainel">
@@ -371,5 +374,6 @@ function linhaDeMira(tipo: 'c' | 'd', id: number) {
       </button>
       <p v-else class="text-xs text-dimmed" :class="v.linha">{{ r.menu.semPainel }}</p>
     </li>
+    </template>
   </ul>
 </template>

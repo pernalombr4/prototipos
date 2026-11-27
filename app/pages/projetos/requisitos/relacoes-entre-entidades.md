@@ -12,6 +12,10 @@ painel do marco, painel do item, janela Nova tarefa, Mover categoria e Configura
 **Fora do escopo:** convidar para o projeto alguém de fora do workspace; discussão dentro da meta; marcos no modelo de
 projeto.
 
+**No MVP** (chave Versão, MVP, no protótipo): valem RN004, RN007, RF201, RF202, RF205, RF401 a RF403, RF501, RF502 e
+RF504, só na parte que fala de tarefa, item, categoria e pessoa. Marco, meta, discussão, painel de dashboard e os
+campos da categoria no projeto ficam para depois do MVP.
+
 **Relevância:** Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer, conversa com produtos antes.
 Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 

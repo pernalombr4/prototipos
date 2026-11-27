@@ -55,7 +55,7 @@ const ABA_NOVA: Record<string, string> = { geral: 'geral', categorias: 'categori
 const aba = ref('geral')
 const abas = computed<TabsItem[]>(() => [
   { value: 'geral', label: props.t.config.abaGeral, icon: 'i-lucide-sliders-horizontal' },
-  { value: 'categorias', label: tf.value.abaCategorias, icon: 'i-lucide-database', badge: categoriasDoForm.value.length ? { label: String(categoriasDoForm.value.length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
+  { value: 'categorias', label: prj.mvp.value ? tf.value.abaCategoriasMvp : tf.value.abaCategorias, icon: 'i-lucide-database', badge: categoriasDoForm.value.length ? { label: String(categoriasDoForm.value.length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'acesso', label: tf.value.abaAcesso, icon: 'i-lucide-shield' },
 ])
 
@@ -379,7 +379,8 @@ const linhasDaExclusao = computed(() => {
     { chave: 'tarefasSemItem', n: e.tarefasSemItem, texto: tx.tarefasSemItem(e.tarefasSemItem), icone: 'i-lucide-square-check' },
     { chave: 'tarefasComItem', n: e.tarefasComItem, texto: tx.tarefasComItem(e.tarefasComItem), icone: 'i-lucide-link' },
     { chave: 'metas', n: e.metas, texto: tx.metas(e.metas), icone: 'i-lucide-target' },
-  ].filter(l => l.n > 0)
+  // Rodada 16: o MVP não tem marcos, discussões, painéis nem metas.
+  ].filter(l => l.n > 0 && (!prj.mvp.value || !['marcos', 'discussoes', 'dashboards', 'metas'].includes(l.chave)))
 })
 function excluir() {
   const nome = p.value!.nome
@@ -405,7 +406,7 @@ function excluir() {
           <!-- GERAL -->
           <template v-if="aba === 'geral'">
             <!-- começar de um modelo: só na criação -->
-            <UFormField v-if="criando && prj.modelos.value.length" :label="t.modelo.comecarDe">
+            <UFormField v-if="criando && !prj.mvp.value && prj.modelos.value.length" :label="t.modelo.comecarDe">
               <USelect v-model="rascunho.modelo" :items="opcoesDeModelo" class="w-full" :icon="modelo ? modelo.icone : 'i-lucide-square-dashed'">
                 <template #item-trailing="{ item }">
                   <span v-if="(item as any).autor" class="text-xs text-muted">{{ (item as any).autor }}</span>
@@ -478,7 +479,7 @@ function excluir() {
             <UCheckbox v-model="rascunho.noMenuDeTodos" :label="t.criar.noMenuDeTodos" :description="t.criar.noMenuDeTodosDica" />
 
             <!-- só na edição: salvar como modelo -->
-            <div v-if="!criando && p" class="rounded-md border border-default p-4" :class="marcaBack">
+            <div v-if="!criando && p && !prj.mvp.value" class="rounded-md border border-default p-4" :class="marcaBack">
               <p class="text-sm font-semibold text-highlighted">{{ t.modelo.salvarComo }}</p>
               <p class="mt-1 text-sm text-muted">{{ t.modelo.salvarComoTexto }}</p>
               <UButton :label="t.modelo.salvarComo" icon="i-lucide-copy-plus" color="neutral" variant="outline" size="sm" class="mt-3" :disabled="!categoriasDoForm.length" @click="prj.janelas.modelo.value = p.id" />
@@ -515,7 +516,7 @@ function excluir() {
 
           <!-- CATEGORIAS E CAMPOS -->
           <template v-else-if="aba === 'categorias'">
-            <p class="text-sm text-muted">{{ tf.categoriasIntro }}</p>
+            <p class="text-sm text-muted">{{ prj.mvp.value ? tf.categoriasIntroMvp : tf.categoriasIntro }}</p>
 
             <UFormField :label="tf.adicionar" :help="tf.adicionarDica">
               <USelectMenu
@@ -550,7 +551,7 @@ function excluir() {
                     <span class="block truncate text-sm font-medium text-highlighted">{{ c.name }}</span>
                     <span class="block text-xs text-muted">{{ c.itens || camposDaCat(c.id) ? t.pagina.itens(c.itens) : tf.nova }}</span>
                   </span>
-                  <UBadge v-if="faltaEscolher(c.id)" :label="tf.aEscolher" icon="i-lucide-circle-dashed" color="warning" variant="soft" size="sm" class="shrink-0" />
+                  <UBadge v-if="!prj.mvp.value && faltaEscolher(c.id)" :label="tf.aEscolher" icon="i-lucide-circle-dashed" color="warning" variant="soft" size="sm" class="shrink-0" />
                   <UTooltip v-if="criando" :text="tf.tirar">
                     <UButton icon="i-lucide-x" size="xs" color="neutral" variant="ghost" :aria-label="tf.tirar" @click="tirar(c.id)" />
                   </UTooltip>
@@ -559,8 +560,8 @@ function excluir() {
                   </UDropdownMenu>
                 </div>
 
-                <!-- os campos que ela empresta ao projeto -->
-                <div class="space-y-2 p-3">
+                <!-- os campos que ela empresta ao projeto (fora do MVP, rodada 16: sem a aba Itens, o mapa não tem uso) -->
+                <div v-if="!prj.mvp.value" class="space-y-2 p-3">
                   <div>
                     <p class="text-xs font-medium text-toned">{{ tf.camposTitulo }}</p>
                     <p class="text-xs text-muted">{{ tf.camposDica }}</p>
@@ -578,8 +579,8 @@ function excluir() {
                   </div>
                 </div>
 
-                <!-- os grupos do status: cada valor da categoria entra em 1 dos 3 grupos do projeto -->
-                <div class="border-t border-default p-3">
+                <!-- os grupos do status: cada valor da categoria entra em 1 dos 3 grupos do projeto (fora do MVP, rodada 16) -->
+                <div v-if="!prj.mvp.value" class="border-t border-default p-3">
                   <template v-if="rascunho.mapa[c.id]?.status && camposDaCat(c.id)">
                     <p class="text-xs font-medium text-toned">{{ tf.gruposTitulo }}</p>
                     <p class="mt-0.5 text-xs text-muted">{{ tf.gruposDica(rascunho.mapa[c.id]!.status!) }}</p>

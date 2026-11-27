@@ -26,6 +26,7 @@
 import type { DropdownMenuItem } from '@nuxt/ui'
 import { textos } from './textos'
 import { textosDeMetasEDiscussoes } from './textosDeMetasEDiscussoes'
+import { useMetasEDiscussoes } from './metasEDiscussoes'
 import { iniciais, secaoComercial, workspace } from './mocks'
 import { personas, useMarcaDeProposta, useProjetos, type Cenario } from './estado'
 import CascaDoMenuNovo from './_CascaDoMenuNovo.vue'
@@ -57,7 +58,7 @@ definePageMeta({
 const t = useTextos(textos)
 const tmd = useTextos(textosDeMetasEDiscussoes)
 const prj = useProjetos()
-const { area, tela, cenario, estadoDaTela, menu, eu, souDono, souConvidado, visiveis } = prj
+const { area, tela, cenario, estadoDaTela, menu, versao, eu, souDono, souConvidado, visiveis } = prj
 // Rodada 12: as chaves "Mostrar o que muda" e "Mostrar o que pede back-end novo" saíram do andaime (a tela inteira é
 // novidade). As marcas continuam no código, sempre desligadas.
 const { marca } = useMarcaDeProposta()
@@ -148,6 +149,22 @@ const menus = computed(() => [
   { value: 'novo' as const, label: t.value.andaime.menuNovo },
   { value: 'atual' as const, label: t.value.andaime.menuAtual },
 ])
+/** Rodada 16: a versão do protótipo. O MVP esconde o que fica para depois e fecha o que estava aberto disso. */
+const versoes = computed(() => [
+  { value: 'completa' as const, label: t.value.andaime.versaoCompleta },
+  { value: 'mvp' as const, label: t.value.andaime.versaoMvp },
+])
+const mdDaVersao = useMetasEDiscussoes()
+watch(versao, (v) => {
+  if (v !== 'mvp') return
+  if (prj.abaDoProjeto.value !== 'geral' && prj.abaDoProjeto.value !== 'tarefas') prj.abaDoProjeto.value = 'geral'
+  if (tela.value.tipo === 'metas') tela.value = { tipo: 'diretorio' }
+  prj.janelas.status.value = null
+  prj.janelas.modelo.value = null
+  mdDaVersao.discussaoAberta.value = null
+  mdDaVersao.metaAberta.value = null
+  mdDaVersao.marcoAberto.value = null
+})
 const cenarios = computed<{ value: Cenario, label: string }[]>(() => [
   { value: 'semProjetos', label: t.value.andaime.semProjetos },
   { value: 'emUso', label: t.value.andaime.emUso },
@@ -263,6 +280,21 @@ const pessoaEscolhida = computed({
     <div class="fixed inset-x-0 bottom-0 z-40 border-t border-default bg-elevated/95 backdrop-blur">
       <div class="flex flex-wrap items-center gap-2 px-4 py-2.5">
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.prototipo }}</span>
+
+        <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.versao }}</span>
+        <UFieldGroup size="xs">
+          <UButton
+            v-for="v in versoes"
+            :key="v.value"
+            :label="v.label"
+            :color="versao === v.value ? 'primary' : 'neutral'"
+            :variant="versao === v.value ? 'solid' : 'subtle'"
+            :aria-pressed="versao === v.value"
+            @click="versao = v.value"
+          />
+        </UFieldGroup>
+
+        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
 
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">{{ t.andaime.menu }}</span>
         <UFieldGroup size="xs">

@@ -204,6 +204,7 @@ const pt = {
   geral: {
     reune: 'O que este projeto reúne',
     reuneTexto: (nome: string) => `Tudo de ${nome} num lugar só: as categorias, as tarefas dos itens, os workflows e os painéis, para quem participa.`,
+    reuneTextoMvp: (nome: string) => `Tudo de ${nome} num lugar só: as categorias e as tarefas dos itens, para quem participa.`,
     tarefasAbertas: 'Tarefas abertas',
     vencidas: 'Tarefas vencidas',
     itens: 'Itens',
@@ -416,6 +417,7 @@ const en: TextosDoProjeto = {
   geral: {
     reune: 'What this project brings together',
     reuneTexto: (nome: string) => `Everything in ${nome} in one place: categories, item tasks, workflows and dashboards, for its members.`,
+    reuneTextoMvp: (nome: string) => `Everything in ${nome} in one place: categories and item tasks, for its members.`,
     tarefasAbertas: 'Open tasks',
     vencidas: 'Overdue tasks',
     itens: 'Items',
@@ -626,6 +628,7 @@ const es: TextosDoProjeto = {
   geral: {
     reune: 'Lo que reúne este proyecto',
     reuneTexto: (nome: string) => `Todo de ${nome} en un solo lugar: las categorías, las tareas de los ítems, los workflows y los paneles, para quien participa.`,
+    reuneTextoMvp: (nome: string) => `Todo de ${nome} en un solo lugar: las categorías y las tareas de los ítems, para quien participa.`,
     tarefasAbertas: 'Tareas abiertas',
     vencidas: 'Tareas vencidas',
     itens: 'Ítems',

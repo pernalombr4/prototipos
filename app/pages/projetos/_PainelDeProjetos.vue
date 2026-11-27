@@ -34,7 +34,8 @@ const tmd = useTextos(textosDeMarcosEMedicao)
 /** Rodada 9: Todos os projetos (o diretório, onde o clique na trilha já cai) e Metas, como itens do menu. */
 const geraisDoPainel = computed(() => [
   { tipo: 'diretorio' as const, rotulo: tmd.value.menu.geral, icone: 'i-lucide-layout-list', n: visiveis.value.length },
-  { tipo: 'metas' as const, rotulo: tmd.value.menu.metas, icone: 'i-lucide-target', n: undefined as number | undefined },
+  // Rodada 16: Metas fica fora do MVP.
+  ...(prj.mvp.value ? [] : [{ tipo: 'metas' as const, rotulo: tmd.value.menu.metas, icone: 'i-lucide-target', n: undefined as number | undefined }]),
 ])
 const camadas = computed(() => [
   { icone: 'i-lucide-folder-kanban', titulo: props.t.camadas.projeto, texto: props.t.camadas.projetoTexto },

@@ -92,21 +92,29 @@ const status = computed(() => prj.statusAtual(p.value))
 const aba = prj.abaDoProjeto
 const nFluxos = computed(() => prj.fluxosDoProjeto(props.id).length)
 const nAtivos = computed(() => prj.fluxosDoProjeto(props.id).filter(f => f.ativo).length)
-const numeros = computed<EnDashboardStatItem[]>(() => [
+const todosOsNumeros = computed<EnDashboardStatItem[]>(() => [
   { key: 'tarefas', label: r.value.geral.tarefasAbertas, value: abertas.value.length, icon: 'i-lucide-square-check' },
   { key: 'vencidas', label: r.value.geral.vencidas, value: abertas.value.filter(x => x.prazo < HOJE).length, icon: 'i-lucide-alarm-clock-off' },
   { key: 'itens', label: r.value.geral.itens, value: categorias.value.reduce((s, c) => s + c.itens, 0).toLocaleString(idioma.value), icon: 'i-lucide-list-checks' },
   { key: 'automacoes', label: r.value.geral.workflowsAtivos, value: `${nAtivos.value} / ${nFluxos.value}`, icon: 'i-lucide-workflow' },
 ])
+/** Rodada 16: no MVP, sem Automações. */
+const numeros = computed(() => prj.mvp.value ? todosOsNumeros.value.filter(s => s.key !== 'automacoes') : todosOsNumeros.value)
 const DESTINO: Record<string, 'tarefas' | 'itens' | 'automacoes' | null> = { tarefas: 'tarefas', vencidas: 'tarefas', itens: 'itens', automacoes: 'automacoes', pessoas: null }
 function abrirNumero(s: EnDashboardStatItem) {
+  // Rodada 16: o MVP não tem a aba Itens; o número abre a 1ª categoria do projeto, onde os itens moram.
+  if (prj.mvp.value && s.key === 'itens') {
+    const c = categorias.value[0]
+    if (c) prj.abrirCategoria(c.id)
+    return
+  }
   const d = DESTINO[s.key]
   if (d) aba.value = d
   else configurar('participantes')
 }
 const raiz = useTemplateRef<HTMLElement>('raiz')
 watch(aba, () => nextTick(() => raiz.value?.scrollIntoView({ block: 'start' })))
-const abas = computed<TabsItem[]>(() => [
+const todasAsAbas = computed<TabsItem[]>(() => [
   { value: 'geral', label: props.t.abas.geral, icon: 'i-lucide-layout-dashboard' },
   { value: 'itens', label: props.t.abas.itens, icon: 'i-lucide-list-checks' },
   { value: 'tarefas', label: r.value.menu.tarefas, icon: 'i-lucide-square-check', badge: abertas.value.length ? { label: String(abertas.value.length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
@@ -115,6 +123,8 @@ const abas = computed<TabsItem[]>(() => [
   { value: 'automacoes', label: props.t.abas.automacoes, icon: 'i-lucide-workflow', badge: nFluxos.value ? { label: String(nFluxos.value), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
   { value: 'painel', label: r.value.menu.paineis, icon: 'i-lucide-chart-column', badge: prj.dashboardsDe(props.id).length ? { label: String(prj.dashboardsDe(props.id).length), color: 'neutral', variant: 'soft', size: 'sm' } : undefined },
 ])
+/** Rodada 16: o MVP tem só Visão geral e Tarefas. */
+const abas = computed(() => prj.mvp.value ? todasAsAbas.value.filter(a => a.value === 'geral' || a.value === 'tarefas') : todasAsAbas.value)
 </script>
 
 <template>
@@ -187,12 +197,12 @@ const abas = computed<TabsItem[]>(() => [
     <div v-else class="mt-4 grid gap-4 lg:grid-cols-3">
       <!-- rodada 5: o que o projeto reúne, em números que levam às abas -->
       <section class="lg:col-span-3 animate-[entrada_0.2s_ease-out_both]">
-        <p class="mb-2 text-sm text-muted">{{ r.geral.reuneTexto(p.nome) }}</p>
-        <EnDashboardGrid :stats="numeros" :columns="4" clickable @stat-click="abrirNumero" />
+        <p class="mb-2 text-sm text-muted">{{ prj.mvp.value ? r.geral.reuneTextoMvp(p.nome) : r.geral.reuneTexto(p.nome) }}</p>
+        <EnDashboardGrid :stats="numeros" :columns="numeros.length" clickable @stat-click="abrirNumero" />
       </section>
-      <StatusDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
-      <MarcosDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
-      <MetasDoProjeto :t="t" :id="p.id" class="lg:col-span-3" />
+      <StatusDoProjeto v-if="!prj.mvp.value" :t="t" :id="p.id" class="lg:col-span-3" />
+      <MarcosDoProjeto v-if="!prj.mvp.value" :t="t" :id="p.id" class="lg:col-span-3" />
+      <MetasDoProjeto v-if="!prj.mvp.value" :t="t" :id="p.id" class="lg:col-span-3" />
       <!-- categorias -->
       <section class="rounded-lg border border-default bg-default lg:col-span-2 animate-[entrada_0.25s_ease-out_both]" style="animation-delay: 40ms">
         <header class="flex items-center gap-2 border-b border-default px-4 py-3">

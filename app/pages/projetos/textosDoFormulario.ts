@@ -6,6 +6,8 @@
 
 const pt = {
   abaCategorias: 'Categorias e campos',
+  abaCategoriasMvp: 'Categorias',
+  categoriasIntroMvp: 'As categorias guardam os itens do projeto. Só os participantes veem as categorias do projeto.',
   abaAcesso: 'Acesso e segurança',
   descricaoCriar: 'Tudo o que se ajusta depois, nas configurações, já se define aqui.',
   // categorias
@@ -44,6 +46,8 @@ export type TextosDoFormulario = typeof pt
 
 const en: TextosDoFormulario = {
   abaCategorias: 'Categories and fields',
+  abaCategoriasMvp: 'Categories',
+  categoriasIntroMvp: 'Categories hold the project items. Only the project members see the project categories.',
   abaAcesso: 'Access and security',
   descricaoCriar: 'Everything you adjust later, in the settings, can be defined here.',
   categoriasIntro: 'Categories hold the project items. The project Items tab brings the items of all of them into a single list and board. For that, each category tells which of its fields is the Owner, the Due date and the Status.',
@@ -77,6 +81,8 @@ const en: TextosDoFormulario = {
 
 const es: TextosDoFormulario = {
   abaCategorias: 'Categorías y campos',
+  abaCategoriasMvp: 'Categorías',
+  categoriasIntroMvp: 'Las categorías guardan los ítems del proyecto. Solo los participantes ven las categorías del proyecto.',
   abaAcesso: 'Acceso y seguridad',
   descricaoCriar: 'Todo lo que se ajusta después, en la configuración, ya se define aquí.',
   categoriasIntro: 'Las categorías guardan los ítems del proyecto. La pestaña Ítems del proyecto junta los ítems de todas ellas en una sola lista y un solo tablero. Para eso, cada categoría indica qué campo suyo es el Responsable, el Plazo y el Estado.',

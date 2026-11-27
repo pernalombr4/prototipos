@@ -384,7 +384,7 @@ function excluir() {
               </div>
               <p v-else class="mt-1 text-sm text-toned">{{ td.semItemTexto }}</p>
             </div>
-            <div v-if="origem" class="rounded-lg border border-default p-3" :class="marca">
+            <div v-if="origem && !prj.mvp.value" class="rounded-lg border border-default p-3" :class="marca">
               <p class="text-xs text-muted">{{ tr.tarefa.criadaNaDiscussao }}</p>
               <button type="button" class="mt-1 flex w-full items-center gap-2 text-left text-sm text-highlighted hover:underline" @click="abrirOrigem">
                 <UIcon name="i-lucide-messages-square" class="size-4 shrink-0 text-muted" />
@@ -457,7 +457,7 @@ function excluir() {
             <span class="text-sm text-highlighted">{{ nomeDoProjeto }}</span>
             <span class="text-[11px] text-dimmed" :class="marca">{{ tarefa.projeto === null ? tr.tarefa.semProjeto : tr.tarefa.projetoProprio }}</span>
           </div>
-          <div class="flex flex-col gap-1 px-4 py-2" :class="marca">
+          <div v-if="!prj.mvp.value" class="flex flex-col gap-1 px-4 py-2" :class="marca">
             <span class="text-xs font-medium text-muted">{{ tl.marco }}</span>
             <!-- B10: a subtarefa segue o marco da tarefa-mãe -->
             <template v-if="mae">

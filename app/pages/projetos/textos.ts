@@ -348,6 +348,8 @@ const pt = {
   inicio: {
     ola: (nome: string) => `Olá, ${nome}`,
     seusProjetos: 'Seus projetos',
+    outros: ['Minhas tarefas', 'Categorias'],
+    outrosTexto: 'Os outros widgets da tela Início ficam como estão. "Seus projetos" entra como mais 1 widget.',
     categorias: (n: number) => n === 1 ? '1 categoria' : `${n} categorias`,
   },
   menuAtual: {
@@ -565,6 +567,9 @@ const pt = {
     menu: 'Menu',
     menuNovo: 'Menu novo',
     menuAtual: 'Menu atual',
+    versao: 'Versão',
+    versaoCompleta: 'Completo',
+    versaoMvp: 'MVP',
   },
 }
 
@@ -908,6 +913,8 @@ const en: Textos = {
   inicio: {
     ola: (nome: string) => `Hello, ${nome}`,
     seusProjetos: 'Your projects',
+    outros: ['My tasks', 'Categories'],
+    outrosTexto: 'The other widgets of the Home screen stay as they are. "Your projects" is 1 more widget.',
     categorias: (n: number) => n === 1 ? '1 category' : `${n} categories`,
   },
   menuAtual: {
@@ -1125,6 +1132,9 @@ const en: Textos = {
     menu: 'Menu',
     menuNovo: 'New menu',
     menuAtual: 'Current menu',
+    versao: 'Version',
+    versaoCompleta: 'Full',
+    versaoMvp: 'MVP',
   },
 }
 
@@ -1466,6 +1476,8 @@ const es: Textos = {
   inicio: {
     ola: (nome: string) => `Hola, ${nome}`,
     seusProjetos: 'Sus proyectos',
+    outros: ['Mis tareas', 'Categorías'],
+    outrosTexto: 'Los demás widgets de la pantalla Inicio quedan como están. "Sus proyectos" entra como 1 widget más.',
     categorias: (n: number) => n === 1 ? '1 categoría' : `${n} categorías`,
   },
   menuAtual: {
@@ -1683,6 +1695,9 @@ const es: Textos = {
     menu: 'Menú',
     menuNovo: 'Menú nuevo',
     menuAtual: 'Menú actual',
+    versao: 'Versión',
+    versaoCompleta: 'Completo',
+    versaoMvp: 'MVP',
   },
 }
 

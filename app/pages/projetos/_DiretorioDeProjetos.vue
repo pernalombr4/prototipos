@@ -38,6 +38,7 @@ const busca = ref('')
 const periodo = ref<Periodo>('todos')
 const fVisibilidade = ref<Visibilidade[]>([])
 const fSituacao = ref<(Situacao | 'sem')[]>([])
+watch(prj.mvp, (m) => { if (m) fSituacao.value = [] })
 const fAdmin = ref<number[]>([])
 const mostrarRapidos = ref(true)
 const pagina = ref(1)
@@ -116,7 +117,8 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'nome', label: td.value.colunaNome, sortable: true },
   { key: 'visibilidade', label: td.value.colunaVisibilidade },
   { key: 'noMenu', label: tmenu.value.colunaNoMenu },
-  { key: 'situacao', label: props.t.situacao.coluna },
+  // Rodada 16: o Status do projeto fica fora do MVP.
+  ...(prj.mvp.value ? [] : [{ key: 'situacao', label: props.t.situacao.coluna }]),
   { key: 'admins', label: td.value.colunaAdmins },
   { key: 'participantes', label: td.value.colunaParticipantes, sortable: true },
   { key: 'categorias', label: td.value.colunaCategorias, sortable: true },
@@ -309,6 +311,7 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
             <template #default>{{ rotuloDoFiltro(td.filtroVisibilidade, fVisibilidade.length) }}</template>
           </USelectMenu>
           <USelectMenu
+            v-if="!prj.mvp.value"
             v-model="fSituacao"
             :items="opcoesDeSituacao"
             value-key="value"

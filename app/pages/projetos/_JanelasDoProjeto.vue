@@ -222,7 +222,7 @@ function criarFluxo() {
         <UFormField :label="r.novaTarefa.prioridade">
           <USelect v-model="tar.prioridade" :items="opPrioridade" class="w-full" />
         </UFormField>
-        <UFormField :label="tmm.marcos.colMarco" :class="marca">
+        <UFormField v-if="!prj.mvp.value" :label="tmm.marcos.colMarco" :class="marca">
           <USelectMenu v-model="tar.marco" v-model:search-term="buscaMarcoDaTarefa" :items="opMarcosDaTarefa" value-key="value" class="w-full" :ui="{ content: 'min-w-72' }">
             <template v-if="podeMarcoNaTarefa" #content-bottom>
               <AtalhoDeCriar :termo="buscaMarcoDaTarefa" :rotulo="ta.marco.rotulo" :com="ta.marco.com" :dica="ta.marco.dica" @criar="criarMarcoNaTarefa" />

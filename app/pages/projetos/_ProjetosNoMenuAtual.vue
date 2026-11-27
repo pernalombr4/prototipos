@@ -142,6 +142,7 @@ function teclar(ev: KeyboardEvent, id: number) {
 
         <!-- Rodada 9: Metas no topo da seção, como item; o item Projetos já abre o diretório e o pé "Ver todos" saiu -->
         <button
+          v-if="!prj.mvp.value"
           type="button"
           class="flex w-full items-center gap-2.5 py-2 pl-10 pr-4 text-left transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
           :class="[tela.tipo === 'metas' ? 'bg-primary/10 font-medium text-primary' : 'text-muted hover:bg-elevated hover:text-default', marca]"

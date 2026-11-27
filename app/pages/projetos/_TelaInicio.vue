@@ -3,6 +3,7 @@
  * Início. CASCA ilustrativa: a saudação e os atalhos de hoje.
  * PROPOSTA: o painel "Seus projetos", com os projetos do menu da pessoa, e o convite para criar o
  * primeiro projeto para quem pode criar e ainda não tem nenhum.
+ * Rodada 16: o painel é 1 widget da Início (protótipo home), ao lado dos outros, que aqui são casca.
  */
 import type { Textos } from './textos'
 import { COR_DO_PROJETO, useMarcaDeProposta, useProjetos } from './estado'
@@ -50,5 +51,24 @@ const primeiroNome = computed(() => prj.euPessoa.value.nome.split(' ')[0])
 
       <p v-else class="px-4 py-8 text-center text-sm text-muted">{{ t.painel.vazioTexto }}</p>
     </section>
+
+    <!-- Rodada 16: "Seus projetos" é 1 widget da Início, entre os outros. Os outros são casca: nada aqui é proposta. -->
+    <div class="mt-4 grid gap-4 sm:grid-cols-2">
+      <div
+        v-for="(w, i) in t.inicio.outros"
+        :key="w"
+        class="rounded-lg border border-dashed border-default bg-default px-4 py-3 animate-[entrada_0.25s_ease-out_both]"
+        :style="{ animationDelay: `${120 + i * 40}ms` }"
+        aria-hidden="true"
+      >
+        <p class="text-sm font-semibold text-muted">{{ w }}</p>
+        <div class="mt-3 space-y-2">
+          <div class="h-2.5 w-3/4 rounded bg-elevated" />
+          <div class="h-2.5 w-1/2 rounded bg-elevated" />
+          <div class="h-2.5 w-2/3 rounded bg-elevated" />
+        </div>
+      </div>
+    </div>
+    <p class="mt-2 flex items-center gap-1.5 text-xs text-muted"><UIcon name="i-lucide-layout-grid" class="size-3.5 shrink-0" />{{ t.inicio.outrosTexto }}</p>
   </div>
 </template>

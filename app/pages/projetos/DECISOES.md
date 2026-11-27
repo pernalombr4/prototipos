@@ -861,3 +861,42 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   preenchido, porque representam projetos já configurados.
 - **Requisitos:** RN011, RN012 e RF701 a RF708, todos Obrigatório.
 - **Evidências:** `evidencias/entrega-r15-01` a `entrega-r15-04`, sem ponteiro.
+
+## Rodada 16 · 2026-11-27
+
+- **Pedido da redatora:** "prototipe o que seria o MVP dessa solução, e deixe num botão separado na base do
+  protótipo". E "Seus projetos" na Início pode ser só um widget dela, "não a tela ser SÓ isso. Mas ter isso nela".
+- **O que muda:**
+  - a barra do protótipo ganha a chave **Versão: Completo · MVP**. A proposta continua 1 só, com 1 link; o MVP é a
+    mesma tela com o que fica para depois escondido;
+  - a tela Início mostra "Seus projetos" como 1 widget entre os outros da Home. "Minhas tarefas" e "Categorias"
+    aparecem como casca, com borda tracejada: nada neles é proposta.
+- **A fronteira:** o MVP muda só o que aparece. Nada do que fica no MVP muda de comportamento.
+- **Requisitos:** `requisitos/widget-seus-projetos.md` (RN801, RN802, RF801 a RF807). O de relações ganhou, no
+  cabeçalho, as linhas que valem no MVP.
+- **Evidências:** `evidencias/entrega-r16-01` a `entrega-r16-07`, sem ponteiro.
+
+### O que entra no MVP e o que fica para depois
+
+O critério: o MVP é o menor projeto que já resolve o problema da demanda, isto é, juntar as categorias, as
+tarefas e as pessoas de uma área num lugar só, com acesso próprio. O que mede, planeja ou automatiza o projeto fica
+para depois.
+
+| Parte | No MVP | Por quê |
+|---|---|---|
+| Criar, configurar, arquivar e excluir o projeto | Entra | É o projeto. |
+| Categorias: trazer do workspace, criar no projeto, mover | Entra | É o que o projeto junta. |
+| Participantes, visibilidade, Sem acesso e Pedir acesso | Entra | O acesso próprio é o motivo do projeto. |
+| O projeto no menu lateral, Ocultar e Adicionar ao menu, Salvar para mim ou para todos | Entra | É a porta de entrada; o Salvar para todos repete o padrão do menu de hoje. |
+| Todos os projetos | Entra, sem a coluna e o filtro de situação | É onde se acha o projeto que não está no menu. |
+| Página do projeto: Visão geral e Tarefas | Entra | A Visão geral leva às categorias; Tarefas junta as tarefas dos itens. |
+| "Seus projetos" na Início | Entra | Atalho para os projetos do menu, como widget. |
+| Aba Itens e o mapa dos campos da categoria (Responsável, Prazo, Status e grupos) | Fica fora | Pede o mapa, peça nova; no MVP, os itens se abrem na categoria. |
+| Status do projeto (situação, fim previsto, atualizações) | Fica fora | Mede o projeto; não junta nada. |
+| Metas e marcos, e o campo Marco da tarefa | Fica fora | Planejamento; pede entidades novas no back-end. |
+| Discussões | Fica fora | Conversa nova, que o produto ainda não tem. |
+| Automações e Painéis na página do projeto | Fica fora | Os fluxos e os painéis continuam onde estão hoje. |
+| Modelos: Criar a partir de modelo e Salvar como modelo | Fica fora | Vale quando já existem projetos para copiar. |
+
+- No MVP, o número Itens da Visão geral abre a 1ª categoria do projeto, porque a aba Itens não existe.
+- Excluir o projeto, no MVP, avisa só das tarefas: as sem item são excluídas; as com item ficam no item.
