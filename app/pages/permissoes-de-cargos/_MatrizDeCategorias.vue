@@ -430,7 +430,7 @@ const meta = {
       :get-row-id="(l: Linha) => l.id"
       sticky
       class="max-h-[62dvh] rounded-lg border border-default"
-      :ui="{ base: 'w-full min-w-[66rem] table-fixed', th: 'py-2 text-xs bg-elevated text-highlighted', td: 'py-2' }"
+      :ui="{ base: 'w-full min-w-[66rem] table-fixed', th: 'py-2 text-xs align-top bg-elevated text-highlighted', td: 'py-2' }"
     >
       <!-- Cabeçalho: ícone e dica da ação; a caixa marca a coluna da lista filtrada. -->
       <template v-for="a in acoes" :key="a" #[`${a}-header`]>

@@ -314,4 +314,7 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
   cabeçalho da parte de categorias, ok?"
 - **Mudou:** o cabeçalho das tabelas de permissão (fora das categorias, Categorias e a aba Configurações) tem fundo
   `bg-elevated` e texto `text-highlighted`. Antes, o fundo era o mesmo das linhas.
+- **Pedido (literal):** "na tabelinha do padrao, falta alinhar a altura dos textos de criar, ver, atualizar, excluir e
+  outras açoes". **Mudou:** os títulos do cabeçalho ficam alinhados pelo topo; antes, "Área" e "Outras ações" ficavam
+  no meio da célula e as ações, com a caixa embaixo, no topo.
 - **Em conversa:** separar o padrão (fora das categorias) e as categorias em abas. Sem decisão.

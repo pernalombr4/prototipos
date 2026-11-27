@@ -106,7 +106,7 @@ const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
         :data="g.linhas"
         :columns="colunas"
         class="rounded-lg border border-default"
-        :ui="{ base: 'w-full min-w-[44rem] table-fixed', th: 'py-2 text-xs bg-elevated text-highlighted', td: 'py-1.5' }"
+        :ui="{ base: 'w-full min-w-[44rem] table-fixed', th: 'py-2 text-xs align-top bg-elevated text-highlighted', td: 'py-1.5' }"
       >
         <!-- Cabeçalho de ação: a caixa marca a coluna inteira do grupo. -->
         <template v-for="a in acoes" :key="a" #[`${a}-header`]>
