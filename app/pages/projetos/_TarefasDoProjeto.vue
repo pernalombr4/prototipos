@@ -127,6 +127,7 @@ const linhas = computed(() => ordenadas.value.slice((pagina.value - 1) * porPagi
 
 /* ---------- colunas: os nomes das listas de tarefas do produto ---------- */
 const colunas = computed<EnTableColumn[]>(() => [
+  { key: 'acoes', label: tac.value.coluna },
   { key: 'titulo', label: rt.value.colTarefa, sortable: true },
   { key: 'item', label: rt.value.colItem, sortable: true },
   { key: 'categoria', label: rt.value.colCategoria, sortable: true },
@@ -136,10 +137,9 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'marco', label: tmm.value.marcos.colMarco },
   { key: 'prioridade', label: rt.value.colPrioridade, sortable: true },
   { key: 'criadaEm', label: rt.value.colCriada, sortable: true },
-  { key: 'acoes', label: tac.value.coluna, align: 'right' },
 ])
 const colunasVisiveis = ref<EnTableColumnVisibility>({ criadaEm: false })
-const larguras = ref<EnTableColumnSizing>({ titulo: 290, item: 150, categoria: 160, responsavel: 170, prazo: 170, status: 140, marco: 200, prioridade: 110, criadaEm: 120, acoes: 70 })
+const larguras = ref<EnTableColumnSizing>({ acoes: 64, titulo: 290, item: 150, categoria: 160, responsavel: 170, prazo: 170, status: 140, marco: 200, prioridade: 110, criadaEm: 120 })
 function verColuna(key: string, ver: boolean | 'indeterminate') {
   colunasVisiveis.value = { ...colunasVisiveis.value, [key]: ver === true }
 }
@@ -448,9 +448,9 @@ function criarRapida(status: StatusDaTarefa = 'aberta') {
           <span class="whitespace-nowrap text-sm text-muted">{{ formatarData((row as TarefaDoProjeto).criadaEm) }}</span>
         </template>
         <template #cell-acoes="{ row }">
-          <span class="flex justify-end" @click.stop>
-            <UDropdownMenu :items="acoesDaLinha(row as TarefaDoProjeto)" :content="{ align: 'end' }">
-              <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as TarefaDoProjeto).titulo)" />
+          <span class="flex" @click.stop>
+            <UDropdownMenu :items="acoesDaLinha(row as TarefaDoProjeto)" :content="{ align: 'start' }">
+              <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as TarefaDoProjeto).titulo)" />
             </UDropdownMenu>
           </span>
         </template>

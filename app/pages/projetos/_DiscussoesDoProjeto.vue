@@ -220,7 +220,10 @@ function abrirTarefas() {
 
     <!-- a lista -->
     <ul v-else class="divide-y divide-default">
-      <li v-for="(d, i) in lista" :key="d.id" class="flex items-center pr-2 animate-[entrada_0.2s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
+      <li v-for="(d, i) in lista" :key="d.id" class="flex items-center pl-2 animate-[entrada_0.2s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
+        <UDropdownMenu :items="acoesDaLinha(d)" :content="{ align: 'start' }">
+          <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="tac.de(d.titulo)" />
+        </UDropdownMenu>
         <button
           type="button"
           class="group flex min-w-0 flex-1 items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-elevated/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary"
@@ -244,9 +247,6 @@ function abrirTarefas() {
             <span class="flex items-center gap-1 tabular-nums"><UIcon name="i-lucide-message-circle" class="size-3.5" />{{ d.mensagens.length - 1 }}</span>
           </span>
         </button>
-        <UDropdownMenu :items="acoesDaLinha(d)" :content="{ align: 'end' }">
-          <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de(d.titulo)" />
-        </UDropdownMenu>
       </li>
     </ul>
   </div>

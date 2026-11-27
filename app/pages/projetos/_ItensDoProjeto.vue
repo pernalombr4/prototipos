@@ -205,6 +205,7 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
 
 /* ---------- colunas ---------- */
 const colunas = computed<EnTableColumn[]>(() => [
+  { key: 'acoes', label: tac.value.coluna },
   { key: 'reference', label: ti.value.referencia, sortable: true },
   { key: 'titulo', label: ti.value.titulo, sortable: true },
   { key: 'categoria', label: ti.value.categoria, sortable: true },
@@ -214,10 +215,9 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'criadoEm', label: ri.value.criadoEm, sortable: true },
   { key: 'atualizadoEm', label: ri.value.atualizadoEm, sortable: true },
   { key: 'criadoPor', label: ri.value.criadoPor, sortable: true },
-  { key: 'acoes', label: tac.value.coluna, align: 'right' },
 ])
 const colunasVisiveis = ref<EnTableColumnVisibility>({ atualizadoEm: false, criadoPor: false })
-const larguras = ref<EnTableColumnSizing>({ reference: 120, titulo: 250, categoria: 170, status: 170, responsavel: 190, prazo: 160, criadoEm: 120, atualizadoEm: 130, criadoPor: 180 })
+const larguras = ref<EnTableColumnSizing>({ acoes: 64, reference: 120, titulo: 250, categoria: 170, status: 170, responsavel: 190, prazo: 160, criadoEm: 120, atualizadoEm: 130, criadoPor: 180 })
 function verColuna(key: string, ver: boolean | 'indeterminate') {
   colunasVisiveis.value = { ...colunasVisiveis.value, [key]: ver === true }
 }
@@ -415,9 +415,9 @@ function configurarCampos() {
               </span>
             </template>
             <template #cell-acoes="{ row }">
-              <span class="flex justify-end" @click.stop>
-                <UDropdownMenu :items="acoesDaLinha(row as Linha)" :content="{ align: 'end' }">
-                  <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as Linha).titulo)" />
+              <span class="flex" @click.stop>
+                <UDropdownMenu :items="acoesDaLinha(row as Linha)" :content="{ align: 'start' }">
+                  <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as Linha).titulo)" />
                 </UDropdownMenu>
               </span>
             </template>

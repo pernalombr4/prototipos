@@ -509,7 +509,7 @@ function excluir() {
                     <UButton icon="i-lucide-x" size="xs" color="neutral" variant="ghost" :aria-label="tf.tirar" @click="tirar(c.id)" />
                   </UTooltip>
                   <UDropdownMenu v-else :items="acoesDaCategoria(c.id)" :content="{ align: 'end' }">
-                    <UButton icon="i-lucide-ellipsis" size="xs" color="neutral" variant="ghost" :aria-label="tf.acoesDa(c.name)" />
+                    <UButton icon="i-lucide-ellipsis-vertical" size="xs" color="neutral" variant="ghost" :aria-label="tf.acoesDa(c.name)" />
                   </UDropdownMenu>
                 </div>
 

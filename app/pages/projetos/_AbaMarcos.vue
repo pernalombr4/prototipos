@@ -196,10 +196,13 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
         </div>
 
         <ul v-else class="divide-y divide-default">
-          <li v-for="(m, i) in lista" :key="m.id" class="flex items-center pr-2 animate-[entrada_0.2s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
+          <li v-for="(m, i) in lista" :key="m.id" class="flex items-center pl-2 animate-[entrada_0.2s_ease-out_both]" :style="{ animationDelay: `${i * 30}ms` }">
+            <UDropdownMenu :items="acoesDaLinha(m)" :content="{ align: 'start' }">
+              <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="tac.de(m.nome)" />
+            </UDropdownMenu>
             <button
               type="button"
-              class="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 px-4 py-3 text-left transition-colors hover:bg-elevated/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary sm:grid-cols-[auto_minmax(0,1fr)_10rem_9rem_12rem]"
+              class="grid min-w-0 flex-1 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-x-3 gap-y-1 py-3 pl-2 pr-4 text-left transition-colors hover:bg-elevated/60 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-primary sm:grid-cols-[auto_minmax(0,1fr)_10rem_9rem_12rem]"
               @click="md.marcoAberto.value = m.id"
             >
               <UIcon :name="m.status === 'concluido' ? 'i-lucide-circle-check' : 'i-lucide-flag'" class="size-4" :class="m.status === 'concluido' ? 'text-success' : 'text-muted'" />
@@ -222,9 +225,6 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
                 <span class="w-9 text-right text-xs tabular-nums text-toned">{{ md.progressoDoMarco(m) }}%</span>
               </span>
             </button>
-            <UDropdownMenu :items="acoesDaLinha(m)" :content="{ align: 'end' }">
-              <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de(m.nome)" />
-            </UDropdownMenu>
           </li>
         </ul>
       </div>

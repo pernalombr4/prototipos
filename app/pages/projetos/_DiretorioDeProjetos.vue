@@ -111,6 +111,7 @@ const ordenadas = computed(() => {
 const linhas = computed(() => ordenadas.value.slice((pagina.value - 1) * porPagina.value, pagina.value * porPagina.value))
 
 const colunas = computed<EnTableColumn[]>(() => [
+  { key: 'acao', label: td.value.colunaAcao },
   { key: 'nome', label: td.value.colunaNome, sortable: true },
   { key: 'visibilidade', label: td.value.colunaVisibilidade },
   { key: 'situacao', label: props.t.situacao.coluna },
@@ -118,7 +119,6 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'participantes', label: td.value.colunaParticipantes, sortable: true },
   { key: 'categorias', label: td.value.colunaCategorias, sortable: true },
   { key: 'criado', label: td.value.colunaCriado, sortable: true },
-  { key: 'acao', label: td.value.colunaAcao, align: 'right' },
 ])
 function alternarColuna(key: string, ver: boolean | 'indeterminate') {
   colunasVisiveis.value = { ...colunasVisiveis.value, [key]: ver === true }
@@ -408,9 +408,9 @@ const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString
             <span class="text-sm text-muted">{{ formatarData((row as Linha).criado) }}</span>
           </template>
           <template #cell-acao="{ row }">
-            <span class="flex justify-end" @click.stop>
-              <UDropdownMenu :items="acoesDaLinha((row as Linha).projeto)" :content="{ align: 'end' }" :ui="{ content: 'w-60' }">
-                <UButton icon="i-lucide-ellipsis" size="xs" color="neutral" variant="ghost" :aria-label="td.acoesDoProjeto((row as Linha).nome)" />
+            <span class="flex" @click.stop>
+              <UDropdownMenu :items="acoesDaLinha((row as Linha).projeto)" :content="{ align: 'start' }" :ui="{ content: 'w-60' }">
+                <UButton icon="i-lucide-ellipsis-vertical" size="xs" color="neutral" variant="ghost" :aria-label="td.acoesDoProjeto((row as Linha).nome)" />
               </UDropdownMenu>
             </span>
           </template>

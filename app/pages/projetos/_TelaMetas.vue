@@ -52,6 +52,7 @@ const busca = ref('')
 const ordem = ref<EnTableSort | null>({ key: 'dataAlvo', direction: 'asc' })
 const normalizar = (s: string) => s.normalize('NFD').replace(/\p{Diacritic}/gu, '').toLowerCase()
 const colunas = computed<EnTableColumn[]>(() => [
+  { key: 'acoes', label: tac.value.coluna },
   { key: 'nome', label: tg.value.colunas.nome!, sortable: true },
   { key: 'situacao', label: tg.value.colunas.situacao!, sortable: true },
   { key: 'progresso', label: tg.value.colunas.progresso!, sortable: true },
@@ -60,7 +61,6 @@ const colunas = computed<EnTableColumn[]>(() => [
   { key: 'dono', label: tg.value.colunas.dono!, sortable: true },
   { key: 'projetos', label: tg.value.colunas.projetos! },
   { key: 'marcos', label: tg.value.colunas.marcos!, align: 'right' },
-  { key: 'acoes', label: tac.value.coluna, align: 'right' },
 ])
 /** Rodada 12: a coluna Ações, como em toda tabela do ENSPACE. */
 function acoesDaLinha(m: Meta): DropdownMenuItem[][] {
@@ -317,9 +317,9 @@ function excluir() {
             <span class="text-sm tabular-nums text-toned">{{ md.marcosQueContam(row as Meta).length }}</span>
           </template>
           <template #cell-acoes="{ row }">
-            <div class="flex justify-end" @click.stop>
-              <UDropdownMenu :items="acoesDaLinha(row as Meta)" :content="{ align: 'end' }">
-                <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as Meta).nome)" />
+            <div class="flex" @click.stop>
+              <UDropdownMenu :items="acoesDaLinha(row as Meta)" :content="{ align: 'start' }">
+                <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="xs" :aria-label="tac.de((row as Meta).nome)" />
               </UDropdownMenu>
             </div>
           </template>
