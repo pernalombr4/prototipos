@@ -79,6 +79,7 @@ async function confirmar() {
             <li v-if="restringe" class="flex gap-2"><UIcon name="i-lucide-panel-left" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ t.mover.menu }}</span></li>
             <li v-if="restringe && temVinculo" class="flex gap-2"><UIcon name="i-lucide-link-2-off" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ t.mover.vinculos }}</span></li>
             <li v-if="nPaineis" class="flex gap-2"><UIcon name="i-lucide-chart-pie" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ tr.mover.paineisSaem(nPaineis) }}</span></li>
+            <li v-if="projetoDestino" class="flex gap-2"><UIcon name="i-lucide-circle-dashed" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ tr.mover.campos }}</span></li>
             <li v-if="nTarefas" class="flex gap-2"><UIcon name="i-lucide-square-check" class="mt-0.5 size-4 shrink-0 text-muted" /><span>{{ tr.mover.tarefasFicam(nTarefas) }}</span></li>
           </ul>
         </div>

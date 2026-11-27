@@ -29,6 +29,8 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 | RN008 (em revisão) | Só pode ligar um projeto a uma meta quem edita a meta ou administra o projeto. | Administrador do Financeiro liga o projeto a uma meta de que não é dono. | Desejável |
 | RN009 | Uma mensagem de discussão pode originar 0 ou mais tarefas, sem limite. | Mensagem com 2 tarefas criadas lista as 2. | Desejável |
 | RN010 | Uma discussão trata de no máximo 1 marco ou 1 item do mesmo projeto. | Discussão "Checklist da auditoria" sobre o marco "Auditoria de dezembro". | Opcional |
+| RN011 | Só quem configura o projeto escolhe os campos Responsável, Prazo e Status e o grupo de cada valor do status. Cada categoria que entra num projeto chega com essas escolhas em branco. | Fornecedores trazida para Compras: Responsável, Prazo, Status e os 3 grupos chegam em branco. | Obrigatório |
+| RN012 | Um item é considerado sem grupo quando a categoria não tem campo de status escolhido ou o valor do status do item não tem grupo no projeto. | Item de Fornecedores em "Suspenso", valor sem grupo: fica sem grupo. | Obrigatório |
 
 ## Marco e meta (RF)
 
@@ -92,6 +94,19 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 | RF503 | Quando o projeto é excluído, o sistema deve tirar das metas o projeto e os marcos dele. | A meta recalcula o andamento sem os marcos do projeto excluído. | Essencial | Obrigatório |
 | RF504 | A confirmação de excluir o projeto deve mostrar, sob "Ao excluir o projeto:", a contagem de cada coisa de RF501 a RF503. | Exemplo: "3 marcos são excluídos", "12 tarefas com item ficam no item, sem projeto", "2 metas deixam de contar o projeto e os marcos dele". | Essencial | Obrigatório |
 | RF505 | No painel da meta, o projeto arquivado deve ter a marca "Arquivado", e o marco aberto dele a marca "Não conta" (RN006). | A dica das marcas diz que os marcos concluídos continuam contando. | Importante | Desejável |
+
+## Campos da categoria no projeto (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade | Relevância |
+|---|---|---|---|---|
+| RF701 | Quando uma categoria entra no projeto, ao criar o projeto ou depois, os seletores Responsável, Prazo e Status devem vir vazios, com "Escolha o campo" (RN011). | Exemplo: Fornecedores trazida para Compras mostra "Escolha o campo" nos 3 seletores. | Essencial | Obrigatório |
+| RF702 | Quando o campo de status é escolhido ou trocado, cada valor do status deve vir sem grupo, com "Escolha o grupo". | Trocar o campo de status apaga os grupos escolhidos antes. | Essencial | Obrigatório |
+| RF703 | Cada seletor de campo deve ter a opção "Não usar", que conta como escolha. | Categoria com Prazo em "Não usar" não aparece como pendente por causa do Prazo. | Essencial | Obrigatório |
+| RF704 | Enquanto a categoria tem campo ou grupo a escolher, o cartão da categoria nas configurações do projeto deve mostrar a marca "Campos a escolher". | Escolher os 3 campos e o grupo de cada valor tira a marca. | Importante | Obrigatório |
+| RF705 | Enquanto alguma categoria do projeto tem campo ou grupo a escolher, a aba Itens deve mostrar um aviso com o número de categorias pendentes. | Para quem administra o projeto, o aviso tem o botão "Escolher os campos", que abre a aba Categorias e campos das configurações. | Importante | Obrigatório |
+| RF706 | O quadro da aba Itens deve mostrar a coluna "Sem grupo" quando há item sem grupo (RN012). | Sem item sem grupo, a coluna não aparece. | Essencial | Obrigatório |
+| RF707 | A confirmação de Mover categoria para outro projeto deve avisar que os campos e os grupos do status chegam em branco no destino. | Ao mover para o workspace, o aviso não aparece. | Importante | Obrigatório |
+| RF708 | Quando o projeto é criado de um modelo, cada categoria deve chegar com os campos e os grupos que a categoria de origem tem no projeto dela. | Categoria de origem sem escolhas: a categoria nova chega em branco. | Importante | Obrigatório |
 
 ## Meta por valor e situação dos projetos (RF)
 

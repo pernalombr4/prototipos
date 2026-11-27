@@ -448,13 +448,20 @@ export const camposDaCategoria: Record<number, CamposDaCategoria> = {
   13: { pessoa: ['Responsável', 'Registrado por'], data: ['Prazo de solução', 'Data da ocorrência'], status: 'Situação', prefixo: 'OC', titulos: ['Infiltração no bloco B', 'Atraso na entrega de aço', 'Andaime sem guarda-corpo'], valores: [{ valor: 'Aberta', grupo: 'aberto' }, { valor: 'Em tratamento', grupo: 'andamento' }, { valor: 'Resolvida', grupo: 'concluido' }] },
 }
 
-/** O mapa de um projeto, por categoria. `null` = a categoria não entra naquela coluna. */
+/**
+ * O mapa de um projeto, por categoria. `null` = "Não usar", escolhido pela pessoa; sem valor = ainda não escolhido.
+ * Rodada 15: a categoria que entra num projeto chega com o mapa vazio (`mapaVazio`). O nome do campo não diz o que
+ * ele significa para o cliente, então o sistema não escolhe por ela. `mapaPadrao` só monta os projetos do mock, que
+ * alguém já configurou.
+ */
 export interface MapaDaCategoria {
-  responsavel: string | null
-  prazo: string | null
-  status: string | null
+  responsavel?: string | null
+  prazo?: string | null
+  status?: string | null
   grupos: Record<string, GrupoDeStatus>
 }
+
+export const mapaVazio = (): MapaDaCategoria => ({ grupos: {} })
 
 export function mapaPadrao(categoria: number): MapaDaCategoria {
   const c = camposDaCategoria[categoria]

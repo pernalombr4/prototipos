@@ -22,6 +22,7 @@ import {
   categoriasBase,
   fluxosBase,
   mapaPadrao,
+  mapaVazio,
   referenciaDoNome,
   modelosBase,
   grupos,
@@ -134,7 +135,8 @@ export function useProjetos() {
   /** Rodada 3: a aba aberta na página do projeto. */
   const abaDoProjeto = useState<AbaDoProjeto>('prj-aba', () => 'geral')
   /** Rodada 3: o mapa Responsável, Prazo e Status de cada categoria de projeto. */
-  const mapas = useState<Record<number, MapaDaCategoria>>('prj-mapas', () => Object.fromEntries(categoriasBase.map(c => [c.id, mapaPadrao(c.id)])))
+  /** Rodada 15: só as categorias que já estão num projeto do mock têm mapa; a que entra num projeto chega vazia. */
+  const mapas = useState<Record<number, MapaDaCategoria>>('prj-mapas', () => Object.fromEntries(categoriasBase.filter(c => c.projeto !== null).map(c => [c.id, mapaPadrao(c.id)])))
   const fluxos = useState<Fluxo[]>('prj-fluxos', () => fluxosBase.map(f => ({ ...f })))
   const avisos = useState<AvisoDePrazo[]>('prj-avisos', () => avisosBase.map(a => ({ ...a })))
   const modelos = useState<ModeloDeProjeto[]>('prj-modelos', () => modelosBase.map(m => ({ ...m, categorias: [...m.categorias] })))
@@ -290,7 +292,7 @@ export function useProjetos() {
     editandoDashboard.value = false
     avisos.value = avisosBase.map(a => ({ ...a }))
     modelos.value = c === 'semProjetos' ? [] : modelosBase.map(m => ({ ...m, categorias: [...m.categorias] }))
-    mapas.value = Object.fromEntries(categoriasBase.map(x => [x.id, mapaPadrao(x.id)]))
+    mapas.value = c === 'semProjetos' ? {} : Object.fromEntries(categoriasBase.filter(x => x.projeto !== null).map(x => [x.id, mapaPadrao(x.id)]))
     expandidos.value = c === 'semProjetos' ? [] : [1]
     area.value = 'inicio'
     tela.value = { tipo: 'inicio' }
@@ -359,7 +361,8 @@ export function useProjetos() {
         return { id: id * 100 + i, name: m.nome, slug: `${origem?.slug ?? 'categoria'}-${id}`, description: origem?.description ?? '', icon: m.icone, color: origem?.color ?? 'neutral', projeto: id, itens: 0, copiaDe: m.origem }
       })
       categorias.value = [...categorias.value, ...novas]
-      mapas.value = { ...mapas.value, ...Object.fromEntries(novas.map(c => [c.id, mapaPadrao(c.copiaDe!)])) }
+      // Rodada 15: o modelo leva o mapa que a categoria de origem tinha no projeto dela; sem mapa lá, chega vazio.
+      mapas.value = { ...mapas.value, ...Object.fromEntries(novas.map(c => [c.id, copiarMapa(mapas.value[c.copiaDe!])])) }
       const deOrigem = (cat: number) => novas.find(n => n.copiaDe === cat)
       fluxos.value = [
         ...fluxos.value,
@@ -387,6 +390,9 @@ export function useProjetos() {
    */
   function moverCategoria(categoriaId: number, destino: number | null) {
     categorias.value = categorias.value.map(c => c.id === categoriaId ? { ...c, projeto: destino } : c)
+    // Rodada 15: o mapa é do projeto. A categoria chega ao destino com os campos e os grupos em branco.
+    const { [categoriaId]: _sai, ...ficam } = mapas.value
+    mapas.value = ficam
     dashboards.value = dashboards.value.map(d => d.projeto === destino ? d : { ...d, itens: d.itens.filter(i => i.categoria !== categoriaId) })
   }
 
@@ -440,6 +446,9 @@ export function useProjetos() {
   }
   /** Os campos da categoria (a criada por modelo usa os da de origem). */
   const camposDe = (c: Categoria) => c.copiaDe ?? c.id
+  function copiarMapa(m?: MapaDaCategoria): MapaDaCategoria {
+    return m ? { ...m, grupos: { ...m.grupos } } : mapaVazio()
+  }
   function salvarMapa(novos: Record<number, MapaDaCategoria>) {
     mapas.value = { ...mapas.value, ...novos }
   }

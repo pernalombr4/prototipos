@@ -29,7 +29,7 @@ import type { EnKanbanCardConfig, EnKanbanColumn, EnTableColumn, EnTableColumnSi
 import { textosDeAcoes } from './textosDeAcoes'
 import type { DropdownMenuItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { iniciais, itensDoProjeto, pessoa, type GrupoDeStatus, type ItemDoProjeto } from './mocks'
+import { camposDaCategoria, iniciais, itensDoProjeto, pessoa, type GrupoDeStatus, type ItemDoProjeto } from './mocks'
 import { textosDoProjeto } from './textosDoProjeto'
 import { useMarcaDeProposta, useProjetos } from './estado'
 import Paginador from './_Paginador.vue'
@@ -93,7 +93,8 @@ interface Linha {
   responsavel: number | null
   prazo: string | null
   status: string | null
-  grupo: GrupoDeStatus
+  /** Rodada 15: 'sem' = o valor do status ainda não tem grupo no projeto (ou a categoria não tem campo de status). */
+  grupo: GrupoDeStatus | 'sem'
   vencido: boolean
   criadoEm: string
   atualizadoEm: string
@@ -115,7 +116,7 @@ const todas = computed<Linha[]>(() => {
       const resp = m?.responsavel ? Number(i.campos[m.responsavel]) || null : null
       const prazo = m?.prazo ? String(i.campos[m.prazo] ?? '') || null : null
       const status = m?.status ? String(i.campos[m.status] ?? '') || null : null
-      const grupo: GrupoDeStatus = (status && m?.grupos[status]) || 'aberto'
+      const grupo: GrupoDeStatus | 'sem' = (status && m?.grupos[status]) || 'sem'
       const pessoasDoItem = Object.values(i.campos).filter((v): v is number => typeof v === 'number')
       const criado = 8 + (i.id * 13) % 110
       return {
@@ -144,7 +145,7 @@ const filtradas = computed(() => todas.value.filter((l) => {
   if (filtroCategorias.value.length && !filtroCategorias.value.includes(l.categoria)) return false
   if (soMeus.value && l.responsavel !== prj.eu.value) return false
   if (soVencidos.value && !l.vencido) return false
-  if (fGrupo.value.length && !fGrupo.value.includes(l.grupo)) return false
+  if (fGrupo.value.length && (l.grupo === 'sem' || !fGrupo.value.includes(l.grupo))) return false
   if (fResp.value.length && (!l.responsavel || !fResp.value.includes(l.responsavel))) return false
   if (fCriador.value.length && !fCriador.value.includes(l.criadoPor)) return false
   if (prazoDe.value && (!l.prazo || l.prazo < prazoDe.value)) return false
@@ -204,7 +205,7 @@ const acordeao = computed(() => [
   { value: 'criadoPor', label: rotuloDoFiltro(ri.value.criadoPor, fCriador.value.length) },
 ])
 
-const corDoGrupo: Record<GrupoDeStatus, 'neutral' | 'info' | 'success'> = { aberto: 'neutral', andamento: 'info', concluido: 'success' }
+const corDoGrupo: Record<GrupoDeStatus | 'sem', 'neutral' | 'info' | 'success'> = { aberto: 'neutral', andamento: 'info', concluido: 'success', sem: 'neutral' }
 const formatarData = (d: string) => new Date(`${d}T12:00:00`).toLocaleDateString(idioma.value)
 
 /* ---------- colunas ---------- */
@@ -227,11 +228,19 @@ function verColuna(key: string, ver: boolean | 'indeterminate') {
 }
 
 /* ---------- quadro ---------- */
-const colunasDoQuadro = computed<EnKanbanColumn[]>(() => (['aberto', 'andamento', 'concluido'] as const).map(g => ({
-  value: g,
-  label: ti.value.grupo[g],
-  colorScheme: corDoGrupo[g],
-})))
+/** Rodada 15: a coluna Sem grupo só aparece quando há item cujo valor de status ainda não tem grupo. */
+const colunasDoQuadro = computed<EnKanbanColumn[]>(() => [
+  ...(todas.value.some(l => l.grupo === 'sem') ? [{ value: 'sem', label: tr.value.mapa.semGrupo, colorScheme: corDoGrupo.sem }] : []),
+  ...(['aberto', 'andamento', 'concluido'] as const).map(g => ({ value: g, label: ti.value.grupo[g], colorScheme: corDoGrupo[g] })),
+])
+/** Rodada 15: as categorias do projeto com campo ou grupo do status ainda sem escolha. */
+const aEscolher = computed(() => categorias.value.filter((c) => {
+  const cs = camposDaCategoria[prj.camposDe(c)]
+  if (!cs) return false
+  const m = prj.mapas.value[c.id]
+  if (!m || m.responsavel === undefined || m.prazo === undefined || m.status === undefined) return true
+  return !!m.status && cs.valores.some(v => !m.grupos[v.valor])
+}))
 const cartoes = computed(() => filtradas.value.map(l => ({
   id: l.id,
   titulo: l.titulo,
@@ -260,6 +269,15 @@ function configurarCampos() {
     <p class="flex items-center gap-1.5 pb-3 text-sm text-muted">
       <UIcon name="i-lucide-layers" class="size-4 shrink-0" />{{ ti.resumo(categorias.length) }}
     </p>
+    <UAlert
+      v-if="aEscolher.length"
+      :description="tr.mapa.aviso(aEscolher.length)"
+      icon="i-lucide-circle-dashed"
+      color="warning"
+      variant="subtle"
+      class="mb-3"
+      :actions="prj.podeAdministrar(p) ? [{ label: tr.mapa.escolher, icon: 'i-lucide-settings-2', color: 'neutral', variant: 'outline', size: 'xs', onClick: configurarCampos }] : []"
+    />
 
     <div class="overflow-hidden rounded-lg border border-default bg-default">
       <!-- abas de visualização (cópia da lista da categoria) -->

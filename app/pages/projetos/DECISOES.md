@@ -840,3 +840,24 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
 | B18 | Opcional | RF602 |
 
 - **Evidências:** `evidencias/entrega-r14-01` a `entrega-r14-13`, sem ponteiro (detector ok em todas).
+
+## Rodada 15 · 2026-11-27
+
+- **Pedido da redatora:** os campos Responsável, Prazo e Status e os grupos do status vinham preenchidos ao trazer uma
+  categoria para o projeto. "É impossível o sistema prever isso. Os campos que o user criou podem significar qualquer
+  coisa. Tem que vir vazio."
+- **O que muda:**
+  - a categoria que entra no projeto (na criação ou depois) chega com os 3 campos em "Escolha o campo";
+  - escolher ou trocar o campo de status deixa cada valor em "Escolha o grupo";
+  - "Não usar" conta como escolha;
+  - a categoria pendente leva a marca "Campos a escolher" nas configurações;
+  - a aba Itens avisa quantas categorias estão pendentes, com "Escolher os campos" para quem administra;
+  - o item sem grupo vai para a coluna "Sem grupo" do quadro, que só aparece quando há item nela. Antes, ele ia para
+    A fazer, o que também era um palpite;
+  - mover a categoria para outro projeto apaga as escolhas, e a confirmação avisa. O mapa é do projeto;
+  - o projeto criado de modelo leva as escolhas da categoria de origem, que alguém fez. Antes, o modelo também
+    adivinhava.
+- **O que não muda:** os projetos do mock (Financeiro, Jurídico, Comercial Sul, Obra Aurora) continuam com o mapa
+  preenchido, porque representam projetos já configurados.
+- **Requisitos:** RN011, RN012 e RF701 a RF708, todos Obrigatório.
+- **Evidências:** `evidencias/entrega-r15-01` a `entrega-r15-04`, sem ponteiro.

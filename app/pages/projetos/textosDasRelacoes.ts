@@ -68,6 +68,7 @@ const pt = {
     incluida: (nome: string) => `${nome} passou a participar do projeto.`,
   },
   mover: {
+    campos: 'Os campos na aba Itens do projeto e os grupos do status desta categoria chegam em branco no destino.',
     tarefasFicam: (n: number) => n === 1
       ? '1 tarefa ligada a item desta categoria continua no projeto dela, com o marco que tem.'
       : `${n} tarefas ligadas a itens desta categoria continuam no projeto delas, com o marco que têm.`,
@@ -84,6 +85,12 @@ const pt = {
     tarefasComItem: (n: number) => n === 1 ? '1 tarefa com item fica no item, sem projeto' : `${n} tarefas com item ficam no item, sem projeto`,
     metas: (n: number) => n === 1 ? '1 meta deixa de contar o projeto e os marcos dele' : `${n} metas deixam de contar o projeto e os marcos dele`,
     categorias: (n: number) => n === 1 ? '1 categoria volta para o workspace, com os itens' : `${n} categorias voltam para o workspace, com os itens`,
+  },
+  mapa: {
+    semGrupo: 'Sem grupo',
+    semGrupoDica: 'Itens cujo valor de status ainda não tem grupo no projeto.',
+    aviso: (n: number) => n === 1 ? '1 categoria tem campos ou grupos do status a escolher. Os itens dela aparecem sem Responsável, Prazo ou grupo até a escolha.' : `${n} categorias têm campos ou grupos do status a escolher. Os itens delas aparecem sem Responsável, Prazo ou grupo até a escolha.`,
+    escolher: 'Escolher os campos',
   },
 }
 
@@ -155,6 +162,7 @@ const en: TextosDasRelacoes = {
     incluida: nome => `${nome} now participates in the project.`,
   },
   mover: {
+    campos: 'The fields in the project Items tab and the status groups of this category arrive blank at the destination.',
     tarefasFicam: n => n === 1
       ? '1 task linked to an item of this category remains in its project, with its milestone.'
       : `${n} tasks linked to items of this category remain in their projects, with their milestones.`,
@@ -171,6 +179,12 @@ const en: TextosDasRelacoes = {
     tarefasComItem: n => n === 1 ? '1 task with item remains in the item, without project' : `${n} tasks with item remain in the item, without project`,
     metas: n => n === 1 ? '1 goal stops counting the project and its milestones' : `${n} goals stop counting the project and its milestones`,
     categorias: n => n === 1 ? '1 category returns to the workspace, with its items' : `${n} categories return to the workspace, with their items`,
+  },
+  mapa: {
+    semGrupo: 'No group',
+    semGrupoDica: 'Items whose status value has no group in the project yet.',
+    aviso: (n: number) => n === 1 ? '1 category has fields or status groups to choose. Its items show no Owner, Due date or group until then.' : `${n} categories have fields or status groups to choose. Their items show no Owner, Due date or group until then.`,
+    escolher: 'Choose the fields',
   },
 }
 
@@ -240,6 +254,7 @@ const es: TextosDasRelacoes = {
     incluida: nome => `${nome} pasó a participar en el proyecto.`,
   },
   mover: {
+    campos: 'Los campos en la pestaña Ítems del proyecto y los grupos del estado de esta categoría llegan en blanco al destino.',
     tarefasFicam: n => n === 1
       ? '1 tarea vinculada a un ítem de esta categoría sigue en su proyecto, con su hito.'
       : `${n} tareas vinculadas a ítems de esta categoría siguen en sus proyectos, con sus hitos.`,
@@ -256,6 +271,12 @@ const es: TextosDasRelacoes = {
     tarefasComItem: n => n === 1 ? '1 tarea con ítem queda en el ítem, sin proyecto' : `${n} tareas con ítem quedan en el ítem, sin proyecto`,
     metas: n => n === 1 ? '1 meta deja de contar el proyecto y sus hitos' : `${n} metas dejan de contar el proyecto y sus hitos`,
     categorias: n => n === 1 ? '1 categoría vuelve al workspace, con sus ítems' : `${n} categorías vuelven al workspace, con sus ítems`,
+  },
+  mapa: {
+    semGrupo: 'Sin grupo',
+    semGrupoDica: 'Ítems cuyo valor de estado aún no tiene grupo en el proyecto.',
+    aviso: (n: number) => n === 1 ? '1 categoría tiene campos o grupos del estado por elegir. Sus ítems aparecen sin Responsable, Plazo ni grupo hasta la elección.' : `${n} categorías tienen campos o grupos del estado por elegir. Sus ítems aparecen sin Responsable, Plazo ni grupo hasta la elección.`,
+    escolher: 'Elegir los campos',
   },
 }
 

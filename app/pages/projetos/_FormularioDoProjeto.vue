@@ -21,7 +21,7 @@
  */
 import type { DropdownMenuItem, SelectMenuItem, TabsItem } from '@nuxt/ui'
 import type { Textos } from './textos'
-import { camposDaCategoria, cargos, grupos, iniciais, mapaPadrao, pessoa, pessoas, referenciaDoNome, type GrupoDeStatus, type MapaDaCategoria, type Participante, type PermissaoPadrao, type Projeto, type Visibilidade } from './mocks'
+import { camposDaCategoria, cargos, grupos, iniciais, mapaVazio, pessoa, pessoas, referenciaDoNome, type GrupoDeStatus, type MapaDaCategoria, type Participante, type PermissaoPadrao, type Projeto, type Visibilidade } from './mocks'
 import { COR_DO_PROJETO, ICONE_DA_VISIBILIDADE, useMarcaDeProposta, useProjetos } from './estado'
 import SalvarComoModelo from './_SalvarComoModelo.vue'
 import { textosDeAtalhos } from './textosDeAtalhos'
@@ -87,7 +87,8 @@ const confirmacao = ref('')
 
 const copiaDoMapa = (id: number): MapaDaCategoria => {
   const c = prj.categorias.value.find(x => x.id === id)
-  const m = prj.mapas.value[id] ?? mapaPadrao(c ? prj.camposDe(c) : id)
+  // Rodada 15: a categoria que entra no projeto chega sem mapa. O sistema não adivinha o que cada campo significa.
+  const m = prj.mapas.value[id] ?? mapaVazio()
   return { ...m, grupos: { ...m.grupos } }
 }
 function carregar() {
@@ -209,12 +210,30 @@ const camposDaCat = (id: number) => {
   const c = prj.categorias.value.find(x => x.id === id)
   return c ? camposDaCategoria[prj.camposDe(c)] : undefined
 }
-/** USelect não guarda null: "Não usar" vira null no rascunho. */
+/** USelect não guarda null: "Não usar" vira null no rascunho; sem escolha, o campo fica vazio e mostra "Escolha o campo". */
 function campo(id: number, chave: 'responsavel' | 'prazo' | 'status') {
   return computed({
-    get: () => rascunho.value?.mapa[id]?.[chave] ?? NAO_USAR,
-    set: (v: string) => { if (rascunho.value?.mapa[id]) rascunho.value.mapa[id]![chave] = v === NAO_USAR ? null : v },
+    get: () => {
+      const v = rascunho.value?.mapa[id]?.[chave]
+      return v === null ? NAO_USAR : v
+    },
+    set: (v: string) => {
+      const m = rascunho.value?.mapa[id]
+      if (!m) return
+      const novo = v === NAO_USAR ? null : v
+      // Outro campo de status tem outros valores: os grupos recomeçam em branco.
+      if (chave === 'status' && novo !== m.status) m.grupos = {}
+      m[chave] = novo
+    },
   })
+}
+/** Falta escolher: um dos 3 campos sem escolha, ou um valor do status sem grupo. */
+function faltaEscolher(id: number) {
+  const m = rascunho.value?.mapa[id]
+  const cs = camposDaCat(id)
+  if (!m || !cs) return false
+  if (m.responsavel === undefined || m.prazo === undefined || m.status === undefined) return true
+  return !!m.status && cs.valores.some(v => !m.grupos[v.valor])
 }
 const GRUPOS = ['aberto', 'andamento', 'concluido'] as const
 const ICONE_DO_GRUPO: Record<GrupoDeStatus, string> = { aberto: 'i-lucide-circle', andamento: 'i-lucide-circle-dot', concluido: 'i-lucide-circle-check' }
@@ -334,7 +353,8 @@ async function salvar() {
     permissaoPadrao: { ...r.permissaoPadrao },
     participantes: r.participantes.map(x => ({ ...x })),
   })
-  prj.salvarMapa(JSON.parse(JSON.stringify(r.mapa)))
+  const doProjeto = new Set(prj.categoriasDe(p.value.id).map(c => c.id))
+  prj.salvarMapa(JSON.parse(JSON.stringify(Object.fromEntries(Object.entries(r.mapa).filter(([id]) => doProjeto.has(Number(id)))))))
   original.value = JSON.stringify(r)
   salvando.value = false
   toast.add({ title: props.t.config.salvo, icon: 'i-lucide-check', color: 'success' })
@@ -530,6 +550,7 @@ function excluir() {
                     <span class="block truncate text-sm font-medium text-highlighted">{{ c.name }}</span>
                     <span class="block text-xs text-muted">{{ c.itens || camposDaCat(c.id) ? t.pagina.itens(c.itens) : tf.nova }}</span>
                   </span>
+                  <UBadge v-if="faltaEscolher(c.id)" :label="tf.aEscolher" icon="i-lucide-circle-dashed" color="warning" variant="soft" size="sm" class="shrink-0" />
                   <UTooltip v-if="criando" :text="tf.tirar">
                     <UButton icon="i-lucide-x" size="xs" color="neutral" variant="ghost" :aria-label="tf.tirar" @click="tirar(c.id)" />
                   </UTooltip>
@@ -546,13 +567,13 @@ function excluir() {
                   </div>
                   <div class="grid gap-3 sm:grid-cols-3">
                     <UFormField :label="t.mapa.responsavel" size="sm">
-                      <USelect v-model="campo(c.id, 'responsavel').value" :items="opcoes(camposDaCat(c.id)?.pessoa ?? [])" icon="i-lucide-user-round" class="w-full" size="sm" />
+                      <USelect v-model="campo(c.id, 'responsavel').value" :items="opcoes(camposDaCat(c.id)?.pessoa ?? [])" :placeholder="tf.escolhaCampo" icon="i-lucide-user-round" class="w-full" size="sm" />
                     </UFormField>
                     <UFormField :label="t.mapa.prazo" size="sm">
-                      <USelect v-model="campo(c.id, 'prazo').value" :items="opcoes(camposDaCat(c.id)?.data ?? [])" icon="i-lucide-calendar" class="w-full" size="sm" />
+                      <USelect v-model="campo(c.id, 'prazo').value" :items="opcoes(camposDaCat(c.id)?.data ?? [])" :placeholder="tf.escolhaCampo" icon="i-lucide-calendar" class="w-full" size="sm" />
                     </UFormField>
                     <UFormField :label="t.mapa.status" size="sm">
-                      <USelect v-model="campo(c.id, 'status').value" :items="opcoes(camposDaCat(c.id) ? [camposDaCat(c.id)!.status] : [])" icon="i-lucide-circle-dot" class="w-full" size="sm" />
+                      <USelect v-model="campo(c.id, 'status').value" :items="opcoes(camposDaCat(c.id) ? [camposDaCat(c.id)!.status] : [])" :placeholder="tf.escolhaCampo" icon="i-lucide-circle-dot" class="w-full" size="sm" />
                     </UFormField>
                   </div>
                 </div>
@@ -572,12 +593,13 @@ function excluir() {
                         <span class="min-w-0"><UBadge :label="v.valor" color="neutral" variant="outline" size="sm" class="max-w-full truncate" /></span>
                         <UIcon name="i-lucide-arrow-right" class="size-4 text-dimmed" />
                         <USelect
-                          :model-value="rascunho.mapa[c.id]!.grupos[v.valor] ?? 'aberto'"
+                          :model-value="rascunho.mapa[c.id]!.grupos[v.valor]"
                           :items="opcoesDeGrupo"
-                          :icon="ICONE_DO_GRUPO[rascunho.mapa[c.id]!.grupos[v.valor] ?? 'aberto']"
+                          :placeholder="tf.escolhaGrupo"
+                          :icon="rascunho.mapa[c.id]!.grupos[v.valor] ? ICONE_DO_GRUPO[rascunho.mapa[c.id]!.grupos[v.valor]!] : 'i-lucide-circle-dashed'"
                           size="xs"
                           class="w-full"
-                          :ui="{ leadingIcon: `text-${COR_DO_GRUPO[rascunho.mapa[c.id]!.grupos[v.valor] ?? 'aberto']}` }"
+                          :ui="{ leadingIcon: rascunho.mapa[c.id]!.grupos[v.valor] ? `text-${COR_DO_GRUPO[rascunho.mapa[c.id]!.grupos[v.valor]!]}` : 'text-dimmed' }"
                           :aria-label="`${v.valor}: ${tf.grupoNoProjeto}`"
                           @update:model-value="(g: GrupoDeStatus) => setGrupo(c.id, v.valor, g)"
                         />
