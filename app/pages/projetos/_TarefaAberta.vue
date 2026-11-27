@@ -227,7 +227,7 @@ function excluir() {
     </template>
     <template #actions>
       <UDropdownMenu :items="acoes" :content="{ align: 'end' }">
-        <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" :aria-label="td.acoes" />
+        <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" :aria-label="td.acoes" />
       </UDropdownMenu>
     </template>
 

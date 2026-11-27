@@ -733,7 +733,8 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
   - Tarefas, Itens, Metas e Todos os projetos têm Ações como 1ª coluna, e o menu abre para a direita.
   - Em Itens, a caixa de seleção do EnTable continua antes de Ações: ela vem do componente.
   - As listas de Marcos e Discussões levam o ⋮ no início da linha, pelo mesmo padrão.
-  - A lista de categorias do formulário troca o ⋯ pelo ⋮. Os menus do topo dos painéis e da casca ficam como estavam.
+  - A lista de categorias do formulário e o topo dos painéis de meta, marco, discussão e tarefa trocam o ⋯ pelo ⋮ (o
+    topo dos painéis, com o sim da redatora). O menu da casca e os cartões de projeto ficam como estavam.
 - **Andaime sem as chaves de marcação:** "Mostrar o que muda" e "Mostrar o que pede back-end novo" saíram da barra do
   protótipo, a pedido da redatora: "é tudo novidade nessa tela de projetos".
 - **Fronteira:** mudam Metas, Visão geral do projeto, a ordem das abas, as tabelas e listas da coluna Ações e a

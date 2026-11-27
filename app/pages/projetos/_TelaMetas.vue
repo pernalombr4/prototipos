@@ -336,7 +336,7 @@ function excluir() {
       </template>
       <template v-if="aberta && acoes.length" #actions>
         <UDropdownMenu :items="acoes" :content="{ align: 'end' }">
-          <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="sm" :aria-label="tv.acoes" />
+          <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="sm" :aria-label="tv.acoes" />
         </UDropdownMenu>
       </template>
       <template v-if="aberta" #body>

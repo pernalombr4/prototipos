@@ -240,7 +240,7 @@ const COR_DO_STATUS = { aberta: 'neutral', andamento: 'info', bloqueada: 'warnin
       </template>
       <template v-if="aberto && acoes.length" #actions>
         <UDropdownMenu :items="acoes" :content="{ align: 'end' }">
-          <UButton icon="i-lucide-ellipsis" color="neutral" variant="ghost" size="sm" :aria-label="tm.acoes" />
+          <UButton icon="i-lucide-ellipsis-vertical" color="neutral" variant="ghost" size="sm" :aria-label="tm.acoes" />
         </UDropdownMenu>
       </template>
       <template v-if="aberto" #body>
