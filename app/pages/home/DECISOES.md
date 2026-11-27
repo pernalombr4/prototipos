@@ -2,6 +2,15 @@
 
 Registro das rodadas. A mais recente em cima.
 
+## Rodada 14 · 2026-11-27 (o nome novo do épico de comunicação)
+
+- **Pedido (literal):** "pode atualizar o card da home também / e me traga uma tabela com a ordem links e titulos dos cards da home apos as atualizaçoes".
+- **Motivo:** no protótipo comunicacao-no-workspace, a rodada 19 renomeou o épico 1 para "Enviar e-mail, WhatsApp e SMS de qualquer tela e central Comunicações no menu". A central se chama Comunicações desde a rodada 16 de lá, e a lista dela não tem mais a aba Mensagens.
+- **Mudou no protótipo:** o botão do cabeçalho do widget E-mail passa de "Abrir E-mails" a "Abrir Comunicações" (EN "Open Communications", ES "Abrir Comunicaciones"), e o aviso do clique na linha cita a central Comunicações.
+- **Requisitos:** épico 2 (a dependência da parte 5 e o "O que é") e parte 5 (Depende de, Protótipo, RN401, RN404, RF403, RF404 e S401) com o nome novo do épico e da central.
+- **No ENSPACE:** descrição do card 2 (USED5D5E3E293344E868DEC6D17B4B50) e as 5 tarefas dele (26596 a 26599 e 26714) reescritas. Os prints dos requisitos ficam: o botão é só de ícone, e a imagem não muda.
+- **Fronteira:** muda só o texto do widget E-mail e os requisitos. Os outros 6 cards da Home não citavam o épico de comunicação.
+
 ## Rodada 13 · 2026-11-26 (botão de enviar e-mail no widget E-mail)
 
 - **Pedido (literal):** "o widget de emails deve permitir um botao de enviar email tambem, como tem no de enviar sms e de abrir no whatsapp. aí atualiza os cards no enspace, os docs de requisitos e o protoitipo da home com isso".
@@ -42,7 +51,7 @@ Registro das rodadas. A mais recente em cima.
   | Épico | Card | Tipo | Prioridade | Tarefas |
   |---|---|---|---|---|
   | 1. Home em widgets, com Categorias e tarefas | [USEC795895B62E54B949B808B6F8F269](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USEC795895B62E54B949B808B6F8F269) | Melhoria | Alta | 26591 a 26595 |
-  | 2. Widgets de itens, agenda e atalhos | [USED5D5E3E293344E868DEC6D17B4B50](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USED5D5E3E293344E868DEC6D17B4B50) | Melhoria | Media | 26596 a 26599 |
+  | 2. Widgets de itens, agenda, atalhos e comunicação | [USED5D5E3E293344E868DEC6D17B4B50](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USED5D5E3E293344E868DEC6D17B4B50) | Melhoria | Media | 26596 a 26599 e 26714 |
   | 3. Widgets de agentes de IA e do Spaceflow | [USE2E26C55343634F58947CEB91D5458](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE2E26C55343634F58947CEB91D5458) | Melhoria | Media | 26600 e 26601 |
   | 4. Home padrão do workspace | [USE2810D9F7E77147729839B3350FB3A](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE2810D9F7E77147729839B3350FB3A) | Inovação | Media | 26602 e 26603 |
   | 5. BENI na Home | [USE92A0D5769F064ABD872A115A6C87F](https://be.enspace.io/workspaces/desenvolvimento-enlighten2/types/user_story/USE92A0D5769F064ABD872A115A6C87F) | Inovação | Media | 26604 a 26606 |

@@ -48,7 +48,7 @@
  * Rodada 11, a pedido da redatora ("uma das seções possíveis de widget lá deve
  * ser de comunicação, e deve ter 2 widgets: email, whatsapp e sms"): o grupo
  * Comunicação, com E-mail e WhatsApp e SMS. Os 2 abrem o que o épico 1 do
- * protótipo comunicacao-no-workspace entrega (o compositor, a central E-mails,
+ * protótipo comunicacao-no-workspace entrega (o compositor, a central Comunicações,
  * o WhatsApp pelo `wa.me` e o painel "Enviar SMS"); nenhum pede back-end novo.
  *
  * Rodada 12, a partir da pesquisa de mercado de 2026-11-26 (pesquisa-de-mercado,
@@ -218,7 +218,7 @@ export const CATALOGO: DefinicaoDoWidget[] = [
   // Fora do MVP (rodada 10): o MVP leva só Categorias e tarefas.
   { tipo: 'fluxosAndamento', permissao: 'fluxos', icone: 'i-lucide-loader', grupo: 'spaceflow', tamanho: { w: 6, h: 6 }, limites: { minW: 4, maxW: 12, minH: 4, maxH: 12 } },
   // Comunicação (rodada 11). Fora do MVP (rodada 10): o MVP leva só Categorias e tarefas.
-  // Os e-mails que a pessoa enviou de um item: a aba Mensagens da central E-mails com "Enviado por" = a pessoa. Rodada 13: o botão "Enviar e-mail" abre o compositor sem item, como o "Novo e-mail" da barra do topo.
+  // Os e-mails que a pessoa enviou de um item: a lista da central Comunicações com "Enviado por" = a pessoa. Rodada 13: o botão "Enviar e-mail" abre o compositor sem item, como o "Novo e-mail" da barra do topo.
   { tipo: 'email', icone: 'i-lucide-mail', grupo: 'comunicacao', tamanho: { w: 6, h: 6 }, limites: { minW: 3, maxW: 8, minH: 4, maxH: 10 } },
   // O número digitado e a mensagem, abertos pelo `wa.me`. O ENSPACE não registra a conversa.
   { tipo: 'whatsapp', icone: 'i-lucide-message-circle', grupo: 'comunicacao', tamanho: { w: 4, h: 6 }, limites: { minW: 3, maxW: 6, minH: 5, maxH: 8 } },

@@ -465,8 +465,8 @@ export const execucoesDeFluxos: ExecucaoDeFluxo[] = [
  * ------------------------------------------------------------------ */
 
 /**
- * Um e-mail que a pessoa enviou de um item. No produto: a aba Mensagens da
- * central E-mails (épico 1 do protótipo comunicacao-no-workspace, parte 9),
+ * Um e-mail que a pessoa enviou de um item. No produto: a lista da
+ * central Comunicações (épico 1 do protótipo comunicacao-no-workspace, parte 9),
  * filtrada por "Enviado por" = a pessoa, a data mais recente primeiro. Só o
  * e-mail com item fica gravado no ENSPACE; o enviado sem item fica só no
  * Outlook de quem enviou.

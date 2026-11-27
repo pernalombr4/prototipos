@@ -509,7 +509,7 @@
       ],
       "destacar": [
         {
-          "css": "[aria-label=\"Abrir E-mails\"]"
+          "css": "[aria-label=\"Abrir Comunicações\"]"
         }
       ]
     },

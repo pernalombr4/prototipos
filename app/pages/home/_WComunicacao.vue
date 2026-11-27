@@ -7,7 +7,7 @@
  * Rodada 12, pela pesquisa de mercado de 2026-11-26 e com o sim da redatora
  * ("whatsapp e sms nao podem ser widgets diferentes? ficou confuso em tela"):
  * - E-mail: só a informação. A lista mostra os e-mails que a pessoa enviou de
- *   um item (a aba Mensagens da central E-mails com "Enviado por" = a pessoa),
+ *   um item (a lista da central Comunicações com "Enviado por" = a pessoa),
  *   e o clique abre a leitura. O botão Novo e-mail saiu: repetia o da barra do
  *   topo, que é o ponto único do compor sem contexto;
  * - WhatsApp e SMS: 2 widgets, cada um com o número, a mensagem e 1 ação. O
@@ -24,7 +24,7 @@
  * "Novo e-mail" da barra do topo; sem o Outlook integrado, abre o app de
  * e-mail do computador.
  *
- * A central E-mails e o painel "Enviar SMS" são do protótipo
+ * A central Comunicações e o painel "Enviar SMS" são do protótipo
  * comunicacao-no-workspace. Aqui o clique mostra o aviso de maquete com o que
  * abre no produto e o link exato.
  *
