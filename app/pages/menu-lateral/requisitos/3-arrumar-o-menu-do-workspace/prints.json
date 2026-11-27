@@ -165,16 +165,6 @@
       ],
       "destacar": "Metas do trimestre"
     },
-    "RF008": {
-      "cena": "comercial",
-      "passos": [
-        {
-          "js": "(() => { const e = [...document.querySelectorAll(\"button\")].filter(e => e.getBoundingClientRect().width && e.innerText.trim().toLowerCase() === \"painel de vendas\")[0]; const r = e.getBoundingClientRect(); e.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true, clientX: r.right - 4, clientY: r.top + r.height / 2, button: 2 })) })()",
-          "esperar": 700
-        }
-      ],
-      "destacar": "Tirar da seção"
-    },
     "RF006": {
       "sem": "O protótipo mostra o menu de uma pessoa só e não simula outro membro fora do grupo."
     },
