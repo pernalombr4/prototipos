@@ -1590,23 +1590,45 @@
           "esperar": 1500
         },
         {
-          "js": "(() => { const els = [...document.querySelectorAll('nav *')].filter(e => e.children.length === 0 && e.textContent.trim() === \"E-mails\"); els[0].closest('a,button').dataset.print = \"nav-emails\" })()"
+          "js": "(() => { const els=[...document.querySelectorAll('nav *')].filter(e=>e.children.length===0 && e.textContent.trim()==='Comunicações'); els[0].closest('button').dataset.print='nav-com'; els[1].closest('button').dataset.print='nav-com-config' })()"
         }
       ],
-      "destacar": {
-        "css": "[data-print=nav-emails]"
-      }
+      "destacar": [
+        {
+          "css": "[data-print=nav-com]"
+        },
+        {
+          "css": "nav[aria-label=Trilha]"
+        }
+      ]
     },
     "RF702": {
       "passos": [
         {
           "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
           "esperar": 1500
+        },
+        {
+          "js": "(() => { const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='Comunicações'); let c=h.parentElement; while(c && ![...c.querySelectorAll('button')].some(b=>b.textContent.trim()==='Novo e-mail')) c=c.parentElement; const m={'Sua conta de envio':'btn-conta','Configurações':'btn-config','Novo e-mail':'btn-novo'}; c.querySelectorAll('button').forEach(b=>{const k=m[b.textContent.trim()]; if(k) b.dataset.print=k}); const i=c.querySelector('[role=img][aria-label]'); if(i) i.dataset.print='i-titulo' })()"
         }
       ],
-      "destacar": {
-        "css": "[role=tablist]"
-      }
+      "destacar": [
+        {
+          "css": "h1"
+        },
+        {
+          "css": "[data-print=i-titulo]"
+        },
+        {
+          "css": "[data-print=btn-conta]"
+        },
+        {
+          "css": "[data-print=btn-config]"
+        },
+        {
+          "css": "[data-print=btn-novo]"
+        }
+      ]
     },
     "RF703": {
       "passos": [
@@ -1615,11 +1637,11 @@
           "esperar": 1500
         },
         {
-          "js": "[...document.querySelectorAll('h1')].find(h => h.textContent.trim() === 'E-mails').parentElement.querySelector('button').dataset.print = 'novo-central'"
+          "js": "(() => { const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='Comunicações'); let c=h.parentElement; while(c && ![...c.querySelectorAll('button')].some(b=>b.textContent.trim()==='Novo e-mail')) c=c.parentElement; const m={'Sua conta de envio':'btn-conta','Configurações':'btn-config','Novo e-mail':'btn-novo'}; c.querySelectorAll('button').forEach(b=>{const k=m[b.textContent.trim()]; if(k) b.dataset.print=k}); const i=c.querySelector('[role=img][aria-label]'); if(i) i.dataset.print='i-titulo' })()"
         }
       ],
       "destacar": {
-        "css": "[data-print=novo-central]"
+        "css": "[data-print=btn-novo]"
       }
     },
     "RF704": {
@@ -1629,31 +1651,21 @@
           "esperar": 1500
         },
         {
-          "pairar": "Os modelos que aparecem no campo Template do e-mail.",
-          "esperar": 900
-        }
-      ],
-      "destacar": {
-        "css": "[data-slot=content]"
-      }
-    },
-    "RF705": {
-      "passos": [
-        {
-          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-          "esperar": 1500
+          "js": "(() => { const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='Comunicações'); let c=h.parentElement; while(c && ![...c.querySelectorAll('button')].some(b=>b.textContent.trim()==='Novo e-mail')) c=c.parentElement; const m={'Sua conta de envio':'btn-conta','Configurações':'btn-config','Novo e-mail':'btn-novo'}; c.querySelectorAll('button').forEach(b=>{const k=m[b.textContent.trim()]; if(k) b.dataset.print=k}); const i=c.querySelector('[role=img][aria-label]'); if(i) i.dataset.print='i-titulo' })()"
         },
         {
-          "pairar": "Os endereços do workspace que recebem e-mails e podem iniciar um fluxo.",
+          "pairar": {
+            "css": "[data-print=btn-config]"
+          },
           "esperar": 900
         }
       ],
       "destacar": [
         {
-          "css": "[data-slot=content]"
+          "css": "[data-print=btn-config]"
         },
         {
-          "texto": "A conta de envio de cada pessoa e as regras do e-mail no workspace."
+          "css": "[data-slot=content]"
         }
       ]
     },
@@ -1824,47 +1836,71 @@
     "RF721": {
       "passos": [
         {
-          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
           "esperar": 1500
+        },
+        {
+          "js": "(() => { const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='Comunicações'); let c=h.parentElement; while(c && ![...c.querySelectorAll('button')].some(b=>b.textContent.trim()==='Novo e-mail')) c=c.parentElement; const m={'Sua conta de envio':'btn-conta','Configurações':'btn-config','Novo e-mail':'btn-novo'}; c.querySelectorAll('button').forEach(b=>{const k=m[b.textContent.trim()]; if(k) b.dataset.print=k}); const i=c.querySelector('[role=img][aria-label]'); if(i) i.dataset.print='i-titulo' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=btn-conta]"
+          },
+          "esperar": 900
         }
       ],
-      "destacar": [
-        {
-          "texto": "Sua conta de envio",
-          "ancestral": "section"
-        }
-      ]
+      "destacar": {
+        "css": "[role=dialog]"
+      }
     },
     "RF722": {
       "passos": [
         {
-          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
           "esperar": 1500
+        },
+        {
+          "js": "(() => { const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='Comunicações'); let c=h.parentElement; while(c && ![...c.querySelectorAll('button')].some(b=>b.textContent.trim()==='Novo e-mail')) c=c.parentElement; const m={'Sua conta de envio':'btn-conta','Configurações':'btn-config','Novo e-mail':'btn-novo'}; c.querySelectorAll('button').forEach(b=>{const k=m[b.textContent.trim()]; if(k) b.dataset.print=k}); const i=c.querySelector('[role=img][aria-label]'); if(i) i.dataset.print='i-titulo' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=btn-conta]"
+          },
+          "esperar": 900
         }
       ],
       "destacar": [
         {
           "regex": "^Conta conectada: "
         },
-        {
-          "texto": "Gerenciar integração"
-        }
+        "Gerenciar integração"
       ]
     },
     "RF723": {
-      "passos": [
+      "antes": [
         {
-          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-cenario'] = \"sem-outlook\"; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "js": "(s => { s['$scnw-cenario'] = \"sem-outlook\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
           "esperar": 1500
         }
       ],
-      "destacar": [
+      "passos": [
         {
-          "texto": "Nenhuma conta integrada. Sem ela, o botão E-mail abre o aplicativo de e-mail do computador."
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
         },
         {
-          "texto": "Integrar contas"
+          "js": "(() => { const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='Comunicações'); let c=h.parentElement; while(c && ![...c.querySelectorAll('button')].some(b=>b.textContent.trim()==='Novo e-mail')) c=c.parentElement; const m={'Sua conta de envio':'btn-conta','Configurações':'btn-config','Novo e-mail':'btn-novo'}; c.querySelectorAll('button').forEach(b=>{const k=m[b.textContent.trim()]; if(k) b.dataset.print=k}); const i=c.querySelector('[role=img][aria-label]'); if(i) i.dataset.print='i-titulo' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=btn-conta]"
+          },
+          "esperar": 900
         }
+      ],
+      "destacar": [
+        "Nenhuma conta integrada. Sem ela, o botão E-mail abre o aplicativo de e-mail do computador.",
+        "Integrar contas"
       ]
     },
     "RF724": {
@@ -1912,27 +1948,15 @@
     "RF731": {
       "passos": [
         {
-          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
           "esperar": 1500
         },
         {
-          "js": "(() => { const els = [...document.querySelectorAll('nav *')].filter(e => e.children.length === 0 && e.textContent.trim() === \"E-mails\"); els[1].closest('a,button').dataset.print = \"nav-emails-config\" })()"
-        },
-        {
-          "clicar": {
-            "css": "[data-print=nav-emails-config]"
-          },
-          "esperar": 700
-        },
-        {
-          "js": "(() => { let e = [...document.querySelectorAll('nav *')].find(x => x.children.length === 0 && x.textContent.trim() === 'E-mails Enviados'); while (e && !e.textContent.includes('Caixas de E-mail')) e = e.parentElement; e.dataset.print = 'sub-emails' })()"
-        },
-        {
-          "js": "void 0"
+          "js": "(() => { let e=[...document.querySelectorAll('nav *')].find(x=>x.children.length===0 && x.textContent.trim()==='Canais e regras'); while(e && !(e.textContent.includes('Modelos') && e.textContent.includes('Comunicações'))) e=e.parentElement; e.dataset.print='grupo-com' })()"
         }
       ],
       "destacar": {
-        "css": "[data-print=sub-emails]"
+        "css": "[data-print=grupo-com]"
       }
     },
     "RF732": {
@@ -1942,22 +1966,27 @@
           "esperar": 1500
         },
         {
-          "js": "(() => { const els = [...document.querySelectorAll('nav *')].filter(e => e.children.length === 0 && e.textContent.trim() === \"E-mails\"); els[1].closest('a,button').dataset.print = \"nav-emails-config\" })()"
+          "js": "(() => { const els=[...document.querySelectorAll('nav *')].filter(e=>e.children.length===0 && e.textContent.trim()==='Comunicações'); els[0].closest('button').dataset.print='nav-com'; els[1].closest('button').dataset.print='nav-com-config' })()"
         },
         {
           "clicar": {
-            "css": "[data-print=nav-emails-config]"
+            "css": "[data-print=nav-com-config]"
           },
           "esperar": 700
         },
         {
-          "clicar": "Modelos de E-mail",
+          "js": "(() => { const e=[...document.querySelectorAll('nav *')].filter(x=>x.children.length===0 && x.textContent.trim()===\"Modelos\").filter(x=>!x.closest('nav[aria-label=Trilha]')).pop(); e.closest('a,button').dataset.print=\"nav-modelos\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=nav-modelos]"
+          },
           "esperar": 1200
         }
       ],
       "destacar": [
         {
-          "texto": "Modelos de E-mail"
+          "css": "[data-print=nav-modelos]"
         },
         {
           "css": "[role=tab][aria-selected=true]"
@@ -1971,16 +2000,16 @@
           "esperar": 1500
         },
         {
-          "js": "(() => { const els = [...document.querySelectorAll('nav *')].filter(e => e.children.length === 0 && e.textContent.trim() === \"E-mails\"); els[1].closest('a,button').dataset.print = \"nav-emails-config\" })()"
+          "js": "(() => { const els=[...document.querySelectorAll('nav *')].filter(e=>e.children.length===0 && e.textContent.trim()==='Comunicações'); els[0].closest('button').dataset.print='nav-com'; els[1].closest('button').dataset.print='nav-com-config' })()"
         },
         {
           "clicar": {
-            "css": "[data-print=nav-emails-config]"
+            "css": "[data-print=nav-com-config]"
           },
           "esperar": 700
         },
         {
-          "js": "(() => { const els = [...document.querySelectorAll('nav *')].filter(e => e.children.length === 0 && e.textContent.trim() === \"Caixas de E-mail\"); els[0].closest('a,button').dataset.print = \"nav-caixas\" })()"
+          "js": "(() => { const e=[...document.querySelectorAll('nav *')].filter(x=>x.children.length===0 && x.textContent.trim()===\"Caixas de E-mail\").filter(x=>!x.closest('nav[aria-label=Trilha]')).pop(); e.closest('a,button').dataset.print=\"nav-caixas\" })()"
         },
         {
           "clicar": {
@@ -2456,7 +2485,7 @@
           "texto": "Do sistema"
         },
         {
-          "css": "thead th:nth-child(8)"
+          "css": "thead th:nth-child(9)"
         },
         {
           "css": "[role=dialog] button[aria-pressed]",
@@ -2529,18 +2558,16 @@
         {
           "js": "[...document.querySelectorAll('button')].find(b => b.textContent.trim() === \"Do sistema\").click()",
           "esperar": 700
-        },
-        {
-          "js": "[...document.querySelectorAll('tbody td:nth-child(7)')].find(td => td.textContent.trim() === 'Sistema').dataset.print = 'sis-sem-tarefa'"
         }
       ],
       "destacar": [
         {
-          "texto": "Sistema · T-1042",
+          "texto": "Tarefa · T-1042",
           "ancestral": "td"
         },
         {
-          "css": "[data-print=sis-sem-tarefa]"
+          "texto": "Spaceflow · Abertura de solicitação",
+          "ancestral": "td"
         }
       ]
     },
@@ -2562,7 +2589,7 @@
           "js": "void 0"
         },
         {
-          "js": "(() => { const tds = [...document.querySelectorAll('tbody td:nth-child(8)')]; tds.find(td => td.textContent.trim() === 'Enviado').dataset.print = 'st-env'; tds.find(td => td.textContent.trim() === 'Falhou').dataset.print = 'st-falhou'; tds.find(td => td.textContent.trim() === 'Em processamento').dataset.print = 'st-proc' })()"
+          "js": "(() => { const tds = [...document.querySelectorAll('tbody td:nth-child(9)')]; tds.find(td => td.textContent.trim() === 'Enviado ao provedor').dataset.print = 'st-env'; tds.find(td => td.textContent.trim() === 'Falhou').dataset.print = 'st-falhou'; tds.find(td => td.textContent.trim() === 'Em processamento').dataset.print = 'st-proc' })()"
         }
       ],
       "destacar": [
@@ -2591,35 +2618,6 @@
       "destacar": {
         "css": "[data-slot=content]"
       }
-    },
-    "RF957": {
-      "passos": [
-        {
-          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
-          "esperar": 1500
-        },
-        {
-          "js": "(() => { const els = [...document.querySelectorAll('nav *')].filter(e => e.children.length === 0 && e.textContent.trim() === \"E-mails\"); els[1].closest('a,button').dataset.print = \"nav-emails-config\" })()"
-        },
-        {
-          "clicar": {
-            "css": "[data-print=nav-emails-config]"
-          },
-          "esperar": 700
-        },
-        {
-          "clicar": "E-mails Enviados",
-          "esperar": 1200
-        }
-      ],
-      "destacar": [
-        {
-          "texto": "E-mails Enviados"
-        },
-        {
-          "texto": "Do sistema"
-        }
-      ]
     },
     "RF961": {
       "passos": [
@@ -2690,7 +2688,7 @@
           "esperar": 900
         },
         {
-          "js": "(() => { const tr = [...document.querySelectorAll('tbody tr')].find(r => r.textContent.includes(\"CTR-00223 \\u00b7 Visita t\\u00e9cnica confirmada\")); tr.querySelector('button').dataset.print = \"menu-proc\" })()"
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes('Visita técnica confirmada')); tr.querySelector('button').dataset.print='menu-proc' })()"
         },
         {
           "clicar": {
@@ -2700,9 +2698,8 @@
         }
       ],
       "destacar": [
-        {
-          "texto": "Reenviar e-mail"
-        }
+        "Reenviar e-mail",
+        "O envio ainda está na fila ou em processamento."
       ]
     },
     "RF964": {
@@ -3714,6 +3711,296 @@
       "destacar": {
         "regex": "^abre as opções de sms com a mensagem"
       }
+    },
+    "RS701": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const els=[...document.querySelectorAll('nav *')].filter(e=>e.children.length===0 && e.textContent.trim()==='Comunicações'); els[0].closest('button').dataset.print='nav-com'; els[1].closest('button').dataset.print='nav-com-config' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=nav-com]"
+        },
+        {
+          "css": "h1"
+        },
+        {
+          "css": "nav[aria-label=Trilha]"
+        }
+      ]
+    },
+    "RF734": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"inicio\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const els=[...document.querySelectorAll('nav *')].filter(e=>e.children.length===0 && e.textContent.trim()==='Comunicações'); els[0].closest('button').dataset.print='nav-com'; els[1].closest('button').dataset.print='nav-com-config' })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=nav-com-config]"
+          },
+          "esperar": 700
+        },
+        {
+          "js": "(() => { const e=[...document.querySelectorAll('nav *')].filter(x=>x.children.length===0 && x.textContent.trim()===\"Canais e regras\").filter(x=>!x.closest('nav[aria-label=Trilha]')).pop(); e.closest('a,button').dataset.print=\"nav-canais\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=nav-canais]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=nav-canais]"
+        },
+        {
+          "css": "[role=tab][aria-selected=true]"
+        }
+      ]
+    },
+    "RF735": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "h1"
+        },
+        "Os modelos, as caixas e as regras que valem para os e-mails do workspace.",
+        {
+          "css": "[role=tablist]"
+        },
+        "Ver mensagens"
+      ]
+    },
+    "RF736": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"caixas\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "js": "(() => { const e=[...document.querySelectorAll('nav *')].filter(x=>x.children.length===0 && x.textContent.trim()===\"Caixas de E-mail\").filter(x=>!x.closest('nav[aria-label=Trilha]')).pop(); e.closest('a,button').dataset.print=\"nav-caixas\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "nav[aria-label=Trilha]"
+        },
+        {
+          "css": "[data-print=nav-caixas]"
+        }
+      ]
+    },
+    "RF737": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "pairar": "Os modelos que aparecem no campo Template do e-mail.",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[data-slot=content]"
+      }
+    },
+    "RF738": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-perfil'] = \"membro\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "h1"
+        },
+        {
+          "css": "nav[aria-label=Trilha]"
+        }
+      ]
+    },
+    "RF719": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label='Filtrar Usar remetente por domínio']"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        },
+        {
+          "css": "thead"
+        }
+      ]
+    },
+    "RF809": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "button[aria-label=Período]"
+        },
+        {
+          "css": "button[aria-label='Filtrar Data']"
+        }
+      ]
+    },
+    "RF810": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "css": "thead"
+      }
+    },
+    "RF815": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        }
+      ],
+      "destacar": {
+        "texto": "Outlook de Ana",
+        "ancestral": "td"
+      }
+    },
+    "RF816": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "pairar": "Outlook de Ana",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[data-slot=content]"
+      }
+    },
+    "RF958": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Do sistema",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const tds=[...document.querySelectorAll('tbody td:nth-child(8)')]; tds.find(td=>td.textContent.trim()==='ENSPACE').dataset.print='saiu-enspace'; tds.find(td=>td.textContent.trim()==='Domínio da empresa').dataset.print='saiu-dominio' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=saiu-enspace]"
+        },
+        {
+          "css": "[data-print=saiu-dominio]"
+        },
+        {
+          "css": "thead th:nth-child(8)"
+        }
+      ]
+    },
+    "RF959": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label='Filtrar Status']"
+          },
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF966": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 1; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
+        },
+        {
+          "clicar": "Do sistema",
+          "esperar": 900
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes('CTR-00229 · Vencimento próximo')); tr.querySelectorAll('td')[4].querySelector('span').click() })()",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        "Motivo da falha"
+      ]
     }
   }
 }

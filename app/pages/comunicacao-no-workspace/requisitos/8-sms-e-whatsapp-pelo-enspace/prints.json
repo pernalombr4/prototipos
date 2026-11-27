@@ -1,0 +1,1848 @@
+{
+  "url": "https://pernalombr4.github.io/prototipos/comunicacao-no-workspace/",
+  "andaime": "Protótipo",
+  "cenas": {},
+  "requisitos": {
+    "RF001": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>[...x.childNodes].some(n=>n.nodeType===3 && n.textContent.trim()==='Canais de envio do workspace')); while(e && e.textContent.split('Abrir Integrações').length<4) e=e.parentElement; e.dataset.print='sec-canais' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=sec-canais]"
+      }
+    },
+    "RF002": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>[...x.childNodes].some(n=>n.nodeType===3 && n.textContent.trim()===\"E-mail do sistema\") && !x.closest('nav')); while(e && !e.textContent.includes('Abrir Integrações')) e=e.parentElement; e.dataset.print=\"c-email\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=c-email]"
+      }
+    },
+    "RF003": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>[...x.childNodes].some(n=>n.nodeType===3 && n.textContent.trim()===\"SMS\") && !x.closest('nav')); while(e && !e.textContent.includes('Abrir Integrações')) e=e.parentElement; e.dataset.print=\"c-sms\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=c-sms]"
+      }
+    },
+    "RF004": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>[...x.childNodes].some(n=>n.nodeType===3 && n.textContent.trim()===\"WhatsApp\") && !x.closest('nav')); while(e && !e.textContent.includes('Abrir Integrações')) e=e.parentElement; e.dataset.print=\"c-wa\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=c-wa]"
+      }
+    },
+    "RF005": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-twilio'] = false })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Sem a integração Twilio no workspace",
+          "n": 0
+        },
+        {
+          "texto": "Sem a integração Twilio no workspace",
+          "n": 1
+        }
+      ]
+    },
+    "RF006": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Abrir Integrações",
+          "n": 0
+        },
+        {
+          "texto": "Abrir Integrações",
+          "n": 1
+        },
+        {
+          "texto": "Abrir Integrações",
+          "n": 2
+        }
+      ]
+    },
+    "RF007": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": "Ver modelos",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=tab][aria-selected=true]"
+        },
+        {
+          "css": "thead"
+        }
+      ]
+    },
+    "RF008": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"configuracoes\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Regras do workspace"
+        },
+        {
+          "texto": "Contato do item",
+          "n": 0
+        }
+      ]
+    },
+    "RI001": {
+      "sem": "leitura das integrações do workspace, sem tela própria"
+    },
+    "RF101": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "thead th:nth-child(12)"
+        },
+        {
+          "css": "tbody td:nth-child(12)",
+          "n": 2
+        }
+      ]
+    },
+    "RF102": {
+      "passos": [
+        {
+          "largura": 2200,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes('Nota fiscal de setembro')); tr.querySelector('td:nth-child(12) span').dataset.print='entrega-outlook' })()"
+        },
+        {
+          "pairar": {
+            "css": "[data-print=entrega-outlook]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=entrega-outlook]"
+        },
+        {
+          "css": "[data-slot=content]"
+        }
+      ]
+    },
+    "RF103": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"SOL-00088 · Solicitação recebida\")); tr.querySelectorAll('td')[5].querySelector('span').click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "O provedor aceitou a mensagem. A coluna Entrega mostra o que aconteceu depois."
+    },
+    "RF104": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": "Não entregues",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        "Não entregues",
+        {
+          "css": "tbody"
+        }
+      ]
+    },
+    "RF105": {
+      "passos": [
+        {
+          "largura": 2200,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label='Filtrar Entrega']"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[role=dialog]"
+      }
+    },
+    "RF111": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"CTR-00230 · Vencimento próximo\")); tr.querySelectorAll('td')[5].querySelector('span').click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^Motivo: "
+        },
+        {
+          "regex": "^Código 550 5\\.1\\.1 do provedor$"
+        }
+      ]
+    },
+    "RF112": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"WhatsApp do workspace\") && r.textContent.includes('Lido')); tr.querySelectorAll('td')[5].querySelector('span').click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Histórico do envio"
+        }
+      ]
+    },
+    "RF113": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"CTR-00230 · Vencimento próximo\")); tr.querySelectorAll('td')[5].querySelector('span').click() })()",
+          "esperar": 1200
+        },
+        {
+          "clicar": "Reenviar e-mail",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] dl"
+        }
+      ]
+    },
+    "RI101": {
+      "sem": "aviso de eventos da SendGrid, sem tela"
+    },
+    "RI102": {
+      "sem": "aviso de status da Twilio, sem tela"
+    },
+    "RF201": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": "Nova mensagem",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=menu]"
+        },
+        "Nova mensagem"
+      ]
+    },
+    "RF202": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-twilio'] = false })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": "Nova mensagem",
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Pelo seu celular. Sem a integração Twilio, o ENSPACE não registra o SMS."
+    },
+    "RF203": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": "Nova mensagem",
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Pelo WhatsApp do workspace, com modelo aprovado, ou pelo seu WhatsApp."
+    },
+    "RF211": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"Número do workspace\") && r.textContent.includes('Entregue')); tr.dataset.print=\"l-sms\"; tr.querySelector('button').dataset.print=\"l-sms-menu\" })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=l-sms]"
+      }
+    },
+    "RF212": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "pairar": "Os e-mails dos itens e as mensagens que o ENSPACE envia por e-mail, SMS e WhatsApp, com o status de entrega.",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[data-slot=content]"
+      }
+    },
+    "RF213": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "[...document.querySelectorAll('button[aria-pressed]')].find(b => b.textContent.trim() === 'SMS').click()",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "E-mail",
+          "exato": true,
+          "n": 0
+        },
+        {
+          "texto": "WhatsApp",
+          "exato": true,
+          "n": 0
+        },
+        {
+          "texto": "SMS",
+          "exato": true,
+          "n": 0
+        },
+        {
+          "css": "tbody"
+        }
+      ]
+    },
+    "RF214": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label='Filtrar Canal']"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        },
+        {
+          "css": "thead th:nth-child(3)"
+        }
+      ]
+    },
+    "RF215": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        }
+      ],
+      "destacar": [
+        {
+          "css": "thead th:nth-child(6)"
+        },
+        {
+          "texto": "Olá, Caio. O contrato CTR-00223",
+          "ancestral": "td"
+        }
+      ]
+    },
+    "RF216": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tds=[...document.querySelectorAll('tbody td:nth-child(10)')]; tds.find(td=>td.textContent.trim()==='WhatsApp do workspace').dataset.print='s-wa'; tds.find(td=>td.textContent.trim()==='Número do workspace').dataset.print='s-sms' })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=s-wa]"
+        },
+        {
+          "css": "[data-print=s-sms]"
+        }
+      ]
+    },
+    "RF217": {
+      "sem": "o protótipo não tem SMS enviado por uma pessoa na lista inicial; o envio pelo painel Enviar SMS aparece no print da parte 5"
+    },
+    "RF218": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-twilio'] = false })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "[...document.querySelectorAll('button[aria-pressed]')].find(b => b.textContent.trim() === 'SMS').click()",
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "SMS",
+          "exato": true,
+          "n": 0
+        },
+        {
+          "css": "tbody"
+        }
+      ]
+    },
+    "RF221": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"Número do workspace\") && r.textContent.includes('Entregue')); tr.querySelectorAll('td')[5].querySelector('span').click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^SMS · "
+        },
+        {
+          "texto": "Olá, Caio. O contrato CTR-00223",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF222": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"Número do workspace\") && r.textContent.includes('Entregue')); tr.querySelectorAll('td')[5].querySelector('span').click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Tamanho"
+        },
+        {
+          "texto": "2 SMS"
+        }
+      ]
+    },
+    "RF223": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"WhatsApp do workspace\") && r.textContent.includes('Lido')); tr.querySelectorAll('td')[5].querySelector('span').click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Modelo aprovado"
+        },
+        {
+          "texto": "lembrete_vencimento"
+        }
+      ]
+    },
+    "RF224": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"Número do workspace\") && r.textContent.includes('Não entregue')); tr.dataset.print=\"l-ne\"; tr.querySelector('button').dataset.print=\"l-ne-menu\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=l-ne-menu]"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RF231": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes('Atendimento') && r.textContent.includes('WhatsApp do workspace')); tr.querySelector('td:nth-child(9)').dataset.print='at-orig' })()"
+        }
+      ],
+      "destacar": {
+        "css": "[data-print=at-orig]"
+      }
+    },
+    "RF232": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"WhatsApp do workspace\") && r.textContent.includes('Atendimento')); tr.dataset.print=\"l-at\"; tr.querySelector('button').dataset.print=\"l-at-menu\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=l-at-menu]"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=menu]"
+        }
+      ]
+    },
+    "RI201": {
+      "sem": "rota da lista da central, sem tela própria"
+    },
+    "RI202": {
+      "sem": "leitura das mensagens do atendimento, sem tela própria"
+    },
+    "RF301": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "E-mail",
+          "exato": true
+        },
+        {
+          "texto": "WhatsApp",
+          "exato": true
+        },
+        {
+          "css": "thead"
+        }
+      ]
+    },
+    "RF302": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "pairar": "Os modelos de e-mail e os modelos de WhatsApp aprovados pela Meta.",
+          "esperar": 900
+        }
+      ],
+      "destacar": {
+        "css": "[data-slot=content]"
+      }
+    },
+    "RF303": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "thead"
+        },
+        "Pesquisar modelos de WhatsApp...",
+        {
+          "texto": "lembrete_vencimento",
+          "ancestral": "tr"
+        }
+      ]
+    },
+    "RF304": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true
+          },
+          "esperar": 1000
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label='Filtrar Status na Meta']"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RF305": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true
+          },
+          "esperar": 1000
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"novidades_do_mes\")); tr.dataset.print=\"m-rec\"; tr.querySelector('button').dataset.print=\"m-rec-menu\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=m-rec-menu]"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[role=menu]"
+      }
+    },
+    "RF311": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Novo modelo de WhatsApp"
+    },
+    "RF312": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-dados'] = \"novo\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "texto": "Nenhum modelo de WhatsApp",
+        "ancestral": "[data-slot=root]"
+      }
+    },
+    "RF313": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-twilio'] = false })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"modelos\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "O workspace não tem a integração Twilio"
+        },
+        {
+          "texto": "Abrir Integrações"
+        }
+      ]
+    },
+    "RI301": {
+      "sem": "modelos de WhatsApp guardados no back, sem tela própria"
+    },
+    "RF401": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        "Enviar pelo ENSPACE",
+        {
+          "regex": "^Sai do número do workspace"
+        }
+      ]
+    },
+    "RF402": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Ou envie pelo seu celular"
+        },
+        "Abrir no app de SMS"
+      ]
+    },
+    "RF403": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": "Envie pelo número do workspace, com registro no ENSPACE, ou pelo seu celular, sem registro."
+    },
+    "RF404": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const t=document.querySelector('[role=dialog] textarea'); t.value=''; t.dispatchEvent(new Event('input',{bubbles:true})) })()",
+          "esperar": 700
+        }
+      ],
+      "destacar": [
+        "Enviar pelo ENSPACE"
+      ]
+    },
+    "RF405": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Enviar pelo ENSPACE",
+          "esperar": 1500
+        }
+      ],
+      "destacar": "SMS enviado"
+    },
+    "RF406": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": "Nova mensagem",
+          "esperar": 1000
+        },
+        {
+          "clicar": "Pelo número do workspace ou pelo seu celular.",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Para",
+          "n": 0
+        },
+        "Informe o destinatário para enviar pelo ENSPACE."
+      ]
+    },
+    "RF407": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'SMS').dataset.print = 'b-sms'"
+        },
+        {
+          "pairar": {
+            "css": "[data-print=b-sms]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=b-sms]"
+        },
+        {
+          "css": "[data-slot=content]"
+        }
+      ]
+    },
+    "RF408": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-twilio'] = false })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47230; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "SMS",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog]"
+        }
+      ]
+    },
+    "RI401": {
+      "sem": "envio pela Twilio do workspace, sem tela própria"
+    },
+    "RF501": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        "Enviar WhatsApp para Caio Fernandes",
+        "Envie pelo WhatsApp do workspace, com modelo aprovado e registro no ENSPACE, ou abra a conversa no seu WhatsApp, sem registro."
+      ]
+    },
+    "RF502": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Para",
+          "n": 0
+        },
+        {
+          "texto": "+55 41 98800-2211"
+        }
+      ]
+    },
+    "RF503": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] [role=tablist]"
+        },
+        "Com modelo aprovado. Fica registrado no ENSPACE."
+      ]
+    },
+    "RF504": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "[...document.querySelectorAll('button')].find(b => b.textContent.trim() === 'WhatsApp').dataset.print = 'b-wa'"
+        },
+        {
+          "pairar": {
+            "css": "[data-print=b-wa]"
+          },
+          "esperar": 900
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=b-wa]"
+        },
+        {
+          "css": "[data-slot=content]"
+        }
+      ]
+    },
+    "RF505": {
+      "sem": "sem a integração, o atalho abre o WhatsApp Web, fora do protótipo"
+    },
+    "RF511": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] button[role=combobox]"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=listbox]"
+        }
+      ]
+    },
+    "RF512": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Valor de {{1}}",
+          "ancestral": "[data-slot=root]"
+        },
+        {
+          "texto": "Valor de {{2}}",
+          "ancestral": "[data-slot=root]"
+        },
+        {
+          "texto": "Valor de {{3}}",
+          "ancestral": "[data-slot=root]"
+        }
+      ]
+    },
+    "RF513": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Prévia",
+          "ancestral": "div"
+        }
+      ]
+    },
+    "RF514": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        "Enviar pelo WhatsApp do workspace",
+        {
+          "regex": "^Sai do WhatsApp do workspace"
+        }
+      ]
+    },
+    "RF515": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Enviar pelo WhatsApp do workspace",
+          "esperar": 1500
+        }
+      ],
+      "destacar": "WhatsApp enviado"
+    },
+    "RF521": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Seu WhatsApp",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[role=dialog] textarea"
+        }
+      ]
+    },
+    "RF522": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Seu WhatsApp",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        "Abrir no meu WhatsApp"
+      ]
+    },
+    "RF523": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-categoria'] = \"contratos\"; s['$scnw-item'] = 47223; s['$scnw-aba-item'] = \"visao\"; s['$scnw-tela'] = \"item\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "texto": "WhatsApp",
+            "exato": true,
+            "n": 0
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Seu WhatsApp",
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^Abre a conversa no WhatsApp Web ou no app"
+        }
+      ]
+    },
+    "RI501": {
+      "sem": "envio pela Twilio do workspace, sem tela própria"
+    },
+    "RF601": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "clicar": {
+            "css": "button[aria-label='Adicionar nó']"
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Comunicação"
+        },
+        {
+          "texto": "Enviar SMS",
+          "n": 0
+        },
+        {
+          "texto": "Enviar WhatsApp",
+          "n": 0
+        }
+      ]
+    },
+    "RF602": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar WhatsApp\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-wa\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=n-sms]"
+        },
+        {
+          "css": "[data-print=n-wa]"
+        }
+      ]
+    },
+    "RF603": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-twilio'] = false })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar WhatsApp\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-wa\" })()"
+        }
+      ],
+      "destacar": [
+        {
+          "css": "[data-print=n-sms]"
+        },
+        {
+          "css": "[data-print=n-wa]"
+        }
+      ]
+    },
+    "RF611": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Variáveis de Entrada"
+        },
+        {
+          "texto": "Nome do Nó"
+        },
+        {
+          "texto": "Variáveis de saída"
+        },
+        "Salvar e fechar"
+      ]
+    },
+    "RF612": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Para",
+        "ancestral": "[data-slot=root]"
+      }
+    },
+    "RF613": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "regex": "^Número do workspace, \\+55"
+      }
+    },
+    "RF614": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        },
+        {
+          "js": "(() => { const t=document.querySelector('[role=dialog] textarea'); t.value=''; t.dispatchEvent(new Event('input',{bubbles:true})) })()",
+          "esperar": 500
+        },
+        {
+          "clicar": "Salvar e fechar",
+          "esperar": 1000
+        }
+      ],
+      "destacar": "Escreva a mensagem."
+    },
+    "RF615": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": "Salvar e fechar",
+          "esperar": 1200
+        }
+      ],
+      "destacar": "Nó salvo"
+    },
+    "RF616": {
+      "antes": [
+        {
+          "js": "(s => { s['$scnw-twilio'] = false })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 300
+        }
+      ],
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "O workspace não tem a integração Twilio"
+        }
+      ]
+    },
+    "RF621": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Mensagem",
+        "ancestral": "[data-slot=root]"
+      }
+    },
+    "RF622": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "regex": "^\\d+ caracteres · \\d+ SMS$"
+        },
+        {
+          "regex": "^Até \\d+ caracteres por SMS"
+        }
+      ]
+    },
+    "RF623": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Prévia",
+        "ancestral": "div"
+      }
+    },
+    "RF631": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar WhatsApp\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-wa\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-wa]"
+          },
+          "esperar": 1200
+        },
+        {
+          "clicar": {
+            "css": "[role=dialog] button[role=combobox]",
+            "n": 0
+          },
+          "esperar": 1000
+        }
+      ],
+      "destacar": {
+        "css": "[role=listbox]"
+      }
+    },
+    "RF632": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar WhatsApp\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-wa\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-wa]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Variáveis do modelo",
+        "ancestral": "div"
+      }
+    },
+    "RF633": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar WhatsApp\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-wa\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-wa]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Prévia",
+        "ancestral": "div"
+      }
+    },
+    "RF641": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Se o envio falhar",
+        "ancestral": "[data-slot=root]"
+      }
+    },
+    "RF642": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": {
+        "texto": "Esperar a confirmação de entrega",
+        "ancestral": "[data-slot=root]"
+      }
+    },
+    "RF643": {
+      "passos": [
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"spaceflow\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { let e=[...document.querySelectorAll('body *')].find(x=>x.children.length===0 && x.textContent.trim()===\"Enviar SMS\" && !x.closest('[role=dialog]')); while(e && !(e.textContent.includes('OK') || e.textContent.includes('MODIFICADO') || e.textContent.includes('ERRO'))) e=e.parentElement; e.dataset.print=\"n-sms\" })()"
+        },
+        {
+          "clicar": {
+            "css": "[data-print=n-sms]"
+          },
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Variáveis de saída"
+        },
+        {
+          "texto": "mensagem_id"
+        }
+      ]
+    },
+    "RF644": {
+      "passos": [
+        {
+          "largura": 1800,
+          "esperar": 500
+        },
+        {
+          "js": "(s => { s['$scnw-fase'] = 4; s['$scnw-tela'] = \"emails\"; s['$scnw-aba-central'] = \"mensagens\" })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 2500
+        },
+        {
+          "js": "(() => { const tr=[...document.querySelectorAll('tbody tr')].find(r=>r.textContent.includes(\"Número do workspace\") && r.textContent.includes('Entregue')); tr.querySelectorAll('td')[5].querySelector('span').click() })()",
+          "esperar": 1200
+        }
+      ],
+      "destacar": [
+        {
+          "texto": "Lembrete de vencimento do contrato › Enviar SMS"
+        }
+      ]
+    },
+    "RI601": {
+      "sem": "execução do nó no back, sem tela"
+    }
+  }
+}

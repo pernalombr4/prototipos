@@ -54,7 +54,7 @@
         "esperar": 1800
       },
       {
-        "clicar": "Ver em E-mails",
+        "clicar": "Ver em Comunicações",
         "esperar": 1500
       }
     ],
@@ -166,7 +166,7 @@
       "cena": "emailsVer",
       "destacar": [
         {
-          "css": "[role=tab][aria-selected=true]"
+          "css": "h1"
         },
         {
           "texto": "Cadastro de fornecedor",
@@ -185,8 +185,11 @@
       "cena": "msg",
       "passos": [
         {
+          "js": "(() => { const h=[...document.querySelectorAll('h1')].find(x=>x.textContent.trim()==='Comunicações'); h.parentElement.querySelector('[role=img][aria-label]').dataset.print='i-titulo' })()"
+        },
+        {
           "pairar": {
-            "css": "[role=tab] [role=img]"
+            "css": "[data-print=i-titulo]"
           },
           "esperar": 1000
         }
@@ -694,7 +697,7 @@
           "esperar": 1800
         },
         {
-          "clicar": "Ver em E-mails",
+          "clicar": "Ver em Comunicações",
           "esperar": 1500
         },
         {
@@ -921,7 +924,7 @@
       ],
       "destacar": [
         {
-          "regex": "^sistema · t-1042$",
+          "regex": "^tarefa · t-1042$",
           "exato": true
         },
         {
@@ -943,7 +946,7 @@
           "css": "thead th:last-child"
         },
         {
-          "regex": "^sistema · t-1042$",
+          "regex": "^tarefa · t-1042$",
           "exato": true
         }
       ]
@@ -994,7 +997,7 @@
       "destacar": [
         "Enviados",
         {
-          "regex": "^sistema · t-1042$"
+          "regex": "^tarefa · t-1042$"
         },
         "Bruno Teixeira"
       ]
@@ -1031,25 +1034,20 @@
       ]
     },
     "RF408": {
-      "cena": "inicio",
       "passos": [
         {
-          "clicar": {
-            "texto": "E-mails",
-            "n": 1
-          },
-          "esperar": 600
+          "js": "(s => { s['$scnw-fase'] = 2; s['$scnw-tela'] = 'emails'; s['$scnw-aba-central'] = 'mensagens' })(document.querySelector('#__nuxt').__vue_app__.config.globalProperties.$nuxt.payload.state)",
+          "esperar": 1500
         },
         {
-          "clicar": "E-mails Enviados",
-          "esperar": 1500
+          "clicar": "Do sistema",
+          "esperar": 900
         }
       ],
       "destacar": [
-        "E-mails Enviados",
         "Do sistema",
         {
-          "regex": "^mostrando 1 a \\d+ de \\d+ resultados$"
+          "regex": "^Mostrando \\d+ a \\d+ de \\d+ resultados$"
         }
       ]
     },

@@ -101,7 +101,9 @@
           "esperar": 1500
         }
       ],
-      "destacar": "Sua conta de envio"
+      "destacar": {
+        "css": "nav[aria-label='Menu lateral']"
+      }
     },
     "RF004": {
       "antes": [
@@ -135,14 +137,15 @@
         },
         {
           "clicar": {
-            "css": "[role=tab]"
+            "css": "[role=tab]",
+            "n": 0
           },
           "esperar": 900
         },
         {
           "clicar": {
             "css": "[role=tab]",
-            "n": 3
+            "n": 2
           },
           "esperar": 1000
         }
