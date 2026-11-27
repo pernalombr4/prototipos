@@ -728,6 +728,8 @@ O importador de estrutura do produto, o mesmo dos casos de uso, define 3 regras 
 - **Referência do projeto:** na criação, preenche sozinha a partir do nome (minúsculas, sem acento, hífen no lugar do
   espaço), como na criação de categoria e campo. A pessoa pode mudar até criar; depois de mexer, o nome não reescreve
   mais. Valida o formato e a repetição. Na edição, fica só para consulta, com cadeado.
+- **Andaime sem as chaves de marcação:** "Mostrar o que muda" e "Mostrar o que pede back-end novo" saíram da barra do
+  protótipo, a pedido da redatora: "é tudo novidade nessa tela de projetos".
 - **Fronteira:** mudam Metas, Visão geral do projeto, a ordem das abas, as tabelas e listas da coluna Ações e a
   sidebar de criar e configurar. A casca e o menu lateral ficam como na rodada 11.
 - **Inventado (pede back-end novo):** meta, marco, projeto e referência do projeto já eram propostas das rodadas

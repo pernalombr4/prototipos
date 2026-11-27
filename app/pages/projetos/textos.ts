@@ -559,14 +559,12 @@ const pt = {
     administradora: 'Administradora do Financeiro',
     participante: 'Participante do Financeiro',
     convidada: 'Convidada da Aurora',
-    mostrarOQueMuda: 'Mostrar o que muda',
     normal: 'Normal',
     prototipo: 'Protótipo',
     porTras: 'Por trás',
     menu: 'Menu',
     menuNovo: 'Menu novo',
     menuAtual: 'Menu atual',
-    mostrarBack: 'Mostrar o que pede back-end novo',
   },
 }
 
@@ -1121,14 +1119,12 @@ const en: Textos = {
     administradora: 'Finance administrator',
     participante: 'Finance participant',
     convidada: 'Aurora guest',
-    mostrarOQueMuda: 'Show what changes',
     normal: 'Normal',
     prototipo: 'Prototype',
     porTras: 'Behind it',
     menu: 'Menu',
     menuNovo: 'New menu',
     menuAtual: 'Current menu',
-    mostrarBack: 'Show what needs new back-end',
   },
 }
 
@@ -1681,14 +1677,12 @@ const es: Textos = {
     administradora: 'Administradora de Finanzas',
     participante: 'Participante de Finanzas',
     convidada: 'Invitada de Aurora',
-    mostrarOQueMuda: 'Mostrar lo que cambia',
     normal: 'Normal',
     prototipo: 'Prototipo',
     porTras: 'Detrás',
     menu: 'Menú',
     menuNovo: 'Menú nuevo',
     menuAtual: 'Menú actual',
-    mostrarBack: 'Mostrar lo que requiere back-end nuevo',
   },
 }
 

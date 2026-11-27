@@ -18,7 +18,7 @@
  *   - a página do projeto com 4 abas: Visão geral (com o status), Itens, Automações e Painel;
  *   - o mapa Campos comuns nas configurações e o modelo de projeto (salvar e começar de);
  *   - as 3 camadas convivendo: projeto, seção do workspace (Comercial) e favoritos pessoais;
- *   - a 2ª chave do andaime, que marca o que pede peça nova no back-end.
+ *   - a 2ª chave do andaime, que marca o que pede peça nova no back-end (as 2 chaves saíram na rodada 12).
  *
  * Uma porta: tudo se navega pelo menu lateral, como no produto.
  * Fonte: o relatório "Usabilidade de projetos no ENSPACE" (2026-11-25), resumido no PESQUISA.md.
@@ -57,7 +57,9 @@ const t = useTextos(textos)
 const tmd = useTextos(textosDeMetasEDiscussoes)
 const prj = useProjetos()
 const { area, tela, cenario, estadoDaTela, menu, eu, souDono, souConvidado, visiveis } = prj
-const { destacar, destacarBack, marca } = useMarcaDeProposta()
+// Rodada 12: as chaves "Mostrar o que muda" e "Mostrar o que pede back-end novo" saíram do andaime (a tela inteira é
+// novidade). As marcas continuam no código, sempre desligadas.
+const { marca } = useMarcaDeProposta()
 const toast = useToast()
 
 /** O ícone Projetos só aparece depois do 1º projeto que a pessoa enxerga (como Favoritos). */
@@ -305,10 +307,6 @@ const pessoaEscolhida = computed({
             @click="estadoDaTela = e.value"
           />
         </UFieldGroup>
-
-        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
-        <USwitch v-model="destacar" :label="t.andaime.mostrarOQueMuda" size="sm" :ui="{ label: 'text-xs' }" />
-        <USwitch v-model="destacarBack" :label="t.andaime.mostrarBack" size="sm" color="info" :ui="{ label: 'text-xs' }" />
 
         <ControlesDePrototipo class="ml-auto" />
 
