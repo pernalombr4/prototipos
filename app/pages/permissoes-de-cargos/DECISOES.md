@@ -322,4 +322,35 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
   da caixa travada abre num popover com ícone, título ("Exigido por Atualizar.") e texto ("Desmarque Atualizar para
   tirar Ver."). Abre no hover e no clique do cadeado ou da caixa; o clique fixa o popover até clicar fora ou apertar Esc.
   A caixa travada não abre mais a dica simples.
-- **Em conversa:** separar o padrão (fora das categorias) e as categorias em abas. Sem decisão.
+- **Pedido (literal):** "o padrao e a categoria nao deveriam estar em abas diferentes? o que acha?". **Mudou:** a aba
+  Dados tem 2 abas: Categorias (primeiro, porque é o que cresce com o workspace) e Fora das categorias (Agenda, IA,
+  Spaceflows e Tarefas). O nome "Padrão" sai dessa seção: ele passa a querer dizer só o padrão das categorias novas.
+- **Pedido (literal):** "me parece confuso do ponto de vista de ux essas 2 linhas do print . uma é um seletor geral e
+  outra é um seletor de padrão pra todas as categorias. voce manteria assim? ou colocaria o padrão pra ser definido em
+  todo lugar? explicando ao user que padrao = o que se define pra esse cargo em qualquer nova categoria que será criada
+  no futuro." **Decisão:** o padrão vale só para as categorias criadas a partir de agora e sai da tabela para o bloco
+  "Padrão para novas categorias", acima da busca. Cada categoria que já existe guarda o próprio valor. Saem a herança
+  em tom claro, o selo e o filtro "Regra própria", os contadores "Liberado em" e "Tirado em" e os botões de voltar ao
+  padrão. A caixa do cabeçalho de cada ação continua sendo o seletor geral da lista filtrada. Motivo: com as 2 linhas
+  juntas, a pessoa não sabia qual mudava as categorias de hoje.
+- **Pedido (literal):** "observe que o campo quais itens pode ser editado pela tabela e campos e formulários nao / tem
+  que clicar pra personalizar e aí siom abrir a sidebar que permite editar isso / e ainda tem um chevron em cada linha
+  que permite abrir e ver os forms. essa usabilidade ta confusa. [...] deixar mais bem centralizado e fluida a
+  navegaçao". **Decisão:** 1 porta por categoria. O nome ou a seta abre, na mesma grade, os formulários e "Itens sem
+  formulário", "Só se for o criador", "Só se for o responsável" (com a escolha dos campos Pessoa na própria linha) e
+  "Campos". As colunas Quais itens, Campos e Formulários viram 1 coluna, Restrições, que só resume o que a categoria
+  limita ("1 de 4 formulários", "76 de 80 campos", "Só alguns itens"); o clique no resumo abre a categoria. Saem o
+  botão Ajustar e o popover de Quais itens. A barra lateral fica só para o campo a campo, com o título "Campos de
+  <categoria>", e abre pelo botão "Escolher campos" da linha Campos ou pelo traço de campo. Referência: a expansão em
+  linha do Strapi e do Appsmith e o campo a campo à parte do Twenty e do Salesforce (`PESQUISA.md`).
+- **Pedido (literal):** "essa aba quem acessa nao deveria estar dentro da configuraçao de um cargo. percebe que é uma
+  informaçao geral? de hierarquia acima." **Decisão:** a aba Quem acessa sai da tela do cargo. O épico 7 passa a pedir
+  uma vista só de leitura na configuração da própria categoria, com o link para a tela de cada cargo. Ficou fora a
+  tela de itens (quem lê itens não decide permissão) e a matriz de todos os cargos (com 120 categorias, vira outra
+  árvore enorme).
+- **Pedido (literal):** "aproveite tambem pra colocar uma caixa de seleçao na colunad e "outras açoes" na tabela de
+  padrao". **Mudou:** o cabeçalho de Outras ações, na aba Fora das categorias e na aba Configurações, tem a caixa que
+  marca ou desmarca todas as outras ações do grupo, como as caixas de Criar, Ver, Atualizar e Excluir.
+- **O que muda e o que não muda:** muda a aba Dados (2 abas, o bloco do padrão, a coluna Restrições, as sublinhas e a
+  barra lateral só de campos). Não muda a casca, o cabeçalho do cargo, o Salvar no topo, a aba Configurações (fora a
+  caixa de Outras ações) e a aba Inválidas.

@@ -1,57 +1,36 @@
 <script setup lang="ts">
 /**
- * "Ajustar": campos, formulários e quem acessa, numa camada lateral.
+ * O campo a campo de uma categoria, numa camada lateral.
  *
  * Hoje o mesmo campo aparece 3 vezes na árvore (sob Criar, sob Ver e sob
  * Atualizar), longe um do outro. Aqui o campo é uma linha e as 3 ações são
  * colunas. E o padrão é "todos os campos": a lista só aparece para quem
  * escolhe esconder ou travar algum.
  *
- * Rodada 2:
- * - ícone por ação no cabeçalho (Directus, Twenty);
- * - Atualizar num campo exige Ver no mesmo campo (Twenty, Salesforce);
- * - aba "Quem acessa": todos os cargos nesta categoria, com Tem e Não tem
- *   (Object Access do Salesforce) e "Esconder cargos iguais a este" (HubSpot).
+ * Rodada 2: Atualizar num campo exige Ver no mesmo campo (Twenty, Salesforce).
+ *
+ * Rodada 6: a camada só cuida dos campos. Formulários e quais itens ficam nas
+ * sublinhas da categoria, na tabela; "Quem acessa" saiu da tela do cargo e
+ * vira proposta para a configuração da categoria.
  */
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import CaixaDePermissao from './_CaixaDePermissao.vue'
-import EditorDeItens from './_EditorDeItens.vue'
-import { type Acao, type AcaoDeCampo, type CategoriaMock, SEM_FORMULARIO, acessoDeOutroCargo, acoes, acoesDeCampo, cargo, outrosCargos } from './mocks'
-import {
-  type EstadoDoCargo,
-  acoesDaCategoria,
-  ajustarOrigens,
-  comDependencia,
-  definirNaOrigem,
-  liberadoNaOrigem,
-  liberarEmTodas,
-  parcialPorOrigem,
-  temAcesso,
-  verExigidoPor,
-  verTravadoNaOrigem,
-} from './estado'
-
-type Aba = 'campos' | 'formularios' | 'itens' | 'acesso'
+import { type AcaoDeCampo, type CategoriaMock, acoesDeCampo } from './mocks'
+import { type EstadoDoCargo, acoesDaCategoria, temAcesso } from './estado'
 
 const props = defineProps<{
   t: Textos
   categoria: CategoriaMock | null
   estado: EstadoDoCargo
   somenteLeitura: boolean
-  /** A aba que abre: a célula parcial e a sublinha Campos abrem em Campos. */
-  abaInicial?: Aba
 }>()
 
 const aberto = defineModel<boolean>('open', { default: false })
 
-const aba = ref<Aba>('campos')
 const busca = ref('')
-const esconderIguais = ref(false)
 
 watch([() => props.categoria?.id, aberto], () => {
-  if (aberto.value)
-    aba.value = props.abaInicial ?? 'campos'
   busca.value = ''
 })
 
@@ -142,212 +121,19 @@ const colunasDeCampo = computed<TableColumn<LinhaDeCampo>[]>(() => [
   ...acoesDeCampo.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20 px-0', td: 'text-center w-20 px-0' } } })),
 ])
 
-/* ------------------------------------------------------------------ *
- * Formulários
- * ------------------------------------------------------------------ */
-
-/*
- * Rodada 5: a caixa da categoria e as dos formulários são pai e filhas.
- * Marcar "Todos" marca todas as origens (e o formulário criado depois);
- * marcar só algumas deixa "Todos" com traço. "Itens sem formulário" é uma
- * origem como as outras: API, importação, Spaceflow, agente de IA.
- */
-interface LinhaDeOrigem {
-  id: number
-  nome: string
-  desc?: string
-  todos?: boolean
-}
-
-const linhasDeOrigem = computed<LinhaDeOrigem[]>(() => {
-  if (!props.categoria)
-    return []
-  return [
-    { id: -1, nome: props.t.todosOsFormularios, desc: props.t.todosOsFormulariosDesc, todos: true },
-    ...props.categoria.formularios.map(f => ({ id: f.id, nome: f.nome })),
-    { id: SEM_FORMULARIO, nome: props.t.semFormulario, desc: props.t.semFormularioDesc },
-  ]
-})
-
-function valorDaOrigem(l: LinhaDeOrigem, a: Acao): Valor {
-  const c = props.categoria!
-  if (!acoesDaCategoria(props.estado, c.id)[a])
-    return false
-  if (l.todos)
-    return parcialPorOrigem(props.estado, c, a) ? 'indeterminate' : true
-  return liberadoNaOrigem(props.estado, c, a, l.id)
-}
-
-function alterarOrigem(l: LinhaDeOrigem, a: Acao, valor: boolean) {
-  const c = props.categoria!
-  if (l.todos) {
-    // Traço ou vazio: libera em todas. Marcada: tira de todas.
-    if (valor || parcialPorOrigem(props.estado, c, a)) {
-      liberarEmTodas(props.estado, c, a)
-    }
-    else {
-      const novo = comDependencia({ ...acoesDaCategoria(props.estado, c.id), [a]: false })
-      props.estado.categorias[c.id]!.proprio = novo
-      ajustarOrigens(props.estado, c)
-    }
-    return
-  }
-  definirNaOrigem(props.estado, c, a, l.id, valor)
-}
-
-function travadaNaOrigem(l: LinhaDeOrigem, a: Acao) {
-  const c = props.categoria!
-  if (a !== 'ver' || !acoesDaCategoria(props.estado, c.id).ver)
-    return null
-  if (l.todos) {
-    if (parcialPorOrigem(props.estado, c, 'ver'))
-      return null
-    const quem = verExigidoPor(acoesDaCategoria(props.estado, c.id))
-    return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
-  }
-  if (!liberadoNaOrigem(props.estado, c, 'ver', l.id))
-    return null
-  const quem = verTravadoNaOrigem(props.estado, c, l.id)
-  return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
-}
-
-const colunasDeForm = computed<TableColumn<LinhaDeOrigem>[]>(() => [
-  { accessorKey: 'nome', header: props.t.colunaFormulario },
-  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20 px-0', td: 'text-center w-20 px-0' } } })),
-])
-
-/* ------------------------------------------------------------------ *
- * Quem acessa: este cargo (ao vivo) e os outros do workspace.
- * ------------------------------------------------------------------ */
-
-interface LinhaDeCargo {
-  id: number
-  nome: string
-  icone: string
-  pessoas: number
-  acesso: Record<Acao, boolean>
-  este?: boolean
-}
-
-const linhasDeCargo = computed<LinhaDeCargo[]>(() => {
-  if (!props.categoria || !acoesCat.value)
-    return []
-  const meu = acoesCat.value
-  const outros = outrosCargos.map(c => ({
-    id: c.id,
-    nome: c.name,
-    icone: c.icon ?? 'i-lucide-id-card',
-    pessoas: c.pessoas,
-    acesso: acessoDeOutroCargo(c.id, props.categoria!.name),
-  }))
-  const visiveis = esconderIguais.value ? outros.filter(o => acoes.some(a => o.acesso[a] !== meu[a])) : outros
-  return [{ id: cargo.id, nome: cargo.name, icone: cargo.icon ?? 'i-lucide-id-card', pessoas: cargo.pessoas, acesso: meu, este: true }, ...visiveis]
-})
-
-const colunasDeCargo = computed<TableColumn<LinhaDeCargo>[]>(() => [
-  { accessorKey: 'nome', header: props.t.colunaCargo },
-  { accessorKey: 'pessoas', header: props.t.colunaPessoas, meta: { class: { th: 'w-24 text-right', td: 'w-24 text-right' } } },
-  ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20', td: 'text-center w-20' } } })),
-])
-
-const itensDeAba = computed(() => [
-  { label: props.t.abaCampos, value: 'campos', icon: 'i-lucide-text-cursor-input', badge: props.categoria?.campos.length },
-  { label: props.t.abaFormularios, value: 'formularios', icon: 'i-lucide-file-text', badge: props.categoria?.formularios.length },
-  { label: props.t.abaItens, value: 'itens', icon: 'i-lucide-user-round-check' },
-  { label: props.t.abaQuemAcessa, value: 'acesso', icon: 'i-lucide-users', badge: outrosCargos.length + 1 },
-])
 </script>
 
 <template>
   <USlideover
     v-model:open="aberto"
-    :title="categoria?.name"
+    :title="categoria ? t.camposDaCategoria(categoria.name) : ''"
     :description="t.detalheDesc"
     :ui="{ content: 'sm:max-w-3xl', body: 'space-y-4' }"
   >
     <template #body>
       <template v-if="categoria && ec && acoesCat">
-        <UTabs v-model="aba" :items="itensDeAba" :content="false" variant="link" />
-
-        <!-- QUEM ACESSA (vale mesmo sem acesso deste cargo) -->
-        <div v-if="aba === 'acesso'" class="space-y-3 animate-[entrada_.25s_ease-out_both]">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-muted">{{ t.quemAcessaDesc }}</p>
-            <USwitch v-model="esconderIguais" :label="t.esconderIguais" size="sm" />
-          </div>
-          <UTable
-            :data="linhasDeCargo"
-            :columns="colunasDeCargo"
-            :meta="{ class: { tr: (r: { original: LinhaDeCargo }) => r.original.este ? 'bg-primary/5' : '' } }"
-            class="rounded-lg border border-default"
-            :ui="{ base: 'w-full min-w-[36rem] table-fixed', th: 'py-2 text-xs', td: 'py-2' }"
-          >
-            <template #nome-cell="{ row }">
-              <span class="flex min-w-0 items-center gap-2">
-                <UIcon :name="row.original.icone" class="size-4 shrink-0 text-muted" />
-                <span class="truncate text-sm text-default">{{ row.original.nome }}</span>
-                <UBadge v-if="row.original.este" :label="t.esteCargo" color="primary" variant="subtle" size="sm" class="shrink-0" />
-              </span>
-            </template>
-            <template v-for="a in acoes" :key="a" #[`${a}-cell`]="{ row }">
-              <UIcon
-                :name="row.original.acesso[a] ? 'i-lucide-check' : 'i-lucide-x'"
-                class="size-4"
-                :class="row.original.acesso[a] ? 'text-success' : 'text-error'"
-                :aria-label="row.original.acesso[a] ? t.tem : t.naoTem"
-                role="img"
-              />
-            </template>
-          </UTable>
-          <p v-if="esconderIguais && linhasDeCargo.length === 1" class="text-center text-sm text-muted">{{ t.semDiferentes }}</p>
-        </div>
-
-        <!-- QUAIS ITENS: criador e responsável -->
-        <div v-else-if="aba === 'itens'" class="animate-[entrada_.25s_ease-out_both]">
-          <EditorDeItens :t="t" :estado="estado" :categoria="categoria" :somente-leitura="somenteLeitura" />
-        </div>
-
-        <!-- FORMULÁRIOS: a categoria é a caixa pai, cada formulário uma filha. -->
-        <div v-else-if="aba === 'formularios'" class="space-y-3 animate-[entrada_.25s_ease-out_both]">
-          <p class="text-sm text-muted">{{ t.formsDesc }}</p>
-          <UTable
-            :data="linhasDeOrigem"
-            :columns="colunasDeForm"
-            :meta="{ class: { tr: (r: { original: LinhaDeOrigem }) => r.original.todos ? 'bg-elevated/60' : '' } }"
-            class="rounded-lg border border-default"
-            :ui="{ base: 'w-full min-w-[36rem] table-fixed', th: 'py-2 text-xs', td: 'py-2' }"
-          >
-            <template #nome-cell="{ row }">
-              <span class="flex min-w-0 items-center gap-2" :class="row.original.todos ? '' : 'pl-6'">
-                <UIcon
-                  :name="row.original.todos ? 'i-lucide-layers' : row.original.id === SEM_FORMULARIO ? 'i-lucide-bot' : 'i-lucide-file-text'"
-                  class="size-4 shrink-0 text-muted"
-                />
-                <span class="min-w-0">
-                  <span class="block truncate text-sm" :class="row.original.todos ? 'font-medium text-highlighted' : 'text-default'">{{ row.original.nome }}</span>
-                  <span v-if="row.original.desc" class="block whitespace-normal text-xs text-muted">{{ row.original.desc }}</span>
-                </span>
-              </span>
-            </template>
-            <template v-for="a in acoes" :key="a" #[`${a}-cell`]="{ row }">
-              <CaixaDePermissao
-                :valor="valorDaOrigem(row.original, a)"
-                :rotulo="`${t.acoes[a]}: ${row.original.nome}`"
-                :travada-por="travadaNaOrigem(row.original, a)"
-                :dica="row.original.todos && valorDaOrigem(row.original, a) === 'indeterminate' ? t.todosComTracoDica : ''"
-                :desabilitada="somenteLeitura"
-                @alterar="v => alterarOrigem(row.original, a, v)"
-              />
-            </template>
-          </UTable>
-          <p class="flex items-start gap-2 rounded-md bg-elevated px-3 py-2 text-xs text-muted">
-            <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />
-            {{ t.formNovoAviso }}
-          </p>
-        </div>
-
         <UAlert
-          v-else-if="!comAcesso"
+          v-if="!comAcesso"
           icon="i-lucide-lock"
           color="neutral"
           variant="subtle"
@@ -355,7 +141,7 @@ const itensDeAba = computed(() => [
         />
 
         <!-- CAMPOS -->
-        <div v-else-if="aba === 'campos'" class="space-y-4 animate-[entrada_.25s_ease-out_both]">
+        <div v-else class="space-y-4 animate-[entrada_.25s_ease-out_both]">
           <URadioGroup
             v-model="modo"
             :items="itensDeModo"
@@ -377,7 +163,7 @@ const itensDeAba = computed(() => [
               :columns="colunasDeCampo"
               sticky
               class="max-h-[52dvh] rounded-lg border border-default"
-              :ui="{ base: 'w-full table-fixed', th: 'py-2 text-xs bg-default', td: 'py-1.5' }"
+              :ui="{ base: 'w-full table-fixed', th: 'py-2 text-xs align-top bg-elevated text-highlighted', td: 'py-1.5' }"
             >
               <template v-for="a in acoesDeCampo" :key="a" #[`${a}-header`]>
                 <UTooltip :text="acoesCat[a] ? t.dicas[a] : t.acaoBloqueada(t.acoes[a])">
@@ -421,7 +207,6 @@ const itensDeAba = computed(() => [
             </UTable>
           </template>
         </div>
-
       </template>
     </template>
 

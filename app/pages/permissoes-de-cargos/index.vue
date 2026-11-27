@@ -25,7 +25,7 @@ import decisoesMd from './DECISOES.md?raw'
 
 definePageMeta({
   titulo: 'Permissões de cargos',
-  descricao: 'A tela do cargo que cresce com o workspace: padrão para todas as categorias, uma linha por categoria e campos e formulários em Ajustar.',
+  descricao: 'A tela do cargo que cresce com o workspace: uma linha por categoria, que abre os formulários, os campos e quais itens, e o padrão só para as categorias novas.',
   status: 'em-revisao',
   atualizado: '2026-10-08',
   tela: 'Gestão de Membros › Cargo › Permissões',
@@ -103,21 +103,24 @@ const itensDeAba = computed(() => [
   { label: t.value.abas.invalidas, value: 'invalidas', icon: 'i-lucide-shield' },
 ])
 
+/** Rodada 6: dentro de Dados, as categorias primeiro e o que fica fora delas na outra aba. */
+const subAba = ref<'categorias' | 'fora'>('categorias')
+const itensDeSubAba = computed(() => [
+  { label: t.value.categorias, value: 'categorias', icon: 'i-lucide-layout-grid' },
+  { label: t.value.padrao, value: 'fora', icon: 'i-lucide-boxes' },
+])
+
+/** Rodada 6: a barra lateral só abre para o campo a campo. */
 const categoriaAberta = ref<CategoriaMock | null>(null)
 const detalheAberto = ref(false)
-const abaDoDetalhe = ref<'campos' | 'formularios' | 'itens' | 'acesso'>('campos')
-function ajustar(c: CategoriaMock, aba: 'campos' | 'formularios' | 'itens' | 'acesso' = 'campos') {
+function abrirCampos(c: CategoriaMock) {
   categoriaAberta.value = c
-  abaDoDetalhe.value = aba
   detalheAberto.value = true
 }
 
 /** Rodada 3: simulação de 5 "outras ações" em Tarefas rápidas, só no andaime. */
 const simularOutras = ref(false)
 const gruposDoPadrao = computed(() => simularOutras.value ? padraoComOutrasSimuladas() : padrao)
-
-/** Rodada 2: padrão como primeira linha. A forma da rodada 1 (cartão) fica no andaime. */
-const formaDoPadrao = ref<'linha' | 'cartao'>('linha')
 
 const confirmando = ref(false)
 const salvando = ref(false)
@@ -245,25 +248,24 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
 
       <div class="pt-5">
         <!-- DADOS -->
-        <div v-if="aba === 'dados'" class="space-y-8">
-          <section class="space-y-3">
-            <header>
-              <h3 class="text-sm font-semibold text-highlighted">{{ t.padrao }}</h3>
-              <p class="text-sm text-muted">{{ t.padraoDesc }}</p>
-            </header>
-            <MatrizFixa :t="t" :grupos="gruposDoPadrao" :estado="estado" :salvo="salvo" :somente-leitura="somenteLeitura" />
-          </section>
+        <div v-if="aba === 'dados'" class="space-y-5">
+          <UTabs v-model="subAba" :items="itensDeSubAba" :content="false" variant="pill" size="sm" color="neutral" class="w-fit" />
 
           <MatrizDeCategorias
+            v-if="subAba === 'categorias'"
             :t="t"
             :lista="lista"
             :estado="estado"
             :salvo="salvo"
             :somente-leitura="somenteLeitura"
             :carregando="carregando"
-            :forma-do-padrao="formaDoPadrao"
-            @ajustar="ajustar"
+            @campos="abrirCampos"
           />
+
+          <section v-else class="space-y-3">
+            <p class="text-sm text-muted">{{ t.padraoDesc }}</p>
+            <MatrizFixa :t="t" :grupos="gruposDoPadrao" :estado="estado" :salvo="salvo" :somente-leitura="somenteLeitura" />
+          </section>
         </div>
 
         <!-- CONFIGURAÇÕES -->
@@ -284,7 +286,6 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
       v-model:open="detalheAberto"
       :t="t"
       :categoria="categoriaAberta"
-      :aba-inicial="abaDoDetalhe"
       :estado="estado"
       :somente-leitura="somenteLeitura"
     />
@@ -337,19 +338,6 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
         />
 
         <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
-        <span class="text-xs font-semibold uppercase tracking-wider text-muted">Padrão</span>
-        <UButton
-          v-for="f in [{ valor: 'linha', rotulo: 'Primeira linha (rodada 2)' }, { valor: 'cartao', rotulo: 'Cartão (rodada 1)' }] as const"
-          :key="f.valor"
-          :label="f.rotulo"
-          size="xs"
-          class="transition-transform hover:-translate-y-0.5"
-          :color="formaDoPadrao === f.valor ? 'primary' : 'neutral'"
-          :variant="formaDoPadrao === f.valor ? 'solid' : 'subtle'"
-          @click="formaDoPadrao = f.valor"
-        />
-
-        <span class="mx-1 h-5 w-px bg-accented" aria-hidden="true" />
         <span class="text-xs font-semibold uppercase tracking-wider text-muted">Outras ações</span>
         <UButton
           v-for="f in [{ valor: false, rotulo: 'Como hoje' }, { valor: true, rotulo: 'Simular 5 na mesma área' }] as const"
@@ -378,7 +366,7 @@ const fmt = (n: number) => n.toLocaleString('pt-BR')
         <UIcon name="i-lucide-ruler" class="mr-1 inline size-3.5 align-[-2px]" />
         Neste volume, a aba Dados de hoje teria <strong class="text-highlighted">{{ fmt(caixasHoje) }} caixas</strong>
         com a árvore aberta (cerca de {{ fmt(pxHoje) }} px de rolagem). A proposta mostra
-        <strong class="text-highlighted">{{ fmt(linhasProposta) }} linhas</strong> de 4 caixas; campo e formulário só em Ajustar.
+        <strong class="text-highlighted">{{ fmt(linhasProposta) }} linhas</strong> de 4 caixas; formulário, campo e quais itens só quando a categoria abre.
       </p>
     </div>
   </CascaDeAcesso>

@@ -40,6 +40,11 @@ function chavesDaColuna(g: GrupoFixo, acao: Acao) {
   return g.linhas.filter(l => l.acoes.includes(acao)).map(l => `${l.chave}:${acao}`)
 }
 
+/** Rodada 6: a coluna Outras ações também tem caixa, que marca todas as outras ações do grupo. */
+function chavesDasOutras(g: GrupoFixo) {
+  return g.linhas.flatMap(l => (l.outras ?? []).map(o => `${l.chave}:${o}`))
+}
+
 function estadoDe(chaves: string[]): Valor {
   const n = chaves.filter(c => props.estado.fixas.includes(c)).length
   if (!n)
@@ -120,6 +125,20 @@ const colunas = computed<TableColumn<GrupoFixo['linhas'][number]>[]>(() => [
               :disabled="somenteLeitura"
               :aria-label="`${t.acoes[a]}: ${t.grupos[g.chave]}`"
               @update:model-value="v => definir(chavesDaColuna(g, a), v === true)"
+            />
+          </span>
+        </template>
+
+        <!-- Rodada 6: Outras ações com a mesma caixa de coluna das ações. -->
+        <template #outras-header>
+          <span class="inline-flex flex-col items-start gap-1">
+            <span>{{ t.colunaOutras }}</span>
+            <UCheckbox
+              v-if="chavesDasOutras(g).length"
+              :model-value="estadoDe(chavesDasOutras(g))"
+              :disabled="somenteLeitura"
+              :aria-label="`${t.colunaOutras}: ${t.grupos[g.chave]}`"
+              @update:model-value="v => definir(chavesDasOutras(g), v === true)"
             />
           </span>
         </template>

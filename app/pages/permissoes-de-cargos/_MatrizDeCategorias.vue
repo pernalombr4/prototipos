@@ -6,19 +6,19 @@
  * inteira de campos cada uma. Com 120 categorias são milhares de caixas.
  *
  * Aqui:
- * - um padrão de 4 caixas vale para toda categoria sem regra própria,
- *   inclusive as que forem criadas depois. Na rodada 2 ele virou a primeira
- *   linha da tabela (Strapi, Retool); o cartão da rodada 1 continua no andaime;
- * - uma linha por categoria, com as 4 ações em colunas fixas e ícone no
- *   cabeçalho (Directus, Twenty);
- * - a seta da categoria abre, na mesma grade, as sublinhas Campos, Quais itens
- *   e cada formulário (Appsmith, Retool). O campo a campo fica em "Ajustar";
- * - a caixa do cabeçalho marca a coluna inteira da lista filtrada.
+ * - rodada 6: o padrão vale só para categoria nova e mora no bloco
+ *   "Padrão para novas categorias", fora da tabela. Cada categoria guarda o
+ *   seu valor; a caixa do cabeçalho muda a coluna inteira da lista filtrada;
+ * - uma linha por categoria, com as 4 ações em colunas fixas (Directus, Twenty);
+ * - rodada 6: 1 porta só. O nome ou a seta da categoria abre, na mesma grade,
+ *   as sublinhas de cada formulário, Quais itens e Campos (Strapi, Appsmith).
+ *   A coluna Restrições só resume o que a categoria limita, e o clique abre a
+ *   categoria. A barra lateral fica só para o campo a campo (Twenty, Salesforce).
  */
 import type { TableColumn } from '@nuxt/ui'
 import type { Textos } from './textos'
 import CaixaDePermissao from './_CaixaDePermissao.vue'
-import QuaisItens from './_QuaisItens.vue'
+import PadraoParaNovas from './_PadraoParaNovas.vue'
 import {
   type Acao,
   type AcaoDeAlcance,
@@ -37,6 +37,7 @@ import {
   type MapaDeAcoes,
   acoesDaCategoria,
   ajustarOrigens,
+  camposPadraoDeResponsavel,
   comDependencia,
   definirNaOrigem,
   definirRegra,
@@ -60,25 +61,20 @@ const props = defineProps<{
   salvo: EstadoDoCargo
   somenteLeitura: boolean
   carregando: boolean
-  /** Rodada 2: primeira linha da tabela. Rodada 1: cartão em cima. */
-  formaDoPadrao: 'linha' | 'cartao'
 }>()
 
-const emit = defineEmits<{ ajustar: [categoria: CategoriaMock, aba?: 'campos' | 'formularios' | 'itens' | 'acesso'] }>()
+/** Abre a barra lateral do campo a campo. */
+const emit = defineEmits<{ campos: [categoria: CategoriaMock] }>()
 
 const toast = useToast()
 
-type Filtro = 'todas' | 'proprias' | 'comAcesso' | 'semAcesso' | 'comItens' | 'alteradas'
+type Filtro = 'todas' | 'comAcesso' | 'semAcesso' | 'comItens' | 'alteradas'
 const busca = ref('')
 const filtro = ref<Filtro>('todas')
 const abertas = ref<number[]>([])
 
 const alterada = (c: CategoriaMock) =>
   JSON.stringify(props.estado.categorias[c.id]) !== JSON.stringify(props.salvo.categorias[c.id])
-  || (!props.estado.categorias[c.id]?.proprio && JSON.stringify(props.estado.padrao) !== JSON.stringify(props.salvo.padrao))
-  || (!props.estado.categorias[c.id]?.itens && JSON.stringify(props.estado.padraoItens) !== JSON.stringify(props.salvo.padraoItens))
-
-const propria = (c: CategoriaMock) => !!props.estado.categorias[c.id]?.proprio || Object.keys(props.estado.categorias[c.id]?.origens ?? {}).length > 0
 
 function normalizar(texto: string) {
   return texto.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
@@ -86,7 +82,6 @@ function normalizar(texto: string) {
 
 const passaNoFiltro: Record<Filtro, (c: CategoriaMock) => boolean> = {
   todas: () => true,
-  proprias: propria,
   comAcesso: c => temAcesso(props.estado, c.id),
   semAcesso: c => !temAcesso(props.estado, c.id),
   comItens: c => temRegraDeItens(props.estado, c),
@@ -105,11 +100,10 @@ const itensDeFiltro = computed(() => (Object.keys(passaNoFiltro) as Filtro[]).ma
 })))
 
 /* ------------------------------------------------------------------ *
- * As linhas da grade: padrão, categorias e, quando abertas, as sublinhas.
+ * As linhas da grade: categorias e, quando abertas, as sublinhas.
  * ------------------------------------------------------------------ */
 
 type Linha =
-  | { tipo: 'padrao', id: string }
   | { tipo: 'categoria', id: string, c: CategoriaMock }
   | { tipo: 'campos', id: string, c: CategoriaMock }
   | { tipo: 'criador', id: string, c: CategoriaMock }
@@ -119,18 +113,16 @@ type Linha =
 
 const linhas = computed<Linha[]>(() => {
   const saida: Linha[] = []
-  if (props.formaDoPadrao === 'linha')
-    saida.push({ tipo: 'padrao', id: 'padrao' })
   for (const c of filtradas.value) {
     saida.push({ tipo: 'categoria', id: `c${c.id}`, c })
     if (abertas.value.includes(c.id)) {
-      saida.push({ tipo: 'campos', id: `k${c.id}`, c })
-      saida.push({ tipo: 'criador', id: `o${c.id}`, c })
-      saida.push({ tipo: 'responsavel', id: `r${c.id}`, c })
       if (temOrigens(c)) {
         c.formularios.forEach(f => saida.push({ tipo: 'formulario', id: `f${f.id}`, c, f }))
         saida.push({ tipo: 'semForm', id: `s${c.id}`, c })
       }
+      saida.push({ tipo: 'criador', id: `o${c.id}`, c })
+      saida.push({ tipo: 'responsavel', id: `r${c.id}`, c })
+      saida.push({ tipo: 'campos', id: `k${c.id}`, c })
     }
   }
   return saida
@@ -140,20 +132,20 @@ function alternarAberta(c: CategoriaMock) {
   abertas.value = abertas.value.includes(c.id) ? abertas.value.filter(x => x !== c.id) : [...abertas.value, c.id]
 }
 
-/* ------------------------------------------------------------------ *
- * Escrever: uma regra igual ao padrão não é regra própria, e a linha
- * volta a seguir o padrão. Assim "Regra própria" quer dizer "diferente".
- * Atualizar e Excluir exigem Ver.
- * ------------------------------------------------------------------ */
-
-function igualAoPadrao(m: MapaDeAcoes) {
-  return acoes.every(a => m[a] === props.estado.padrao[a])
+/** O resumo da coluna Restrições só abre (não fecha) a categoria. */
+function abrir(c: CategoriaMock) {
+  if (!abertas.value.includes(c.id))
+    abertas.value = [...abertas.value, c.id]
 }
+
+/* ------------------------------------------------------------------ *
+ * Escrever. Atualizar e Excluir exigem Ver.
+ * ------------------------------------------------------------------ */
 
 function definirAcao(c: CategoriaMock, acao: Acao, valor: boolean) {
   const e = props.estado.categorias[c.id]!
   const novo = comDependencia({ ...acoesDaCategoria(props.estado, c.id), [acao]: valor })
-  e.proprio = igualAoPadrao(novo) ? null : novo
+  e.proprio = novo
   // Marcar a categoria marca todas as origens; desmarcar tira de todas.
   delete e.origens[acao]
   ajustarOrigens(props.estado, c)
@@ -162,23 +154,8 @@ function definirAcao(c: CategoriaMock, acao: Acao, valor: boolean) {
 function definirLinha(c: CategoriaMock, valor: boolean) {
   const e = props.estado.categorias[c.id]!
   const novo = { criar: valor, ver: valor, atualizar: valor, excluir: valor }
-  e.proprio = igualAoPadrao(novo) ? null : novo
+  e.proprio = novo
   e.origens = {}
-}
-
-function voltarAoPadrao(c: CategoriaMock) {
-  props.estado.categorias[c.id]!.proprio = null
-  props.estado.categorias[c.id]!.origens = {}
-  ajustarOrigens(props.estado, c)
-}
-
-function definirPadrao(acao: Acao, valor: boolean) {
-  props.estado.padrao = comDependencia({ ...props.estado.padrao, [acao]: valor })
-  for (const c of props.lista) {
-    const p = props.estado.categorias[c.id]!.proprio
-    if (p && igualAoPadrao(p))
-      props.estado.categorias[c.id]!.proprio = null
-  }
 }
 
 type Valor = boolean | 'indeterminate'
@@ -221,12 +198,6 @@ function estadoDaLinha(c: CategoriaMock): Valor {
   return n === 4 ? true : 'indeterminate'
 }
 
-/** A célula foge do padrão: cor cheia e desfazer ao lado (Twenty). */
-function difere(c: CategoriaMock, acao: Acao) {
-  const p = props.estado.categorias[c.id]?.proprio
-  return !!p && p[acao] !== props.estado.padrao[acao]
-}
-
 /** Ação liberada só em parte dos campos: a célula fica parcial (Directus, Strapi). */
 function parcial(c: CategoriaMock, acao: Acao) {
   if (!(acoesDeCampo as Acao[]).includes(acao) || !acoesDaCategoria(props.estado, c.id)[acao])
@@ -245,12 +216,6 @@ function valorDaCelula(c: CategoriaMock, acao: Acao): Valor {
 /** Os nomes das origens, na ordem da categoria. */
 function nomesDasOrigens(c: CategoriaMock, lista: number[]) {
   return lista.map(o => o === SEM_FORMULARIO ? props.t.semFormulario : c.formularios.find(f => f.id === o)?.nome ?? '').join(', ')
-}
-
-/** "1 de 4" quando alguma origem fica sem ação nenhuma; "Em parte" quando só algumas ações se limitam. */
-function rotuloDeOrigens(c: CategoriaMock) {
-  const r = resumoDeOrigens(props.estado, c)!
-  return r.n < r.total ? props.t.origensDe(r.n, r.total) : props.t.origensEmParte
 }
 
 /** Uma linha por ação limitada: "Criar em 12 de 13". Com 1 a 3 origens, os nomes. */
@@ -278,7 +243,7 @@ function clicarCelula(c: CategoriaMock, acao: Acao, valor: boolean) {
   }
   // Traço por campo: o clique leva ao ajuste dos campos, sem apagar a escolha feita lá.
   if (parcial(c, acao)) {
-    emit('ajustar', c, 'campos')
+    emit('campos', c)
     return
   }
   definirAcao(c, acao, valor)
@@ -289,12 +254,12 @@ function travadaPor(m: MapaDeAcoes, acao: Acao) {
   return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
 }
 
-/** Ícone e dica da regra de itens na caixa (criador, responsável ou os 2). `c` nulo = padrão. */
-function regraDaCelula(c: CategoriaMock | null, acao: Acao) {
+/** Ícone e dica da regra de itens na caixa (criador, responsável ou os 2). */
+function regraDaCelula(c: CategoriaMock, acao: Acao) {
   if (!(acoesDeAlcance as Acao[]).includes(acao))
     return null
-  const ligada = c ? acoesDaCategoria(props.estado, c.id)[acao] : props.estado.padrao[acao]
-  const r = (c ? itensDaCategoria(props.estado, c.id) : props.estado.padraoItens)[acao as AcaoDeAlcance]
+  const ligada = acoesDaCategoria(props.estado, c.id)[acao]
+  const r = itensDaCategoria(props.estado, c.id)[acao as AcaoDeAlcance]
   if (!ligada || !r || !(r.criador || r.responsavel))
     return null
   const nome = props.t.acoes[acao]
@@ -302,13 +267,6 @@ function regraDaCelula(c: CategoriaMock | null, acao: Acao) {
     return { icone: 'i-lucide-users', dica: props.t.soAmbos(nome) }
   return r.criador ? { icone: 'i-lucide-user-round', dica: props.t.soOsSeus(nome) } : { icone: 'i-lucide-user-check', dica: props.t.soResponsavel(nome) }
 }
-
-/** Quantas categorias fogem do padrão nesta ação (o "Revoked for N" do Twenty). */
-const excecoes = (acao: Acao) =>
-  props.lista.filter(c => acoesDaCategoria(props.estado, c.id)[acao] !== props.estado.padrao[acao]).length
-
-const rotuloExcecao = (a: Acao) =>
-  props.estado.padrao[a] ? props.t.tiradoEm(excecoes(a)) : props.t.liberadoEm(excecoes(a))
 
 /* ------------------------------------------------------------------ *
  * Sublinhas
@@ -323,6 +281,16 @@ function valorDeCampos(c: CategoriaMock, acao: AcaoDeCampo): Valor {
 
 function regraMarcada(c: CategoriaMock, acao: AcaoDeAlcance, tipo: keyof RegraDeItens) {
   return !!itensDaCategoria(props.estado, c.id)[acao]?.[tipo]
+}
+
+/** Rodada 6: os campos Pessoa que contam como responsável se escolhem na própria sublinha. */
+function camposDoResponsavel(c: CategoriaMock) {
+  return props.estado.categorias[c.id]?.itens?.campos ?? camposPadraoDeResponsavel(c)
+}
+
+function definirCamposDoResponsavel(c: CategoriaMock, campos: string[]) {
+  const ec = props.estado.categorias[c.id]!
+  ec.itens = { regras: ec.itens?.regras ?? {}, campos }
 }
 
 function nomesDosResponsaveis(c: CategoriaMock) {
@@ -340,24 +308,35 @@ function travadaNaOrigem(c: CategoriaMock, a: Acao, o: number) {
   return quem ? props.t.exigidoPor(props.t.acoes[quem]) : null
 }
 
+/** A coluna Restrições: o que a categoria limita, em até 3 resumos. */
+function restricoes(c: CategoriaMock) {
+  const saida: { rotulo: string, icone: string, dica: string }[] = []
+  const o = resumoDeOrigens(props.estado, c)
+  if (o)
+    saida.push({ rotulo: o.n < o.total ? props.t.formulariosDe(o.n, o.total) : props.t.formulariosEmParte, icone: 'i-lucide-split', dica: dicaDeOrigens(c) })
+  const k = resumoDeCampos(props.estado, c)
+  if (k)
+    saida.push({ rotulo: props.t.camposDeTotal(k.liberados, k.total), icone: 'i-lucide-eye-off', dica: props.t.restricaoDica })
+  if (temRegraDeItens(props.estado, c)) {
+    const dica = acoesDeAlcance.map(a => regraDaCelula(c, a)?.dica).filter(Boolean).join(' ')
+    saida.push({ rotulo: props.t.filtros.comItens, icone: 'i-lucide-user-round-check', dica })
+  }
+  return saida
+}
+
 const valorNaOrigem = (c: CategoriaMock, a: Acao, o: number) =>
   acoesDaCategoria(props.estado, c.id)[a] && liberadoNaOrigem(props.estado, c, a, o)
 
 const colunas = computed<TableColumn<Linha>[]>(() => [
   { id: 'nome', header: props.t.colunaCategoria, meta: { class: { th: 'w-auto', td: 'w-auto' } } },
   ...acoes.map(a => ({ id: a, header: props.t.acoes[a], meta: { class: { th: 'text-center w-20 px-0', td: 'text-center w-20 px-0' } } })),
-  { id: 'itens', header: props.t.colunaItens, meta: { class: { th: 'w-48', td: 'w-48' } } },
-  { id: 'campos', header: props.t.colunaCampos, meta: { class: { th: 'w-28', td: 'w-28' } } },
-  { id: 'formularios', header: props.t.colunaFormularios, meta: { class: { th: 'w-44', td: 'w-44' } } },
-  { id: 'ajustar', header: '', meta: { class: { th: 'w-32 pl-0', td: 'w-32 pl-0 text-right' } } },
+  { id: 'restricoes', header: props.t.colunaRestricoes, meta: { class: { th: 'w-96', td: 'w-96' } } },
 ])
 
 const meta = {
   class: {
     tr: (row: { original: Linha }) => {
       const l = row.original
-      if (l.tipo === 'padrao')
-        return 'bg-primary/5'
       if (l.tipo !== 'categoria')
         return 'bg-elevated/50'
       return alterada(l.c) ? 'bg-warning/5' : ''
@@ -373,38 +352,8 @@ const meta = {
       <p class="text-sm text-muted">{{ t.categoriasDesc }}</p>
     </header>
 
-    <!-- Rodada 1: o padrão num cartão em cima da tabela. -->
-    <div v-if="formaDoPadrao === 'cartao'" class="flex flex-wrap items-center gap-x-8 gap-y-3 rounded-lg border border-primary/30 bg-primary/5 px-4 py-3 animate-[entrada_.3s_ease-out_both]">
-      <div class="flex min-w-60 flex-1 items-start gap-3">
-        <span class="flex size-8 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
-          <UIcon name="i-lucide-layers" class="size-4" />
-        </span>
-        <span>
-          <span class="block text-sm font-semibold text-highlighted">{{ t.padraoLinha }}</span>
-          <span class="block text-xs text-muted">{{ t.padraoLinhaDesc }}</span>
-        </span>
-      </div>
-      <div class="flex flex-wrap gap-6">
-        <div v-for="a in acoes" :key="a" class="flex flex-col items-start gap-0.5">
-          <span class="flex items-center gap-1.5">
-            <CaixaDePermissao
-              :valor="estado.padrao[a]"
-              :rotulo="`${t.padraoLinha}: ${t.acoes[a]}`"
-              :travada-por="travadaPor(estado.padrao, a)"
-              :dica="t.dicas[a]"
-              :desabilitada="somenteLeitura"
-              @alterar="v => definirPadrao(a, v)"
-            />
-            <span class="text-sm text-default">{{ t.acoes[a] }}</span>
-          </span>
-          <UButton v-if="excecoes(a)" :label="rotuloExcecao(a)" size="xs" variant="link" color="neutral" class="-ml-1 px-1 text-xs" @click="filtro = 'proprias'" />
-        </div>
-        <div class="flex flex-col items-start gap-0.5">
-          <span class="text-xs text-muted">{{ t.colunaItens }}</span>
-          <QuaisItens :t="t" :estado="estado" :categoria="null" :somente-leitura="somenteLeitura" />
-        </div>
-      </div>
-    </div>
+    <!-- Rodada 6: o padrão vale só para categoria nova e fica fora da tabela. -->
+    <PadraoParaNovas :t="t" :estado="estado" :salvo="salvo" :somente-leitura="somenteLeitura" />
 
     <!-- Busca, filtro e contagem. -->
     <div class="flex flex-wrap items-center gap-3">
@@ -451,19 +400,8 @@ const meta = {
 
       <!-- ───────── Coluna do nome ───────── -->
       <template #nome-cell="{ row }">
-        <!-- Padrão -->
-        <span v-if="row.original.tipo === 'padrao'" class="flex min-w-0 items-center gap-2.5 pl-7">
-          <span class="flex size-6 shrink-0 items-center justify-center rounded-md bg-primary/15 text-primary">
-            <UIcon name="i-lucide-layers" class="size-3.5" />
-          </span>
-          <span class="min-w-0">
-            <span class="block truncate text-sm font-semibold text-highlighted">{{ t.padraoLinha }}</span>
-            <span class="block truncate text-xs text-muted">{{ t.padraoLinhaDesc }}</span>
-          </span>
-        </span>
-
-        <!-- Categoria -->
-        <span v-else-if="row.original.tipo === 'categoria'" class="flex min-w-0 items-center gap-2">
+        <!-- Categoria: a seta e o nome abrem as sublinhas (a única porta). -->
+        <span v-if="row.original.tipo === 'categoria'" class="flex min-w-0 items-center gap-2">
           <UButton
             icon="i-lucide-chevron-right"
             size="xs"
@@ -481,20 +419,22 @@ const meta = {
             :aria-label="t.marcarLinha(row.original.c.name)"
             @update:model-value="v => definirLinha(row.original.c, v === true)"
           />
-          <UIcon :name="row.original.c.icon ?? 'i-lucide-file'" class="size-4 shrink-0 text-muted" />
-          <span class="min-w-0 flex-1">
-            <span class="flex min-w-0 items-center gap-2">
-              <span class="truncate text-sm font-medium text-default" :title="row.original.c.name">{{ row.original.c.name }}</span>
-              <UBadge v-if="propria(row.original.c)" :label="t.regraPropria" color="primary" variant="subtle" size="sm" class="shrink-0" />
-              <UTooltip v-if="propria(row.original.c) && !somenteLeitura" :text="t.voltarAoPadrao">
-                <UButton icon="i-lucide-undo-2" size="xs" variant="ghost" color="warning" class="shrink-0" :aria-label="`${t.voltarAoPadrao}: ${row.original.c.name}`" @click="voltarAoPadrao(row.original.c)" />
-              </UTooltip>
-              <span v-if="alterada(row.original.c)" class="size-1.5 shrink-0 rounded-full bg-warning" :title="t.alterada" />
+          <button
+            type="button"
+            class="group flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-md text-left focus-visible:outline-2 focus-visible:outline-primary"
+            :aria-expanded="abertas.includes(row.original.c.id)"
+            :aria-label="t.expandir(row.original.c.name)"
+            @click="alternarAberta(row.original.c)"
+          >
+            <UIcon :name="row.original.c.icon ?? 'i-lucide-file'" class="size-4 shrink-0 text-muted" />
+            <span class="min-w-0 flex-1">
+              <span class="flex min-w-0 items-center gap-2">
+                <span class="truncate text-sm font-medium text-default transition-colors group-hover:text-highlighted" :title="row.original.c.name">{{ row.original.c.name }}</span>
+                <span v-if="alterada(row.original.c)" class="size-1.5 shrink-0 rounded-full bg-warning" :title="t.alterada" />
+              </span>
+              <span class="block truncate text-xs text-muted">{{ t.meta(row.original.c.campos.length, row.original.c.formularios.length) }}</span>
             </span>
-            <span class="block truncate text-xs text-muted">
-              {{ propria(row.original.c) ? t.meta(row.original.c.campos.length, row.original.c.formularios.length) : `${t.seguePadrao} · ${t.meta(row.original.c.campos.length, row.original.c.formularios.length)}` }}
-            </span>
-          </span>
+          </button>
         </span>
 
         <!-- Sublinha: campos -->
@@ -546,46 +486,19 @@ const meta = {
 
       <!-- ───────── Colunas das ações ───────── -->
       <template v-for="a in acoes" :key="a" #[`${a}-cell`]="{ row }">
-        <!-- Padrão -->
-        <span v-if="row.original.tipo === 'padrao'" class="inline-flex flex-col items-center gap-0.5">
-          <CaixaDePermissao
-            :valor="estado.padrao[a]"
-            :rotulo="`${t.padraoLinha}: ${t.acoes[a]}`"
-            :travada-por="travadaPor(estado.padrao, a)"
-            :dica="t.padraoColunaDica"
-            :desabilitada="somenteLeitura"
-            :regra="regraDaCelula(null, a)"
-            @alterar="v => definirPadrao(a, v)"
-          />
-          <UTooltip v-if="excecoes(a)" :text="rotuloExcecao(a)">
-            <UButton
-              :label="estado.padrao[a] ? t.tiradoCurto(excecoes(a)) : t.liberadoCurto(excecoes(a))"
-              size="xs"
-              variant="link"
-              color="neutral"
-              class="px-0 text-xs"
-              @click="filtro = 'proprias'"
-            />
-          </UTooltip>
-        </span>
-
-        <!-- Categoria: herdada clara, diferente cheia com desfazer, parcial com traço. -->
+        <!-- Categoria: marcada, vazia ou parcial com traço. -->
         <CaixaDePermissao
-          v-else-if="row.original.tipo === 'categoria'"
+          v-if="row.original.tipo === 'categoria'"
           :valor="valorDaCelula(row.original.c, a)"
           :rotulo="`${t.acoes[a]}: ${row.original.c.name}`"
-          herdada
-          :difere="difere(row.original.c, a)"
           :travada-por="parcial(row.original.c, a) || parcialPorOrigem(estado, row.original.c, a) ? null : travadaPor(acoesDaCategoria(estado, row.original.c.id), a)"
           :dica="dicaDaCelula(row.original.c, a)"
           :desabilitada="somenteLeitura"
-          :rotulo-desfazer="t.voltarAcao(t.acoes[a], row.original.c.name)"
           :regra="regraDaCelula(row.original.c, a)"
           @alterar="v => clicarCelula(row.original.c, a, v)"
-          @desfazer="definirAcao(row.original.c, a, estado.padrao[a])"
         />
 
-        <!-- Campos: todos, parte ou nenhum, por ação. O clique abre o Ajustar. -->
+        <!-- Campos: todos, parte ou nenhum, por ação. O clique abre o campo a campo. -->
         <template v-else-if="row.original.tipo === 'campos'">
           <UCheckbox
             v-if="(acoesDeCampo as Acao[]).includes(a)"
@@ -593,7 +506,7 @@ const meta = {
             :disabled="somenteLeitura || !acoesDaCategoria(estado, row.original.c.id)[a]"
             :aria-label="`${t.subCampos}: ${t.acoes[a]}`"
             class="inline-flex"
-            @update:model-value="emit('ajustar', row.original.c, 'campos')"
+            @update:model-value="emit('campos', row.original.c)"
           />
           <span v-else class="text-dimmed" aria-hidden="true">·</span>
         </template>
@@ -607,8 +520,6 @@ const meta = {
             v-if="(acoesDeAlcance as Acao[]).includes(a)"
             :valor="regraMarcada(row.original.c, a as AcaoDeAlcance, row.original.tipo)"
             :rotulo="`${row.original.tipo === 'criador' ? t.subAlcance : t.subResponsavel}: ${t.acoes[a]} (${row.original.c.name})`"
-            herdada
-            :difere="!!estado.categorias[row.original.c.id]?.itens"
             :dica="acoesDaCategoria(estado, row.original.c.id)[a] ? '' : t.acaoBloqueada(t.acoes[a])"
             :desabilitada="somenteLeitura || !acoesDaCategoria(estado, row.original.c.id)[a] || (row.original.tipo === 'responsavel' && !camposPessoa(row.original.c).length)"
             @alterar="v => definirRegra(estado, row.original.c, a as AcaoDeAlcance, row.original.tipo as keyof RegraDeItens, v)"
@@ -630,80 +541,55 @@ const meta = {
         />
       </template>
 
-      <!-- ───────── Quais itens (criador e responsável) ───────── -->
-      <template #itens-cell="{ row }">
-        <QuaisItens
-          v-if="row.original.tipo === 'padrao' || row.original.tipo === 'categoria'"
-          :t="t"
-          :estado="estado"
-          :categoria="row.original.tipo === 'categoria' ? row.original.c : null"
-          :somente-leitura="somenteLeitura"
-        />
-      </template>
-
-      <!-- ───────── Campos ───────── -->
-      <template #campos-cell="{ row }">
-        <template v-if="row.original.tipo === 'padrao'">
-          <span class="text-xs text-muted">{{ t.camposTodos }}</span>
+      <!-- ───────── Restrições: só o resumo; o clique abre a categoria. ───────── -->
+      <template #restricoes-cell="{ row }">
+        <template v-if="row.original.tipo === 'categoria'">
+          <span v-if="!temAcesso(estado, row.original.c.id)" class="text-xs text-dimmed">{{ t.filtros.semAcesso }}</span>
+          <span v-else-if="!restricoes(row.original.c).length" class="text-xs text-muted">{{ t.semRestricao }}</span>
+          <span v-else class="flex flex-wrap gap-1.5">
+            <UTooltip v-for="r in restricoes(row.original.c)" :key="r.rotulo" :text="r.dica || t.restricaoDica">
+              <UButton
+                :label="r.rotulo"
+                :icon="r.icone"
+                color="warning"
+                variant="outline"
+                size="xs"
+                :aria-label="`${r.rotulo}: ${t.expandir(row.original.c.name)}`"
+                @click="abrir(row.original.c)"
+              />
+            </UTooltip>
+          </span>
         </template>
-        <template v-else-if="row.original.tipo === 'categoria'">
-          <span v-if="!temAcesso(estado, row.original.c.id)" class="text-xs text-dimmed">{{ t.camposNenhum }}</span>
-          <UBadge
-            v-else-if="resumoDeCampos(estado, row.original.c)"
-            :label="t.camposDe(resumoDeCampos(estado, row.original.c)!.liberados, resumoDeCampos(estado, row.original.c)!.total)"
-            icon="i-lucide-eye-off"
-            color="warning"
-            variant="subtle"
-            size="sm"
+        <!-- Os campos Pessoa que contam como responsável (antes no editor de Quais itens). -->
+        <template v-else-if="row.original.tipo === 'responsavel'">
+          <USelectMenu
+            v-if="camposPessoa(row.original.c).length"
+            :model-value="camposDoResponsavel(row.original.c)"
+            :items="camposPessoa(row.original.c).map(f => ({ label: f.label ?? f.name, value: f.name }))"
+            value-key="value"
+            multiple
+            size="xs"
+            icon="i-lucide-user-check"
+            :placeholder="t.campoPessoaPlaceholder"
+            :aria-label="t.campoPessoa"
+            :disabled="somenteLeitura"
+            class="w-full max-w-80"
+            @update:model-value="(v: string[]) => definirCamposDoResponsavel(row.original.c, v)"
           />
-          <span v-else class="text-xs text-muted">{{ t.camposTodos }}</span>
         </template>
-      </template>
-
-      <!-- ───────── Formulários ───────── -->
-      <template #formularios-cell="{ row }">
-        <template v-if="row.original.tipo === 'padrao'">
-          <span class="text-xs text-muted">{{ t.origensTodas }}</span>
-        </template>
-        <template v-else-if="row.original.tipo === 'categoria'">
-          <span v-if="!temAcesso(estado, row.original.c.id)" class="text-xs text-dimmed">{{ t.camposNenhum }}</span>
-          <span v-else-if="!temOrigens(row.original.c)" class="text-xs text-muted">{{ t.semFormularios }}</span>
-          <UTooltip
-            v-else-if="resumoDeOrigens(estado, row.original.c)"
-            :text="dicaDeOrigens(row.original.c)"
-          >
-            <UButton
-              :label="rotuloDeOrigens(row.original.c)"
-              icon="i-lucide-split"
-              color="warning"
-              variant="subtle"
-              size="xs"
-              @click="emit('ajustar', row.original.c, 'formularios')"
-            />
-          </UTooltip>
-          <span v-else class="text-xs text-muted">{{ t.origensTodas }}</span>
-        </template>
-      </template>
-
-      <!-- ───────── Ajustar ───────── -->
-      <template #ajustar-cell="{ row }">
-        <UButton
-          v-if="row.original.tipo === 'categoria'"
-          :label="t.ajustar"
-          icon="i-lucide-sliders-horizontal"
-          size="xs"
-          variant="ghost"
-          color="neutral"
-          :aria-label="t.ajustarAria(row.original.c.name)"
-          @click="emit('ajustar', row.original.c)"
-        />
+        <!-- O que vale para o formulário criado depois, ao lado da última origem. -->
+        <p v-else-if="row.original.tipo === 'semForm'" class="flex items-start gap-1.5 whitespace-normal text-xs text-muted">
+          <UIcon name="i-lucide-info" class="mt-0.5 size-3.5 shrink-0" />
+          {{ t.formNovoAviso }}
+        </p>
         <UButton
           v-else-if="row.original.tipo === 'campos'"
           :label="t.escolherCampos"
+          icon="i-lucide-sliders-horizontal"
           size="xs"
-          variant="link"
+          variant="outline"
           color="neutral"
-          @click="emit('ajustar', row.original.c, 'campos')"
+          @click="emit('campos', row.original.c)"
         />
       </template>
 
@@ -733,10 +619,5 @@ const meta = {
         />
       </template>
     </UTable>
-
-    <!-- Com o padrão em linha, a tabela nunca fica vazia: o aviso vem embaixo. -->
-    <p v-if="!carregando && formaDoPadrao === 'linha' && !filtradas.length" class="rounded-lg border border-dashed border-default px-4 py-6 text-center text-sm text-muted">
-      {{ !lista.length ? `${t.vazioWsTitulo}. ${t.vazioWsDesc}` : busca ? `${t.vazioBuscaTitulo}. ${t.vazioBuscaDesc}` : `${t.vazioFiltroTitulo}. ${t.vazioFiltroDesc}` }}
-    </p>
   </section>
 </template>

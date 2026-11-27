@@ -6,9 +6,10 @@
  *   padrão das categorias  →  categoria  →  formulário
  *                                        →  campo
  *
- * - `padrao`: as 4 ações que valem para toda categoria sem regra própria,
- *   inclusive as criadas depois;
- * - `categorias[id].proprio`: `null` segue o padrão; um objeto é a regra própria;
+ * - `padrao`: as 4 ações que cada categoria criada a partir de agora recebe.
+ *   Rodada 6: o padrão não mexe nas categorias que já existem. Cada uma
+ *   guarda o seu valor; mudar todas de uma vez é a caixa do cabeçalho;
+ * - `categorias[id].proprio`: as ações da categoria (`null` = nenhuma);
  * - `categorias[id].campos`: `null` = todos os campos que a ação libera;
  *   um objeto = a lista escolhida campo a campo, por ação;
  * - `categorias[id].origens[acao]`: de onde vêm os itens que a ação alcança.
@@ -20,7 +21,7 @@
  *   desmarcar uma origem deixa a categoria com traço.
  * - `padraoItens` e `categorias[id].itens`: "Quais itens". Por ação (Ver,
  *   Atualizar, Excluir), só se a pessoa for a criadora e/ou a responsável.
- *   Na categoria, `null` segue o padrão; `campos` diz quais campos Pessoa
+ *   Na categoria, `null` = sem regra (todos os itens); `campos` diz quais campos Pessoa
  *   contam como responsável. No padrão vale qualquer campo Pessoa.
  *
  * Dependência: Atualizar e Excluir exigem Ver. Quem marca uma delas marca Ver,
@@ -88,6 +89,8 @@ export function comDependencia(m: MapaDeAcoes): MapaDeAcoes {
   return verExigidoPor(m) ? { ...m, ver: true } : m
 }
 
+const padraoInicial: MapaDeAcoes = { criar: false, ver: true, atualizar: false, excluir: false }
+
 /** O cargo como está gravado ao abrir a tela. */
 export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
   const categorias: Record<number, EstadoDaCategoria> = {}
@@ -130,10 +133,12 @@ export function estadoInicial(lista: CategoriaMock[]): EstadoDoCargo {
       if (criminal)
         e.origens = { criar: [criminal.id], ver: [criminal.id], atualizar: [criminal.id] }
     }
+    // Rodada 6: quem seguia o padrão grava o valor que tinha (Ver).
+    e.proprio ??= { ...padraoInicial }
     categorias[c.id] = e
   })
   return {
-    padrao: { criar: false, ver: true, atualizar: false, excluir: false },
+    padrao: { ...padraoInicial },
     padraoItens: {},
     categorias,
     fixas: [...fixasIniciais],
@@ -150,7 +155,7 @@ export function clonar<T>(x: T): T {
 
 /** As regras que valem na categoria: as dela ou, se não tiver, as do padrão. */
 export function itensDaCategoria(e: EstadoDoCargo, id: number): RegrasDeItens {
-  return e.categorias[id]?.itens?.regras ?? e.padraoItens
+  return e.categorias[id]?.itens?.regras ?? {}
 }
 
 export function temRegra(r?: RegraDeItens) {
@@ -184,7 +189,7 @@ export function definirRegra(e: EstadoDoCargo, c: CategoriaMock | null, acao: Ac
     return
   }
   const ec = e.categorias[c.id]!
-  const base = ec.itens ?? { regras: clonar(e.padraoItens), campos: camposPadraoDeResponsavel(c) }
+  const base = ec.itens ?? { regras: {}, campos: camposPadraoDeResponsavel(c) }
   const atual = base.regras[acao] ?? { criador: false, responsavel: false }
   ec.itens = { ...base, regras: limpar({ ...base.regras, [acao]: { ...atual, [tipo]: valor } }) }
 }
@@ -201,7 +206,7 @@ export function temRegraDeItens(e: EstadoDoCargo, c: CategoriaMock) {
  * ------------------------------------------------------------------ */
 
 export function acoesDaCategoria(e: EstadoDoCargo, id: number): MapaDeAcoes {
-  return e.categorias[id]?.proprio ?? e.padrao
+  return e.categorias[id]?.proprio ?? vazio()
 }
 
 /* ------------------------------------------------------------------ *
@@ -257,7 +262,7 @@ function gravarOrigens(e: EstadoDoCargo, c: CategoriaMock, acao: Acao, lista: Or
   const acoesAtuais = acoesDaCategoria(e, c.id)
   if (acoesAtuais[acao] !== ligada) {
     const novo = { ...acoesAtuais, [acao]: ligada }
-    ec.proprio = acoes.every(a => novo[a] === e.padrao[a]) ? null : novo
+    ec.proprio = novo
   }
   const completa = lista === null || todas.every(o => lista.includes(o))
   if (!ligada || completa)
