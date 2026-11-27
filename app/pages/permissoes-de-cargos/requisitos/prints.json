@@ -6,14 +6,14 @@
       { "focar": "Buscar categoria" },
       { "digitar": "Processos Judiciais" },
       { "esperar": 600 },
-      { "clicar": { "texto": "1 de 4", "exato": true } },
+      { "clicar": { "texto": "1 de 3 formulários" } },
       { "esperar": 900 }
     ]
   },
   "requisitos": {
     "RF601": { "cena": "formsProcessos", "destacar": { "texto": "Itens sem formulário" } },
     "RF602": { "cena": "formsProcessos", "destacar": "Criados pelo formulário padrão, pela API, por importação, pelo Spaceflow ou por agente de IA." },
-    "RF603": { "cena": "formsProcessos", "destacar": "Todos os formulários" },
+    "RF603": { "cena": "formsProcessos", "destacar": { "css": "[aria-label=\"Marcar todas as ações de Processos Judiciais\"]" } },
     "RF604": { "sem": "no protótipo, toda categoria tem formulário; a categoria sem formulário mostra só as 4 ações, como hoje" },
     "RI601": { "sem": "é a permissão que o back grava; não tem tela" },
     "RF611": { "sem": "regra da listagem no back; o protótipo não lista itens" },

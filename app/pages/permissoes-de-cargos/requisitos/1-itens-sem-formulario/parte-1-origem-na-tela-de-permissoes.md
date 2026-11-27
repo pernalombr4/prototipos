@@ -6,8 +6,8 @@ categoria, e o cargo grava a permissão dela como grava a de um formulário.
 **Onde vale:** Configurações > Gestão de membros > Cargos > o cargo, aba Dados, a árvore de cada categoria com
 formulário.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/. Em "Processos Judiciais", clique em
-Ajustar › Formulários: a linha "Itens sem formulário" é o que o nó da árvore de hoje mostra.
+**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/. Clique em "Processos Judiciais": a linha
+"Itens sem formulário", abaixo dos formulários, é o que o nó da árvore de hoje mostra.
 
 ## Na tela de permissões (RF)
 

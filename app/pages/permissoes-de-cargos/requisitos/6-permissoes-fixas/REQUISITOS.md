@@ -3,13 +3,14 @@
 **Objetivo:** o administrador vê e muda as permissões que não dependem de categoria numa matriz por área, com as
 mesmas 4 ações da tabela de categorias e as outras ações na mesma linha.
 
-**Onde vale:** a seção Padrão da aba Dados ("O que o cargo faz fora das categorias.") e a aba Configurações da tela
-do cargo.
+**Onde vale:** as abas Funcionalidades ("O que o cargo faz nas áreas do workspace que não são categorias.") e
+Configurações da tela do cargo.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, seção Padrão da aba Dados e aba
-Configurações.
+**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, abas Funcionalidades e Configurações.
+As linhas que pedem permissão nova no back (Painel de tarefas, Relatórios, Faturamento e as outras ações novas) são
+do épico "Permissões novas"; aqui entram só as que o back já aceita.
 
-**Fora do escopo:** a seção Categorias (épico "Tela nova de permissões"). A aba Inválidas continua como está.
+**Fora do escopo:** a aba Categorias (épico "Tela nova de permissões"). A aba Inválidas continua como está.
 
 **Relevância:** Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer, conversa com produtos antes.
 Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
@@ -33,12 +34,23 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 | RF306 | Cada linha deve ter uma caixa que marca ou desmarca cada ação da área, com o nome acessível "Marcar todas as ações de {área}". | Marcar a linha Cargos marca Criar, Ver, Atualizar e Excluir de Cargos. | Importante | Desejável |
 | RF307 | Marcar Atualizar ou Excluir numa área deve marcar e travar Ver na mesma área (RN301). | Marcar Excluir em Membros trava Ver em Membros. | Essencial | Obrigatório |
 
+## Aba Funcionalidades (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade | Relevância |
+|---|---|---|---|---|
+| RF312 | A aba Funcionalidades deve ter 2 grupos com título: Geral (Agenda, Tarefas rápidas, Tarefas programadas e Assinaturas) e Automação e IA (Spaceflows e IA). Os grupos são só de leitura: a referência de cada linha não muda. | A aba mostra os 2 títulos, cada um com a caixa do grupo e a contagem. | Importante | Obrigatório |
+| RF313 | A linha Assinaturas deve ter Criar, Ver e a outra ação Cancelar (`signature::create`, `read` e `cancel`, que o back já confere). | Marcar Cancelar e salvar deixa o cargo cancelar uma assinatura enviada. | Essencial | Obrigatório |
+| RF314 | A linha IA deve ter as outras ações "Usar Chat da IA" e "Gerenciar agentes" (`ai::chat` e `ai::agents`). | A linha IA mostra as 2 caixas. | Essencial | Obrigatório |
+| RF315 | A linha Spaceflows de Funcionalidades deve dizer "Iniciar e acompanhar fluxos de trabalho." e a de Configurações › Dados, "Montar e editar fluxos.", para a pessoa distinguir as 2. | As 2 linhas mostram a descrição de 1 linha. | Importante | Obrigatório |
+| RF316 | Na aba Configurações, Casos de uso deve ter Criar, Ver, Atualizar e Excluir, como o back calcula; hoje a tela oferece Criar e Ver. | Casos de uso mostra as 4 caixas. | Importante | Obrigatório |
+
 ## Outras ações (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF308 | A coluna Outras ações deve mostrar até 2 ações da área como caixas com o nome da ação. | IA mostra "Usar Chat da IA". | Essencial | Obrigatório |
 | RF309 | Com 3 ou mais outras ações, a coluna deve mostrar o botão "+{n} ações", que abre a lista de caixas, com a quantidade marcada entre parênteses. | Área com 5 outras ações, 2 marcadas: "+5 ações (2 marcadas)". | Importante | Obrigatório |
+| RF317 | O cabeçalho da coluna Outras ações deve ter a caixa que marca ou desmarca todas as outras ações do grupo, como as caixas de Criar, Ver, Atualizar e Excluir. | Marcar a caixa de Outras ações em Automação e IA marca "Iniciar Spaceflow", "Usar Chat da IA" e "Gerenciar agentes". | Importante | Desejável |
 
 ## Salvar (RF)
 
@@ -51,7 +63,7 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| S301 | As áreas, os grupos e as outras ações são os que a tela de hoje lista, sem permissão nova. | dev do front | Permissão fixa nova entra como linha ou como outra ação, sem mudar a matriz |
+| S301 | As áreas e as outras ações são as que a árvore da develop lista (com Assinaturas e "Gerenciar agentes"), sem permissão nova. | dev do front | Permissão fixa nova entra como linha ou como outra ação, sem mudar a matriz |
 | P301 | O cargo gravado hoje com Atualizar ou Excluir sem Ver numa área fixa: a tela marca Ver ao abrir, ou mostra o cargo como está até alguém salvar? | produto | Marcando ao abrir, salvar dá Ver a cargos que hoje não têm |
 
 ## Padrão de qualidade

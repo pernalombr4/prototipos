@@ -1,22 +1,26 @@
 # Épico: Tela nova de permissões
 
 **O que é:** a tela de permissões do cargo troca a árvore de caixas por uma tabela com 1 linha por categoria e 4
-caixas (Criar, Ver, Atualizar, Excluir). Campos e formulários saem da tabela e ficam em Ajustar, uma camada lateral,
-e salvar mostra em palavras o que muda e para quantas pessoas. A tela grava as mesmas permissões que a árvore grava
-hoje: nada muda no back. As 4 partes sobem juntas: a tabela sem o Ajustar perde o caminho para campos e formulários.
+caixas (Criar, Ver, Atualizar, Excluir). A categoria tem 1 porta só: o nome ou a seta abre, na própria tabela, os
+formulários e a linha Campos; o campo a campo fica numa camada lateral. A coluna Restrições resume o que a categoria
+limita. Salvar mostra em palavras o que muda e para quantas pessoas. A tela grava as mesmas permissões que a árvore
+grava hoje: nada muda no back. As 4 partes sobem juntas: a tabela sem as sublinhas perde o caminho para campos e
+formulários.
 
-**Onde vale:** Configurações > Gestão de membros > Cargos > o cargo, seção Categorias da aba Dados.
+**Onde vale:** Configurações > Gestão de membros > Cargos > o cargo. A aba Dados vira 2 abas no topo, Categorias e
+Funcionalidades.
 
 **Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, aprovado em 24/11/2026. Os textos nos
 3 idiomas estão no arquivo de textos da pasta do protótipo:
 https://github.com/pernalombr4/prototipos/tree/main/app/pages/permissoes-de-cargos. A barra "Protótipo" no pé da tela
 (estados da tela e simulações) é ferramenta de revisão e não entra no produto. O protótipo mostra também o que é de
-outros épicos: a linha do padrão, a coluna Quais itens, a matriz das permissões fixas e a aba Quem acessa.
+outros épicos: o bloco "Padrão para novas categorias", as sublinhas "Só se for o criador" e "Só se for o
+responsável" e o resumo "Só alguns itens", a matriz das permissões fixas e a linha "Itens sem formulário".
 
-**Fora do escopo:** o padrão para todas as categorias (épico "Padrão para todas as categorias"); a coluna e a aba
-Quais itens (épico "Quais itens: criador e responsável"); a matriz das permissões fixas (épico "Permissões fixas em
-matriz"); a aba Quem acessa (épico "Quem acessa"); a regra de "Itens sem formulário" e das ações por formulário no
-back. A aba Inválidas, a casca da tela, o cabeçalho do cargo e o lugar de "Salvar Alterações" continuam como estão.
+**Fora do escopo:** o padrão para novas categorias (épico "Padrão para novas categorias"); as sublinhas e o resumo de
+quais itens (épico "Quais itens: criador e responsável"); a matriz das permissões fixas (épico "Permissões fixas em
+matriz"); a regra de "Itens sem formulário" e das ações por formulário no back. A aba Inválidas, a casca da tela, o
+cabeçalho do cargo e o lugar de "Salvar Alterações" continuam como estão.
 
 **Relevância** (coluna das tarefas): Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer,
 conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
@@ -25,9 +29,9 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 
 | Parte | O que entrega | Depende de | Por que nesta ordem |
 |---|---|---|---|
-| [1. Tabela de categorias](parte-1-tabela-de-categorias.md) | 1 linha por categoria com 4 caixas, busca, filtros, a caixa de coluna com desfazer, Ver travado por Atualizar e Excluir e a célula parcial | | É a base: as outras partes abrem dela |
-| [2. Campos da categoria](parte-2-campos-da-categoria.md) | Ajustar › Campos, com "Todos os campos" ou campo a campo, e a coluna Campos | 1 | Abre do botão Ajustar da linha |
-| [3. Formulários da categoria](parte-3-formularios-da-categoria.md) | Ajustar › Formulários como caixa pai e filhas por ação, as sublinhas de formulário e a coluna Formulários | 1 | Abre do botão Ajustar e da seta da linha |
+| [1. Tabela de categorias](parte-1-tabela-de-categorias.md) | As abas Categorias e Fora das categorias, 1 linha por categoria com 4 caixas, a categoria que abre, a coluna Restrições, busca, filtros, a caixa de coluna com desfazer, Ver travado por Atualizar e Excluir e a célula parcial | | É a base: as outras partes abrem dela |
+| [2. Campos da categoria](parte-2-campos-da-categoria.md) | A sublinha Campos e a camada "Campos de {categoria}", com "Todos os campos" ou campo a campo | 1 | Abre da categoria aberta |
+| [3. Formulários da categoria](parte-3-formularios-da-categoria.md) | As sublinhas de formulário, com a categoria como caixa pai e os formulários como filhas por ação | 1 | Abre da categoria aberta |
 | [4. Pessoas do cargo e confirmação](parte-4-pessoas-e-confirmacao.md) | A janela das pessoas do cargo, o aviso de alterações pendentes e a confirmação que diz o que muda e para quantas pessoas | 1 | Fecha o fluxo de salvar a tabela |
 
 ## Regras de negócio comuns (RN)
@@ -58,6 +62,8 @@ conversa com produtos antes. Opcional, o dev pode não fazer quando o esforço �
 | Caixa de coluna | A caixa no cabeçalho de uma ação que marca ou desmarca a ação em cada categoria da lista filtrada | (sem nome na tela) |
 | Traço | O estado da caixa quando a ação vale só em parte dos campos ou dos formulários | (sem nome na tela) |
 | Origem | De onde o item veio: cada formulário da categoria e, quando a tela de hoje a mostra, "Itens sem formulário" | Os formulários e "Itens sem formulário" |
+| Categoria aberta | A linha da categoria com as sublinhas à mostra, abaixo dela | (sem nome na tela) |
+| Sublinha | Cada linha que a categoria aberta mostra: um formulário, "Itens sem formulário", "Só se for o criador", "Só se for o responsável" ou Campos | Os nomes das linhas |
 
 ## Em aberto
 

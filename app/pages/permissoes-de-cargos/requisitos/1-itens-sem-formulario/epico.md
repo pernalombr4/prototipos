@@ -8,8 +8,8 @@ demandas criadas pelo agente de IA do Spaceflow no workspace de produtos.
 **Onde vale:** a tela de permissões do cargo (Configurações > Gestão de membros > Cargos > o cargo, aba Dados, a
 árvore de cada categoria) e a listagem e a abertura de itens em toda porta: a tela, a API, o MCP e os agentes de IA.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, aprovado em 24/11/2026. Em "Processos
-Judiciais", Ajustar › Formulários mostra a linha "Itens sem formulário". Na tela de hoje, a mesma escolha é 1 nó na
+**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, aprovado em 24/11/2026. Clique em
+"Processos Judiciais": a categoria abre e mostra a linha "Itens sem formulário". Na tela de hoje, a mesma escolha é 1 nó na
 árvore da categoria, junto dos formulários. O resto da tela do protótipo é outro desenvolvimento.
 
 **Fora do escopo:** a tela nova de permissões do protótipo; Criar, Atualizar e Excluir por formulário valendo na API;

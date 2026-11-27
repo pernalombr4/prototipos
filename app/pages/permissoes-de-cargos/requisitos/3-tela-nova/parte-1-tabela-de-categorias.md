@@ -3,18 +3,44 @@
 **Objetivo:** o administrador vê e muda o que o cargo faz em cada categoria numa linha só, com 4 caixas, e libera ou
 tira uma ação em várias categorias de uma vez.
 
-**Onde vale:** a seção Categorias da aba Dados, na tela do cargo.
+**Onde vale:** a tela do cargo, abas Categorias e Funcionalidades.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, aba Dados, seção Categorias.
+**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, aba Categorias.
+
+## Abas da tela do cargo (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade | Relevância |
+|---|---|---|---|---|
+| RF025 | A aba Dados deve virar 2 abas no topo: Categorias, que abre primeiro, e Funcionalidades. As abas ficam Categorias, Funcionalidades, Configurações e Inválidas, cada uma com a contagem "{marcadas}/{total}" como hoje. | Abrir o cargo mostra Categorias; a contagem de Categorias soma as ações de categoria e de formulário. | Essencial | Obrigatório |
+| RF035 | Cada permissão deve cair na aba que o código já usa para separar a árvore: o que começa com `types::<slug>` em Categorias; o grupo das permissões que não são categoria nem configuração em Funcionalidades; `settings::` e os prefixos de administração em Configurações. | Uma referência nova `tasks::...` aparece em Funcionalidades sem mudar a regra das abas. | Essencial | Obrigatório |
+| RF026 | Trocar de aba não deve perder as alterações não salvas. | Marcar Ver numa categoria, ir a Funcionalidades e voltar mantém Ver marcado e "Alterada, não salva". | Essencial | Obrigatório |
 
 ## Tabela (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF001 | A seção Categorias deve mostrar 1 linha por categoria do workspace, com as colunas Categoria, Criar, Ver, Atualizar, Excluir, Campos, Formulários e o botão Ajustar. | Exemplo: workspace com 120 categorias mostra 120 linhas de 4 caixas, sem caixa de campo na tabela. | Essencial | Obrigatório |
+| RF001 | A aba Categorias deve mostrar 1 linha por categoria do workspace, com as colunas Categoria, Criar, Ver, Atualizar, Excluir e Restrições. | Exemplo: workspace com 120 categorias mostra 120 linhas de 4 caixas, sem caixa de campo na tabela. | Essencial | Obrigatório |
 | RF002 | Cada caixa de ação deve ligar ou desligar a ação do cargo na categoria daquela linha. | Marcar Ver em "Contratos de Clientes" e salvar dá ao cargo a permissão de ver os itens da categoria. | Essencial | Obrigatório |
 | RF003 | A linha da categoria deve mostrar abaixo do nome a quantidade de campos e de formulários da categoria. | "24 campos · 3 formulários". | Desejável | Desejável |
 | RF004 | A linha alterada e ainda não salva deve mostrar "Alterada, não salva". | Marcar Criar numa categoria mostra o aviso na linha até salvar ou descartar. | Importante | Obrigatório |
+
+## Categoria aberta (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade | Relevância |
+|---|---|---|---|---|
+| RF027 | O clique no nome da categoria ou na seta deve abrir, na própria tabela, as sublinhas da categoria; o segundo clique fecha. | O clique em "Processos Judiciais" mostra as sublinhas abaixo dela, sem sair da tabela. | Essencial | Obrigatório |
+| RF028 | As sublinhas devem vir nesta ordem: cada formulário, "Itens sem formulário" quando a categoria tem a origem, e Campos. | "Processos Judiciais" mostra Cível, Criminal, Trabalhista e Campos. | Essencial | Obrigatório |
+| RF029 | O nome e a seta devem ter o nome acessível "Mostrar formulários, campos e quais itens de {categoria}" e dizer se a categoria está aberta. | O leitor de tela lê o nome e "expandido" ou "recolhido". | Importante | Obrigatório |
+| RF030 | Várias categorias podem ficar abertas ao mesmo tempo. | Abrir "Contratos" com "Processos Judiciais" aberta mantém as 2 abertas. | Desejável | Desejável |
+
+## Coluna Restrições (RF)
+
+| ID | Requisito | Critério de aceite | Prioridade | Relevância |
+|---|---|---|---|---|
+| RF031 | A coluna Restrições deve mostrar 1 resumo por limite da categoria: "{n} de {total} formulários" quando ao menos 1 formulário fica sem ação, "Formulários em parte" quando cada formulário tem ao menos 1 ação e ao menos 1 ação tem traço, e "{n} de {total} campos" com campos escolhidos. | Ver só em Criminal mostra "1 de 3 formulários"; Ver em 76 de 80 campos mostra "76 de 80 campos". | Essencial | Obrigatório |
+| RF032 | A categoria sem limite deve mostrar "Sem restrição", e a categoria sem ação, "Sem acesso". | "Fornecedores" com as 4 ações inteiras mostra "Sem restrição". | Importante | Obrigatório |
+| RF033 | Cada resumo deve ser um botão com ícone e dica: no de formulários, cada ação restrita com os formulários, até 3, ou "{ação} em {n} de {total}". | O resumo "1 de 3 formulários" tem a dica "Criar: Criminal · Ver: Criminal · Atualizar: Criminal". | Importante | Desejável |
+| RF034 | O clique num resumo deve abrir a categoria (RF027). Com a categoria já aberta, ela continua aberta. | O clique em "1 de 3 formulários" mostra as sublinhas de "Processos Judiciais". | Essencial | Obrigatório |
 
 ## Busca e filtros (RF)
 
@@ -41,8 +67,8 @@ tira uma ação em várias categorias de uma vez.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF015 | Marcar Atualizar ou Excluir deve marcar Ver na mesma categoria e travar a caixa de Ver (RN901). | Marcar Excluir em "Reembolsos" marca Ver, que fica desabilitado. | Essencial | Obrigatório |
-| RF016 | O Ver travado deve mostrar um cadeado com a dica "Exigido por {ação}. Desmarque {ação} para tirar Ver.". | O cadeado de Ver em "Reembolsos" diz "Exigido por Excluir. Desmarque Excluir para tirar Ver.". | Importante | Obrigatório |
-| RF022 | O cadeado do Ver travado deve receber foco pelo teclado e abrir a dica no foco. | Com Tab até o cadeado, a dica aparece. | Importante | Obrigatório |
+| RF016 | O Ver travado deve mostrar um cadeado que abre um popover com o título "Exigido por {ação}." e o texto "Desmarque {ação} para tirar Ver.". O popover abre no hover e no clique do cadeado ou da caixa; o clique fixa o popover até clicar fora ou apertar Esc. | O clique no cadeado de Ver em "Reembolsos" abre "Exigido por Excluir." e o popover fica aberto ao tirar o mouse. | Importante | Obrigatório |
+| RF022 | O cadeado do Ver travado deve receber foco pelo teclado e abrir o popover com Enter ou espaço. | Com Tab até o cadeado e Enter, o popover abre; Esc fecha. | Importante | Obrigatório |
 | RF017 | Desmarcar Atualizar e Excluir deve destravar Ver e manter Ver marcado. | Desmarcar Excluir em "Reembolsos" deixa Ver marcado e liberado. | Importante | Obrigatório |
 
 ## Célula parcial (RF)
@@ -50,8 +76,8 @@ tira uma ação em várias categorias de uma vez.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF018 | A caixa da ação que vale só em parte dos campos ou dos formulários da categoria deve mostrar o traço. | Ver em 76 de 80 campos de "Contratos" mostra o traço em Ver. | Essencial | Obrigatório |
-| RF019 | A caixa com traço por campo deve ter a dica "{ação} em {n} de {total} campos. Clique para ajustar.". | Ver em 76 de 80 campos mostra "Ver em 76 de 80 campos. Clique para ajustar.". | Importante | Obrigatório |
-| RF023 | O clique na caixa com traço por campo deve abrir Ajustar na aba Campos. | O clique no traço de Ver em "Contratos" abre Ajustar › Campos de "Contratos". | Importante | Obrigatório |
+| RF019 | A caixa com traço por campo deve ter a dica "{ação} em {n} de {total} campos. Clique para escolher os campos.". | Ver em 76 de 80 campos mostra "Ver em 76 de 80 campos. Clique para escolher os campos.". | Importante | Obrigatório |
+| RF023 | O clique na caixa com traço por campo deve abrir a camada "Campos de {categoria}", sem apagar a escolha feita. | O clique no traço de Ver em "Contratos" abre "Campos de Contratos". | Importante | Obrigatório |
 | RF020 | A caixa com traço por formulário deve ter a dica "{ação} só em: {formulários}. Clique para liberar em todos os formulários.". | Ver só em Criminal mostra "Ver só em: Criminal. Clique para liberar em todos os formulários.". | Importante | Obrigatório |
 | RF024 | O clique na caixa com traço por formulário deve liberar a ação em cada formulário da categoria. | Ver só em Criminal em "Processos Judiciais": o clique marca Ver em Cível, Criminal e Trabalhista. | Importante | Obrigatório |
 

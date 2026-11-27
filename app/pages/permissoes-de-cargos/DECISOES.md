@@ -387,8 +387,11 @@ USE87A7C6 está na develop desde 2026-11-16 e ainda não está na branch princip
 - **Pedido (literal):** "use /investigar-codigo pra ter certeza de que está fazendo no front alinhamentos que seguem a
   logica do back". **Como ficou:** o back só aceita referência cuja 1ª parte e cuja ação estão na lista dele
   (`validatePermissionReference`). Cada linha nova tem uma referência que o back já aceita ou que pede uma mudança
-  declarada no requisito (épico 8). "Personalizar o Início para todos" saiu de Funcionalidades e foi para
+  declarada no requisito (épico 9, "Permissões novas"). "Personalizar o Início para todos" saiu de Funcionalidades e foi para
   Configurações › Interface (`screens::`), porque é ação de administração.
 - **O que muda e o que não muda:** mudam as abas do topo, os grupos de Funcionalidades, as linhas novas e a
   sublinha Outras ações. Não muda a tabela de categorias da rodada 6, a casca, o cabeçalho do cargo e o Salvar.
-
+- **Requisitos da rodada 7:** épico 8, "Permissões valem na API" (o back confere hoje só dono ou membro full em
+  Configurações e em cargos; o histórico e o comentário de item conferem só se a pessoa é membro do workspace), e
+  épico 9, "Permissões novas", com a referência e a mudança do back de cada linha nova. Lido no código da develop em
+  2026-11-27, sem teste pela API.

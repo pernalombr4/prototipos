@@ -1,17 +1,19 @@
-# Requisitos: Padrão para todas as categorias
+# Requisitos: Padrão para novas categorias
 
-**Objetivo:** o administrador define uma vez o que o cargo faz em toda categoria, inclusive nas criadas depois, e
-marca só as exceções.
+**Objetivo:** o administrador define o que o cargo recebe em cada categoria criada a partir de agora, e a categoria
+nova já nasce com essa permissão. As categorias que já existem não mudam.
 
-**Depende de:** épico "Tela nova de permissões", onde fica a linha do padrão; épico "Quais itens, criador e
+**Depende de:** épico "Tela nova de permissões", onde fica o bloco do padrão; épico "Quais itens, criador e
 responsável", só para a seção "Quais itens no padrão".
 
-**Onde vale:** a primeira linha da seção Categorias, na aba Dados da tela do cargo, a confirmação de "Salvar
-Alterações" e a checagem de permissão de itens em toda porta.
+**Onde vale:** o bloco "Padrão para novas categorias", acima da busca na aba Categorias da aba Dados; a confirmação de
+"Salvar Alterações"; e a criação de categoria, que grava a permissão do padrão em cada cargo.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, linha "Padrão para todas as categorias".
+**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, aba Dados › Categorias, bloco "Padrão
+para novas categorias".
 
-**Fora do escopo:** as permissões fixas, que já valem fora das categorias.
+**Fora do escopo:** mudar as categorias que já existem pelo padrão (a caixa do cabeçalho de cada ação, do épico 3,
+faz isso na lista filtrada); as permissões fixas, que ficam na aba Fora das categorias.
 
 **Relevância:** Obrigatório, o dev faz. Desejável, o dev faz; se achar melhor não fazer, conversa com produtos antes.
 Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
@@ -20,55 +22,49 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 
 | ID | Regra | Exemplo | Relevância |
 |---|---|---|---|
-| RN101 | O padrão vale para cada categoria sem regra própria, inclusive a categoria criada depois. | Com Ver no padrão, a categoria "Fornecedores" criada amanhã já tem Ver para o cargo. | Obrigatório |
-| RN102 | A regra própria da categoria vence o padrão, ação por ação. | Padrão com Excluir e "Reembolsos" com regra própria sem Excluir: o cargo não exclui em "Reembolsos". | Obrigatório |
-| RN103 | Uma categoria passa a ter regra própria quando alguma caixa dela fica diferente do padrão. | Desmarcar Ver em "Contratos" com Ver no padrão dá regra própria a "Contratos". | Obrigatório |
-| RN104 | A regra de itens da categoria vence a do padrão. | Padrão com Ver só se for o criador e "Contratos" sem regra de itens: em "Contratos", a pessoa vê todos os itens. | Obrigatório |
-| RN105 | Na regra de responsável do padrão, conta cada campo Pessoa da categoria. | Padrão com Ver só se for o responsável: em "Chamados de TI", contam "Responsável" e "Solicitante". | Obrigatório |
+| RN101 | O padrão vale só para a categoria criada depois de salvo. A categoria que já existe guarda o próprio valor. | Com Ver no padrão, a categoria "Fornecedores" criada amanhã nasce com Ver; "Contratos", que já existe sem Ver, continua sem Ver. | Obrigatório |
+| RN102 | A categoria nova recebe uma cópia do padrão. Mudar o padrão depois não muda a categoria já criada. | "Fornecedores" nasce com Ver; tirar Ver do padrão na semana seguinte não tira Ver de "Fornecedores". | Obrigatório |
+| RN103 | Na regra de responsável do padrão, conta cada campo Pessoa da categoria nova. | Padrão com Ver só se for o responsável: em "Chamados de TI" criada depois, contam "Responsável" e "Solicitante". | Obrigatório |
 
-## Linha do padrão (RF)
+## Bloco do padrão (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF101 | A primeira linha da seção Categorias deve ser "Padrão para todas as categorias", com as 4 caixas alinhadas às colunas e a frase "Vale para toda categoria sem regra própria, inclusive as criadas depois.". | A linha fica acima da primeira categoria e não some com busca ou filtro. | Essencial | Obrigatório |
-| RF102 | Cada caixa do padrão deve mudar a ação em cada categoria sem regra própria (RN101). | Marcar Ver no padrão marca Ver, em tom claro, em cada categoria que segue o padrão. | Essencial | Obrigatório |
-| RF103 | Abaixo do padrão, cada ação deve mostrar o contador de exceções com direção: "Liberado em {n}" e "Tirado em {n}". | Ver no padrão e 9 categorias sem Ver mostra "Tirado em 9" em Ver. | Importante | Desejável |
-| RF104 | Marcar Atualizar ou Excluir no padrão deve marcar e travar Ver no padrão, como nas categorias. | Marcar Excluir no padrão trava Ver no padrão. | Essencial | Obrigatório |
+| RF101 | A aba Categorias deve ter, acima da busca e fora da tabela, o bloco "Padrão para novas categorias", com a frase "O que este cargo recebe em cada categoria criada a partir de agora. As categorias que já existem não mudam.". | O bloco fica acima da busca e não muda com busca ou filtro. | Essencial | Obrigatório |
+| RF102 | O bloco deve ter a linha "Ações na categoria", com as caixas Criar, Ver, Atualizar e Excluir alinhadas às colunas da tabela de categorias. | As 4 caixas ficam na mesma coluna que as caixas das categorias. | Essencial | Obrigatório |
+| RF103 | Mudar uma caixa do bloco não deve mudar nenhuma categoria da tabela (RN101). | Marcar Excluir no padrão deixa as 120 categorias como estavam. | Essencial | Obrigatório |
+| RF104 | Marcar Atualizar ou Excluir no padrão deve marcar e travar Ver no padrão, como nas categorias. | Marcar Excluir no padrão trava Ver no padrão, com o cadeado e o motivo. | Essencial | Obrigatório |
+| RF105 | O bloco alterado e ainda não salvo deve mostrar o ponto de "Alterada, não salva" junto do título. | Marcar Criar no padrão mostra o ponto até salvar ou descartar. | Importante | Obrigatório |
+| RF106 | No workspace sem categorias, o aviso deve dizer também "Quando alguém criar uma, ela recebe o padrão para novas categorias.". | O workspace novo mostra as 2 frases. | Desejável | Desejável |
 
-## Categoria que segue o padrão (RF)
+## Categoria nova (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF105 | A categoria sem regra própria deve mostrar "Segue o padrão" e as caixas em tom claro. | "Fornecedores" sem regra mostra "Segue o padrão". | Essencial | Obrigatório |
-| RF106 | A categoria com regra própria deve mostrar o selo "Regra própria" e as caixas diferentes do padrão em cor cheia (RN103). | Desmarcar Ver em "Contratos" mostra o selo e Ver vazio em cor cheia. | Essencial | Obrigatório |
-| RF107 | Cada caixa diferente do padrão deve ter o desfazer "Voltar {ação} ao padrão em {categoria}". | O desfazer de Ver em "Contratos" volta Ver ao valor do padrão. | Importante | Desejável |
-| RF108 | A linha da categoria com regra própria deve ter "Voltar ao padrão", que tira a regra própria inteira. | "Voltar ao padrão" em "Contratos" volta as 4 caixas, os campos e os formulários ao padrão. | Importante | Obrigatório |
-| RF109 | A categoria com as 4 caixas iguais às do padrão deve voltar a seguir o padrão. | Marcar de novo Ver em "Contratos" tira o selo "Regra própria". | Importante | Obrigatório |
-| RF110 | A tabela deve ter o filtro "Regra própria", com a contagem de categorias com regra própria. | O filtro mostra só as categorias com o selo. | Importante | Obrigatório |
-| RF111 | No workspace sem categorias, o aviso deve dizer também "Quando alguém criar uma, ela segue o padrão acima.". | O workspace novo mostra as 2 frases. | Desejável | Desejável |
+| RF107 | Criar uma categoria deve gravar, em cada cargo, as ações do padrão daquele cargo (RN101). | Cargo com Ver e Criar no padrão: a categoria "Fornecedores" criada depois aparece com Ver e Criar na tela do cargo. | Essencial | Obrigatório |
+| RF108 | A categoria nova deve aparecer na tabela como qualquer outra, sem marca de origem. | "Fornecedores" mostra as caixas marcadas, sem selo nem tom diferente. | Importante | Obrigatório |
 
 ## Confirmação (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF112 | A confirmação deve dizer a mudança do padrão em palavras, com o alcance. | "Padrão das categorias: liberou Ver, vale para 111 categorias". | Essencial | Obrigatório |
-| RF113 | A confirmação deve dizer quando uma categoria passa a ter regra própria ou volta a seguir o padrão. | "Contratos: passou a ter regra própria". "Reembolsos: voltou a seguir o padrão". | Importante | Obrigatório |
+| RF109 | A confirmação deve dizer a mudança do padrão em palavras, com o alcance. | "Padrão para novas categorias: liberou Ver; vale só para as categorias criadas a partir de agora". | Essencial | Obrigatório |
 
 ## Quais itens no padrão (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF117 | A linha do padrão deve ter a coluna Quais itens, com o editor de Quais itens das categorias. | O padrão mostra "Todos" até alguém marcar uma regra. | Importante | Obrigatório |
-| RF114 | Na categoria que segue a regra de itens do padrão, a coluna deve mostrar o valor com "· do padrão". | Padrão com "Criador" e "Fornecedores" sem regra mostra "Criador · do padrão". | Importante | Obrigatório |
-| RF115 | No padrão, o editor deve dizer "No padrão, conta qualquer campo Pessoa da categoria." no lugar da escolha de campos (RN105). | O editor do padrão não tem a escolha de campos. | Importante | Obrigatório |
-| RF116 | Na categoria que segue o padrão, o editor deve dizer "Segue o padrão. Mudar aqui cria a regra desta categoria." e ter "Voltar ao padrão". | Mudar a regra em "Fornecedores" cria a regra de itens dela; "Voltar ao padrão" desfaz. | Importante | Obrigatório |
+| RF110 | O bloco deve ter as linhas "Só se for o criador" e "Só se for o responsável", com as caixas Ver, Atualizar e Excluir. Criar não tem regra de itens. | O bloco mostra as 2 linhas abaixo de "Ações na categoria". | Importante | Obrigatório |
+| RF111 | A caixa de regra de uma ação desligada no padrão deve ficar desabilitada, com a dica "Libere {ação} para usar a regra.". | Sem Excluir no padrão, as caixas de Excluir das 2 linhas ficam desabilitadas. | Importante | Obrigatório |
+| RF112 | A linha "Só se for o responsável" deve dizer "No padrão, conta qualquer campo Pessoa da categoria." (RN103). | O bloco não tem a escolha de campos Pessoa. | Importante | Obrigatório |
+| RF113 | A categoria nova deve receber também a regra de itens do padrão. | Padrão com Ver só se for o criador: "Fornecedores" criada depois tem Ver só se for o criador. | Importante | Obrigatório |
 
 ## Interfaces (RI)
 
 | ID | Rota ou evento | O que deve receber ou devolver | Relevância |
 |---|---|---|---|
-| RI101 | Permissão do padrão no cargo | Uma referência que vale para toda categoria, aceita na gravação do cargo; o formato fica <a definir>. | Obrigatório |
-| RI102 | Checagem de permissão de item | A regra própria da categoria vence a referência do padrão (RN102). | Obrigatório |
+| RI101 | Permissão do padrão no cargo | Uma referência do padrão por ação, aceita na gravação do cargo e lida ao criar categoria; o formato fica <a definir>. | Obrigatório |
+| RI102 | Criação de categoria | Grava em cada cargo as permissões da categoria nova a partir do padrão do cargo (RF107, RF113). | Obrigatório |
 
 ## Não funcionais, restrições e transição (RNF, RS, RT)
 
@@ -80,8 +76,8 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
-| P101 | Quem quer que uma categoria não acompanhe a mudança futura do padrão, com as 4 caixas iguais às dele, consegue travar a categoria? | produto | Pedindo trava, RF109 vira escolha da pessoa, e não automático |
-| P102 | Na migração, o cargo com a mesma regra em todas as categorias já abre com essa regra no padrão? | produto | Abrindo, RT101 muda: o padrão nasce preenchido e as categorias seguem o padrão |
+| P101 | A categoria criada pela API, pela importação ou por agente de IA também recebe o padrão? | produto | Recebendo, RI102 vale em toda porta de criação de categoria, não só na tela |
+| P102 | Na migração, o padrão vazio dá a cada categoria nova nenhuma permissão nos cargos de hoje. Isso basta, ou o padrão nasce com Ver? | produto | Nascendo com Ver, RT101 muda: o padrão começa com Ver em cada cargo |
 
 ## Padrão de qualidade
 

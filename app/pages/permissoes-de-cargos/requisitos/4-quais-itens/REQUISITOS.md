@@ -3,13 +3,13 @@
 **Objetivo:** o administrador faz Ver, Atualizar ou Excluir valer só nos itens que a pessoa criou, só nos itens em que
 ela é a responsável, ou nos 2.
 
-**Depende de:** épico "Tela nova de permissões", onde ficam a coluna e a aba.
+**Depende de:** épico "Tela nova de permissões", onde ficam a coluna Restrições e as sublinhas da categoria.
 
-**Onde vale:** a coluna Quais itens da tabela de categorias, as sublinhas da categoria aberta, a aba Quais itens do
-Ajustar e a listagem, a edição e a exclusão de itens em toda porta.
+**Onde vale:** as sublinhas "Só se for o criador" e "Só se for o responsável" da categoria aberta, a coluna
+Restrições, o filtro "Só alguns itens" e a listagem, a edição e a exclusão de itens em toda porta.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/. Em "Reembolsos" ou "Chamados de TI",
-clique na coluna Quais itens.
+**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/, aba Categorias. Abra "Chamados de TI"
+pela seta.
 
 **Fora do escopo:** a regra de itens na linha do padrão, que entra no épico "Padrão para todas as categorias".
 
@@ -25,19 +25,17 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 | RN203 | Com as 2 regras, a ação vale se a pessoa é a criadora ou a responsável. | A pessoa vê o chamado que abriu e o chamado em que é a responsável. | Obrigatório |
 | RN204 | A regra de itens vale para Ver, Atualizar e Excluir. Criar não tem regra de itens. | A coluna Criar não aparece no editor de Quais itens. | Obrigatório |
 
-## Coluna e editor (RF)
+## Sublinhas e coluna Restrições (RF)
 
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
-| RF201 | Cada linha de categoria da tabela deve ter a coluna Quais itens, com "Todos", "Criador", "Responsável" ou "Criador ou responsável". | "Reembolsos" mostra "Criador". | Essencial | Obrigatório |
-| RF203 | O clique na coluna deve abrir o editor "Quais itens: {categoria}", com as linhas "Só se for o criador" e "Só se for o responsável" e as caixas Ver, Atualizar e Excluir (RN204). | O editor de "Reembolsos" mostra as 2 linhas e as 3 colunas. | Essencial | Obrigatório |
-| RF204 | O editor deve dizer "Sem nada marcado, a ação vale em todos os itens. Com as 2 regras, vale se a pessoa for a criadora ou a responsável.". | A frase aparece acima das caixas. | Importante | Desejável |
-| RF205 | A caixa de regra de uma ação desligada na categoria deve ficar desabilitada, com a dica "Libere {ação} para usar a regra.". | Sem Excluir na categoria, a coluna Excluir do editor fica desabilitada. | Importante | Obrigatório |
-| RF206 | Com "Só se for o responsável" na categoria, o editor deve pedir os campos Pessoa que contam como responsável, com o campo "Responsável" marcado quando existe. | "Chamados de TI" abre com "Responsável" escolhido. | Essencial | Obrigatório |
-| RF207 | Na categoria sem campo Pessoa, o editor deve desabilitar "Só se for o responsável" e dizer "Esta categoria não tem campo Pessoa. Só a regra de criador vale aqui.". | "Fornecedores" sem campo Pessoa mostra o aviso. | Importante | Obrigatório |
+| RF211 | A categoria aberta deve mostrar as sublinhas "Só se for o criador" e "Só se for o responsável", com as caixas de Ver, Atualizar e Excluir (RN204). Na coluna Criar, a sublinha mostra "·". | A seta de "Chamados de TI" mostra as 2 sublinhas, com 3 caixas cada. | Essencial | Obrigatório |
+| RF204 | A sublinha "Só se for o criador" deve dizer "Marque para a ação valer só nos itens que a pessoa criou.". | A frase aparece abaixo do nome da sublinha. | Importante | Desejável |
+| RF205 | A caixa de regra de uma ação desligada na categoria deve ficar desabilitada, com a dica "Libere {ação} para usar a regra.". | Sem Excluir na categoria, a caixa Excluir das 2 sublinhas fica desabilitada. | Importante | Obrigatório |
+| RF206 | A sublinha "Só se for o responsável" deve ter, na coluna Restrições, a escolha dos campos Pessoa que contam como responsável, com o campo "Responsável" marcado quando existe, e dizer "Conta como responsável: {campos}.". | "Chamados de TI" abre com "Responsável" escolhido e a frase "Conta como responsável: Responsável.". | Essencial | Obrigatório |
+| RF207 | Na categoria sem campo Pessoa, a sublinha "Só se for o responsável" deve ficar desabilitada e dizer "Esta categoria não tem campo Pessoa. Só a regra de criador vale aqui.". | "Fornecedores" sem campo Pessoa mostra o aviso. | Importante | Obrigatório |
+| RF201 | A coluna Restrições da linha da categoria deve mostrar "Só alguns itens" quando a categoria tem regra de itens, com a dica do alcance de cada ação. | "Reembolsos" mostra "Só alguns itens", com a dica "Ver só nos itens que a pessoa criou.". | Essencial | Obrigatório |
 | RF210 | A caixa da ação com regra de itens deve mostrar o ícone da regra, com a dica do alcance. | Ver em "Reembolsos" mostra o ícone de pessoa e a dica "Ver só nos itens que a pessoa criou.". | Importante | Obrigatório |
-| RF211 | A seta da categoria deve mostrar as sublinhas "Só se for o criador" e "Só se for o responsável", com as caixas de Ver, Atualizar e Excluir. | A seta de "Chamados de TI" mostra as 2 sublinhas, com os campos Pessoa que contam. | Importante | Desejável |
-| RF212 | O Ajustar deve ter a aba Quais itens, com o editor de RF203. | Ajustar › Quais itens de "Reembolsos" mostra as mesmas caixas da coluna. | Importante | Desejável |
 | RF213 | A tabela deve ter o filtro "Só alguns itens", com a contagem de categorias com regra de itens. | O filtro mostra "Reembolsos" e "Chamados de TI". | Desejável | Desejável |
 | RF214 | A confirmação deve dizer "mudou a regra de criador" na categoria cuja regra de itens mudou. | "Reembolsos: mudou a regra de criador". | Importante | Obrigatório |
 

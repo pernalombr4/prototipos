@@ -8,8 +8,8 @@ nas tarefas de formulário. A ação marcada na categoria inteira vale também n
 **Onde vale:** a criação, a edição e a exclusão de itens em toda porta: a tela, a API, a importação, o Spaceflow, os
 agentes de IA e as tarefas de formulário do fluxo da categoria; e a gravação das permissões de formulário do cargo.
 
-**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/. Em "Processos Judiciais", Ajustar ›
-Formulários mostra Criar, Ver e Atualizar só em Criminal.
+**Protótipo:** https://pernalombr4.github.io/prototipos/permissoes-de-cargos/. Clique em "Processos Judiciais": as linhas
+dos formulários mostram Criar, Ver e Atualizar só em Criminal.
 
 **Fora do escopo:** o que a pessoa vê (épico "Itens sem formulário") e a tela nova de permissões (épico "Tela nova de
 permissões").
@@ -41,8 +41,7 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 | ID | Requisito | Critério de aceite | Prioridade | Relevância |
 |---|---|---|---|---|
 | RF016 | A ação marcada na categoria inteira deve valer no formulário criado depois, sem editar o cargo (RN002). | Exemplo: Ver em toda "Processos Judiciais"; o formulário "Tributário" criado amanhã já tem Ver para o cargo. | Essencial | Obrigatório |
-| RF017 | Na aba Formulários do Ajustar, a linha "Todos os formulários" deve dizer "Inclui os itens sem formulário e os formulários criados depois.". | A frase aparece abaixo do rótulo. | Importante | Obrigatório |
-| RF018 | Na aba Formulários do Ajustar, o aviso do formulário criado depois deve dizer "Formulário criado depois entra na ação marcada em "Todos os formulários". Na ação com traço, ele entra desmarcado." (RN002, RN003). | O aviso aparece abaixo da tabela. | Importante | Obrigatório |
+| RF018 | Na categoria aberta, o aviso ao lado de "Itens sem formulário" deve dizer "Formulário criado depois entra na ação marcada na categoria inteira. Na ação com traço, ele entra desmarcado." (RN002, RN003). | O aviso aparece na coluna Restrições, na linha "Itens sem formulário". | Importante | Obrigatório |
 
 ## Interfaces (RI)
 
@@ -61,7 +60,7 @@ Opcional, o dev pode não fazer quando o esforço é grande para o ganho.
 | ID | Pergunta ou suposição | A quem perguntar ou o que confirma | O que muda conforme a resposta |
 |---|---|---|---|
 | P003 | A edição e a exclusão de item pela API conferem hoje o formulário do item? A criação pela API confere só a permissão da categoria. | dev do back | Conferindo, RF012 e RF013 já valem na API e ficam só como critério |
-| P004 | Na tela de hoje, sem a aba Formulários do Ajustar, onde ficam as frases de RF017 e RF018? | produto | Sem a tela nova no ar, as 2 frases entram como dica no nó da categoria, ou esperam a tela nova |
+| P004 | Na tela de hoje, sem a tela nova, onde fica o aviso de RF018? | produto | Sem a tela nova no ar, o aviso entra como dica no nó da categoria, ou espera a tela nova |
 | P005 | O formulário criado depois numa ação marcada em parte das origens entra desmarcado. Produto confirma? | produto | Entrando marcado, RN003 e o aviso de RF018 mudam |
 
 ## Padrão de qualidade
